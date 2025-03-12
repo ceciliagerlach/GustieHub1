@@ -22,8 +22,9 @@ class MainActivity : AppCompatActivity() {
 
         loginButton.setOnClickListener {
             val email = emailInput.text.toString()
-
-
+            // verify email here, then move to dashboard view
+            val dashboardIntent = DashboardActivity.newIntent(this, email)
+            startActivity(dashboardIntent)
         }
     }
 }
