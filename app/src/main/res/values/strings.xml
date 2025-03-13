@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">GustieHub</string>
+    <string name="login">Log In to GustieHub</string>
+    <string name="email_input">Email Address</string>
+    <string name="continue_button">Continue</string>
+    <string name="welcome_text">Welcome!</string>
+    <string name="announcements_text">Announcements</string>
+    <string name="see_all_text">See All</string>
+    <string name="activity_text">Activity</string>
+
 </resources>
