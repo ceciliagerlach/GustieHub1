@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 class MainActivity : AppCompatActivity() {
     lateinit var emailInput: EditText
     lateinit var loginButton: Button
+    Gusties = Group("Gusties", null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,7 +23,9 @@ class MainActivity : AppCompatActivity() {
 
         loginButton.setOnClickListener {
             val email = emailInput.text.toString()
-            // verify email here, then move to dashboard view
+            // verify email here and update current user info
+
+            // move to dashboard view if valid email/password
             val dashboardIntent = DashboardActivity.newIntent(this, email)
             startActivity(dashboardIntent)
         }
