@@ -11,9 +11,9 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:background="@color/gold"
         android:contentInsetStart="0dp"
-        android:background="@color/gold">
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/menu"
@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:padding="8dp"
-            android:src="@drawable/menu_icon"/>
+            android:src="@drawable/menu_icon" />
 
         <ImageView
             android:id="@+id/messaging"
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:padding="8dp"
-            android:src="@drawable/profile_icon"/>
+            android:src="@drawable/profile_icon" />
 
         <ImageView
             android:id="@+id/profile"
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:padding="8dp"
-            android:src="@drawable/message_icon"/>
+            android:src="@drawable/message_icon" />
 
     </Toolbar>
 
