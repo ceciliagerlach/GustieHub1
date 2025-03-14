@@ -25,7 +25,6 @@
             android:src="@drawable/gustavus_icon"/>
 
         <TextView
-            android:id="@+id/login_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="18dp"
