@@ -3,12 +3,13 @@ package com.example.gustiehub
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.provider.ContactsContract.Profile
-import android.view.Menu
+import android.util.Log
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.FragmentTransaction
 
 class DashboardActivity : AppCompatActivity() {
 
@@ -25,19 +26,25 @@ class DashboardActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .add(R.id.fragment_container, ExampleFragment())
+                .commit()
+        }
 
+        val fragment = ExampleFragment()
         val email = intent.getStringExtra(EXTRA_EMAIL)
         // use the email to fetch information
 
         //initialize buttons reference
-        val messageButton:ImageView = findViewById(R.id.messaging)
-        val profileButton:ImageView = findViewById(R.id.profile)
-        val menuButton:ImageView = findViewById(R.id.menu)
         val announcementsButton:Button = findViewById(R.id.see_all_announcements_button)
         val activityButton:Button = findViewById(R.id.see_all_activity_button)
-        val myGroupsButton:ImageButton = findViewById(R.id.my_groups_button)
+        val groupsButton:ImageButton = findViewById(R.id.groups_button)
         val marketplaceButton:ImageButton = findViewById(R.id.marketplace_button)
         val eventsButton:ImageButton = findViewById(R.id.events_button)
+        val messageButton:ImageView = fragment.view?.findViewById<ImageView>(R.id.messaging) ?: return
+        val profileButton:ImageView = fragment.view?.findViewById<ImageView>(R.id.profile) ?: return
+        val menuButton:ImageView = fragment.view?.findViewById<ImageView>(R.id.menu) ?: return
 
         //handling clicks for buttons.
         messageButton.setOnClickListener{
@@ -48,8 +55,8 @@ class DashboardActivity : AppCompatActivity() {
             val intent= Intent(this,ProfileActivity::class.java)
             startActivity(intent)
         }
-        myGroupsButton.setOnClickListener {
-            val intent = Intent(this, MyGroupsActivity::class.java)
+        groupsButton.setOnClickListener {
+            val intent = Intent(this, GroupsActivity::class.java)
             startActivity(intent)
         }
         marketplaceButton.setOnClickListener {
