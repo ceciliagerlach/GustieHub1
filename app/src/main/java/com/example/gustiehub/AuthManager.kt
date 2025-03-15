@@ -8,14 +8,6 @@ object AuthManager {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
-    fun addUserToGustiesGroup(userId: String) {
-        val groupsRef = db.collection("groups").document("Gusties")
-
-        groupsRef.update("members", FieldValue.arrayUnion(userId))
-            .addOnSuccessListener { println("User added to Gusties group.") }
-            .addOnFailureListener { it.printStackTrace() }
-    }
-
     fun signUpUser(email: String, password: String, firstName: String, lastName: String, onComplete: (Boolean, String?) -> Unit) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->

@@ -43,6 +43,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.play.services.auth)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -53,4 +54,7 @@ dependencies {
     implementation("com.google.firebase:firebase-storage")    // Firebase Storage (for media)
     implementation("com.google.firebase:firebase-messaging")  // Firebase Cloud Messaging
     implementation("com.google.firebase:firebase-functions")  // Firebase Cloud Functions
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 }

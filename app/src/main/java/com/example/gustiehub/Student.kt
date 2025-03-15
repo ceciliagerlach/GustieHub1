@@ -1,7 +1,7 @@
 package com.example.gustiehub
 
-import com.example.gustiehub.AuthManager.addUserToGustiesGroup
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.Year
 
@@ -38,7 +38,8 @@ class Student(private val _userId: String,
             .set(userData)
             .addOnSuccessListener {
                 println("User profile created for $userId")
-                addUserToGustiesGroup(userId) // add new user to Gusties group
+                this.joinGroup("Gusties") // add new user to Gusties group
+//                addUserToGustiesGroup(userId)
                 onComplete(true, null)
             }
             .addOnFailureListener { e ->
@@ -46,6 +47,14 @@ class Student(private val _userId: String,
                 onComplete(false, e.message)
             }
     }
+
+//    fun addUserToGustiesGroup(userId: String) {
+//        val groupsRef = db.collection("groups").document("Gusties")
+//
+//        groupsRef.update("members", FieldValue.arrayUnion(userId))
+//            .addOnSuccessListener { println("User added to Gusties group.") }
+//            .addOnFailureListener { it.printStackTrace() }
+//    }
 
     // Setters
     fun setFirstName(_firstName: String) {
