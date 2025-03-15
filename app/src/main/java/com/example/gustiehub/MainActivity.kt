@@ -12,7 +12,6 @@ import androidx.core.view.WindowInsetsCompat
 class MainActivity : AppCompatActivity() {
     lateinit var emailInput: EditText
     lateinit var loginButton: Button
-    Gusties = Group("Gusties", null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

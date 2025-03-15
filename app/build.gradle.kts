@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -45,4 +46,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")       // Firebase Authentication
+    implementation("com.google.firebase:firebase-firestore")  // Firestore (NoSQL DB)
+    implementation("com.google.firebase:firebase-storage")    // Firebase Storage (for media)
+    implementation("com.google.firebase:firebase-messaging")  // Firebase Cloud Messaging
+    implementation("com.google.firebase:firebase-functions")  // Firebase Cloud Functions
 }
