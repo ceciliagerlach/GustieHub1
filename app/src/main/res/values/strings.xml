@@ -10,5 +10,7 @@
     <string name="group_text">Groups</string>"
     <string name="marketplace_text">Marketplace</string>
     <string name="events_text">Events</string>
-    <string name="dashboard_text">Dashboard</string>"
+    <string name="dashboard_text">Dashboard</string>
+    <string name="discover_groups_text"><b>Discover Groups</b></string>
+    <string name="join_text">Join Group</string>
 </resources>

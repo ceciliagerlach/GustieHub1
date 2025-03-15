@@ -3,8 +3,6 @@ package com.example.gustiehub
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.provider.ContactsContract.Profile
-import android.view.Menu
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -49,7 +47,7 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(intent)
         }
         myGroupsButton.setOnClickListener {
-            val intent = Intent(this, MyGroupsActivity::class.java)
+            val intent = Intent(this, GroupsActivity::class.java)
             startActivity(intent)
         }
         marketplaceButton.setOnClickListener {
