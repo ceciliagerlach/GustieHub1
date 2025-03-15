@@ -1,13 +1,11 @@
 package com.example.gustiehub
 
-class Group(val _name: String, val _creator: Student?) {
-    private val name: String
-    private var members: MutableList<Student>
+data class Group(
+    val name: String = "",
+    val creatorId: String? = null, // store creator's user ID (UID)
+    val members: MutableList<String> = mutableListOf() // store member UIDs
+)
 
-    init {
-        this.name = _name
-        // if a creator is provided, add them to the members list
-        // otherwise, initialize an empty list
-        members = if (_creator != null) mutableListOf(_creator) else mutableListOf()
-    }
-}
+// TODO: Add post structure to Group + Firebase, capable of changing order
+// TODO: Add setters + getters for profile pic
+// TODO: Create functions createGroup + ones for posts
