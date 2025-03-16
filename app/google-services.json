@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "183734578676",
+    "project_id": "gustiehub",
+    "storage_bucket": "gustiehub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183734578676:android:bce47e07795e7890075da1",
+        "android_client_info": {
+          "package_name": "com.example.gustiehub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183734578676-5go73524svo3mtu4mn4u69v3g9plsf5a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.gustiehub",
+            "certificate_hash": "c0b16b2d3bddf9e481842d2a5b6de8b0465ec316"
+          }
+        },
+        {
+          "client_id": "183734578676-c4vnp76b0k2cbu26f2qb6ujjikr6hknb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4q4Ym636lKgyp-yk_pPD-2hSSE04kAX8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183734578676-c4vnp76b0k2cbu26f2qb6ujjikr6hknb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
