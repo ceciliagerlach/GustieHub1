@@ -13,4 +13,6 @@
     <string name="dashboard_text">Dashboard</string>
     <string name="discover_groups_text"><b>Discover Groups</b></string>
     <string name="join_text">Join Group</string>
+    <string name="nav_open">Open</string>
+    <string name="nav_close">Close</string>
 </resources>
