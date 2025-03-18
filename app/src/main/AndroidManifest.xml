@@ -13,9 +13,6 @@
         android:theme="@style/Theme.GustieHub"
         tools:targetApi="31">
         <activity
-            android:name=".GoogleSignInActivity"
-            android:exported="false" />
-        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
