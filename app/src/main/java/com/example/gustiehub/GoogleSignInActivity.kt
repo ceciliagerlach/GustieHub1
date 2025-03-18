@@ -17,6 +17,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Co
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
@@ -29,7 +30,7 @@ class GoogleSignInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_login)
+        setContentView(R.layout.activity_google_sign_in)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -37,18 +38,18 @@ class GoogleSignInActivity : AppCompatActivity() {
             insets
         }
 
-        auth = FirebaseAuth.getInstance()
+        auth = Firebase.auth
         credentialManager = CredentialManager.create(this)
 
         // set up sign-in button
-        findViewById<Button>(R.id.login_button).setOnClickListener {
+        findViewById<Button>(R.id.sign_in_button).setOnClickListener {
             signIn()
         }
 
         // set up sign-out button
-        //findViewById<Button>(R.id.sign_out_button).setOnClickListener {
-            //signOut()
-        //}
+        findViewById<Button>(R.id.sign_out_button).setOnClickListener {
+            signOut()
+        }
     }
 
     override fun onStart() {
