@@ -30,7 +30,7 @@ class GoogleSignInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_google_sign_in)
+        setContentView(R.layout.activity_login)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -42,14 +42,14 @@ class GoogleSignInActivity : AppCompatActivity() {
         credentialManager = CredentialManager.create(this)
 
         // set up sign-in button
-        findViewById<Button>(R.id.sign_in_button).setOnClickListener {
+        findViewById<Button>(R.id.login_button).setOnClickListener {
             signIn()
         }
 
         // set up sign-out button
-        findViewById<Button>(R.id.sign_out_button).setOnClickListener {
-            signOut()
-        }
+        //findViewById<Button>(R.id.sign_out_button).setOnClickListener {
+            //signOut()
+        //}
     }
 
     override fun onStart() {
