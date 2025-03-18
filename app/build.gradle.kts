@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.fir.declarations.builder.buildScript
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -47,14 +49,14 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    implementation(platform("com.google.firebase:firebase-bom:33.10.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth")       // Firebase Authentication
-    implementation("com.google.firebase:firebase-firestore")  // Firestore (NoSQL DB)
-    implementation("com.google.firebase:firebase-storage")    // Firebase Storage (for media)
-    implementation("com.google.firebase:firebase-messaging")  // Firebase Cloud Messaging
-    implementation("com.google.firebase:firebase-functions")  // Firebase Cloud Functions
-    implementation("androidx.credentials:credentials:1.3.0")
-    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)       // Firebase Authentication
+    implementation(libs.firebase.firestore)  // Firestore (NoSQL DB)
+    implementation(libs.firebase.storage)    // Firebase Storage (for media)
+    implementation(libs.firebase.messaging)  // Firebase Cloud Messaging
+    implementation(libs.firebase.functions)  // Firebase Cloud Functions
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 }

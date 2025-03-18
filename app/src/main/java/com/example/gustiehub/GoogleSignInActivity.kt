@@ -17,7 +17,6 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Co
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
 
@@ -30,7 +29,7 @@ class GoogleSignInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_google_sign_in)
+        setContentView(R.layout.activity_login)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -38,18 +37,18 @@ class GoogleSignInActivity : AppCompatActivity() {
             insets
         }
 
-        auth = Firebase.auth
+        auth = FirebaseAuth.getInstance()
         credentialManager = CredentialManager.create(this)
 
         // set up sign-in button
-        findViewById<Button>(R.id.sign_in_button).setOnClickListener {
+        findViewById<Button>(R.id.login_button).setOnClickListener {
             signIn()
         }
 
-        // set up sign-out button
-        findViewById<Button>(R.id.sign_out_button).setOnClickListener {
-            signOut()
-        }
+//        // set up sign-out button
+//        findViewById<Button>(R.id.logout_button).setOnClickListener {
+//            signOut()
+//        }
     }
 
     override fun onStart() {
@@ -67,7 +66,7 @@ class GoogleSignInActivity : AppCompatActivity() {
             try {
                 // create Google Sign-In request
                 val googleIdOption = GetGoogleIdOption.Builder()
-                    .setFilterByAuthorizedAccounts(false) // Allow all Google accounts
+                    .setFilterByAuthorizedAccounts(true) // Filter by Gustavus Google accounts
                     .setServerClientId(SERVER_CLIENT_ID)
                     .build()
 
@@ -93,8 +92,6 @@ class GoogleSignInActivity : AppCompatActivity() {
 
             // authenticate with Firebase using the Google ID token
             firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
-        } else {
-            Log.w(TAG, "Credential is not of type Google ID Token!")
         }
     }
 
@@ -146,11 +143,7 @@ class GoogleSignInActivity : AppCompatActivity() {
      * Updates UI based on user authentication state
      */
     private fun updateUI(user: FirebaseUser?) {
-        if (user != null) {
-            Log.d(TAG, "User signed in: ${user.email}")
-        } else {
-            Log.d(TAG, "No user signed in")
-        }
+        Log.d(TAG, "User signed in: ${user?.email ?: "No user"}")
     }
 
     companion object {
