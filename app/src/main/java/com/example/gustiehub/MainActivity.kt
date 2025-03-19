@@ -113,24 +113,24 @@ class MainActivity : AppCompatActivity() {
                 Log.e(TAG, "Google Sign-In failed: ${e.localizedMessage}", e)
 
                 // If no Google account is available, prompt the user to add one
-                if (e is androidx.credentials.exceptions.NoCredentialException) {
-                    Log.d(TAG, "No Google accounts found, prompting user to add one...")
-                    promptAddGoogleAccount()
-                }
+//                if (e is androidx.credentials.exceptions.NoCredentialException) {
+//                    Log.d(TAG, "No Google accounts found, prompting user to add one...")
+//                    promptAddGoogleAccount()
+//                }
             }
         }
     }
 
-    private fun promptAddGoogleAccount() {
-        try {
-            val intent = Intent(Settings.ACTION_ADD_ACCOUNT).apply {
-                putExtra(android.provider.Settings.EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
-            }
-            startActivity(intent)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to open account settings", e)
-        }
-    }
+//    private fun promptAddGoogleAccount() {
+//        try {
+//            val intent = Intent(Settings.ACTION_ADD_ACCOUNT).apply {
+//                putExtra(android.provider.Settings.EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
+//            }
+//            startActivity(intent)
+//        } catch (e: Exception) {
+//            Log.e(TAG, "Failed to open account settings", e)
+//        }
+//    }
 
     /**
      * Handles the received credential and signs in with Firebase
