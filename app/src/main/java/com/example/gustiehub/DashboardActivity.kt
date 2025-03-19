@@ -12,7 +12,7 @@ class DashboardActivity : AppCompatActivity() {
 
         fun newIntent(packageContext: Context, email: String): Intent? {
             return Intent(packageContext, DashboardActivity::class.java).apply {
-                putExtra(EXTRA_EMAIL, email)
+                putExtra("USER_EMAIL", email)
             }
         }
     }

@@ -1,6 +1,8 @@
 package com.example.gustiehub
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -23,7 +25,9 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.sign
 
 class MainActivity : AppCompatActivity() {
@@ -33,7 +37,6 @@ class MainActivity : AppCompatActivity() {
     private val SERVER_CLIENT_ID = "183734578676-c4vnp76b0k2cbu26f2qb6ujjikr6hknb.apps.googleusercontent.com"
     private val CLIENT_EMAIL_DOMAIN = "@gustavus.edu"
     private lateinit var auth: FirebaseAuth
-    private lateinit var credentialManager: CredentialManager
     private  val TAG = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,10 +48,13 @@ class MainActivity : AppCompatActivity() {
 
         loginButton.setOnClickListener {
             val email = emailInput.text.toString()
-            // verify email here and update current user info
+            Log.d(TAG, "Login button clicked with email: $email")
+
             if (email.isNotEmpty() && email.endsWith(CLIENT_EMAIL_DOMAIN)) {
+                Log.d(TAG, "Valid Gustavus email. Proceeding with sign-in.")
                 signIn()
             } else {
+                Log.w(TAG, "Invalid email entered")
                 Toast.makeText(this, "Enter a Gustavus email address", Toast.LENGTH_SHORT).show()
             }
         }
@@ -64,15 +70,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         auth = Firebase.auth
-        credentialManager = CredentialManager.create(this)
-
-        // set up sign-in button
-//        findViewById<Button>(R.id.login_button).setOnClickListener {
-//            signIn()
-//        }
 
         // set up sign-out button
-        //findViewById<Button>(R.id.sign_out_button).setOnClickListener {
+        //findViewById<Button>(R.id.logout_button).setOnClickListener {
         //signOut()
         //}
     } // end onCreate()
@@ -84,28 +84,49 @@ class MainActivity : AppCompatActivity() {
         updateUI(currentUser)
     }
 
+    private var credentialManager = CredentialManager.create(this)
     /**
      * Initiates Google Sign-In using Credential Manager
      */
     private fun signIn() {
         lifecycleScope.launch {
             try {
-                // create Google Sign-In request
+                Log.d(TAG, "Building Google Sign-In request...")
+
                 val googleIdOption = GetGoogleIdOption.Builder()
-                    .setFilterByAuthorizedAccounts(false) // Allow all Google accounts
                     .setServerClientId(SERVER_CLIENT_ID)
+                    .setFilterByAuthorizedAccounts(false) // Allows selecting any Google account
                     .build()
 
                 val request = GetCredentialRequest.Builder()
                     .addCredentialOption(googleIdOption)
                     .build()
 
-                // request credentials
+                Log.d(TAG, "Requesting credential from Credential Manager...")
                 val credential = credentialManager.getCredential(this@MainActivity, request).credential
+
+                Log.d(TAG, "Credential received: ${credential.data}")
                 handleSignIn(credential)
             } catch (e: GetCredentialException) {
-                Log.e(TAG, "Google Sign-In failed: ${e.localizedMessage}")
+                Log.e(TAG, "Google Sign-In failed: ${e.localizedMessage}", e)
+
+                // If no Google account is available, prompt the user to add one
+                if (e is androidx.credentials.exceptions.NoCredentialException) {
+                    Log.d(TAG, "No Google accounts found, prompting user to add one...")
+                    promptAddGoogleAccount()
+                }
             }
+        }
+    }
+
+    private fun promptAddGoogleAccount() {
+        try {
+            val intent = Intent(Settings.ACTION_ADD_ACCOUNT).apply {
+                putExtra(android.provider.Settings.EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
+            }
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to open account settings", e)
         }
     }
 
@@ -113,13 +134,15 @@ class MainActivity : AppCompatActivity() {
      * Handles the received credential and signs in with Firebase
      */
     private fun handleSignIn(credential: Credential) {
+        Log.d(TAG, "Received credential: ${credential.data}")
+
         if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
             val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+            Log.d(TAG, "Google ID Token: ${googleIdTokenCredential.idToken}")
 
-            // authenticate with Firebase using the Google ID token
             firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
         } else {
-            Log.w(TAG, "Credential is not of type Google ID Token!")
+            Log.w(TAG, "Credential is not a valid Google ID Token!")
         }
     }
 
