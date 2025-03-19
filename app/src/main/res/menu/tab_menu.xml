@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tab_menu">
+
+    <item
+        android:id="@+id/dashboard"
+        android:title="@string/dashboard_text"
+        android:icon="@drawable/dashboard_icon"
+        app:showAsAction="withText"/>
+
+    <item
+        android:id="@+id/announcements"
+        android:title="@string/announcements_text"
+        android:icon="@drawable/announcement_icon"
+        app:showAsAction="withText"/>
+
+    <item
+        android:id="@+id/marketplace"
+        android:title="@string/marketplace_text"
+        android:icon="@drawable/marketplace_icon"
+        app:showAsAction="withText"/>
+
+    <item
+        android:id="@+id/events"
+        android:title="@string/events_text"
+        android:icon="@drawable/events_icon"
+        app:showAsAction="withText"/>
+
+    <item
+        android:id="@+id/groups"
+        android:title="@string/group_text"
+        android:icon="@drawable/group_icon"
+        app:showAsAction="withText"/>
+
+
+</menu>
