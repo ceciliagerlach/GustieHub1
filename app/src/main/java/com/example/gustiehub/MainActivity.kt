@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        GlobalData.initializeGlobalData()
+
         emailInput = findViewById(R.id.email_input)
         loginButton = findViewById(R.id.login_button)
 
