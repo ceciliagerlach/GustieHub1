@@ -53,18 +53,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:paddingTop="32dp">
 
+
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:gravity="start"
+            android:layout_weight="1"
             android:paddingStart="14dp"
             android:paddingBottom="32dp"
-            android:textSize="30sp"
-            android:gravity="start"
             android:text="@string/discover_groups_text"
-            android:textColor="@color/black"/>
+            android:textColor="@color/black"
+            android:textSize="30sp" />
+
+        <ImageButton
+            android:id="@+id/create_groups_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:backgroundTint="@color/gold"
+            android:padding="14dp"
+            android:src="@drawable/add_group_icon"
+            android:layout_marginEnd="16dp"/>
+
 
     </LinearLayout>
 
