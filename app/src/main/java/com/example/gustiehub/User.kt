@@ -5,15 +5,15 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.Year
 
-class Student(private val _userId: String,
-              private val _email: String,
-              private val _firstName: String,
-              private val _lastName: String) {
+class User(private val _userId: String,
+           private val _email: String,
+           private val _firstName: String,
+           private val _lastName: String) {
     private val userId = _userId
     private val email = _email
     private var firstName = _firstName
     private var lastName = _lastName
-    private lateinit var profilePictureUrl: String // store as URL
+    private lateinit var profilePicture: String // store as URL?
     private lateinit var gradYear: Year
     private var joinedGroups: MutableList<String> = mutableListOf("Gusties") // store group names
 
@@ -22,6 +22,7 @@ class Student(private val _userId: String,
 
     init {
         // Automatically save student data
+        this.joinGroup("Gusties")
     }
 
     // save new student info to Firestore
@@ -67,9 +68,9 @@ class Student(private val _userId: String,
         updateField("lastName", _lastName)
     }
 
-    fun setProfilePictureUrl(_profilePictureUrl: String) {
-        this.profilePictureUrl = _profilePictureUrl
-        updateField("profilePictureUrl", _profilePictureUrl)
+    fun setProfilePicture(_profilePicture: String) {
+        this.profilePicture = _profilePicture
+        updateField("profilePicture", _profilePicture)
     }
 
     fun setGradYear(_gradYear: Year) {
@@ -78,44 +79,24 @@ class Student(private val _userId: String,
     }
 
     fun joinGroup(groupID: String) {
-        // grab user
         val user = auth.currentUser
         user?.let {
             val userID = it.uid
-
-            // Reference to user and group in Firestore
             val userRef = db.collection("users").document(userID)
             val groupRef = db.collection("groups").document(groupID)
 
             // Update user's joinedGroups
-            userRef.get().addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val joinedGroups = document.get("joinedGroups") as? MutableList<String> ?: mutableListOf()
-                    if (!joinedGroups.contains(groupID)) {
-                        joinedGroups.add(groupID)
-                        userRef.update("joinedGroups", joinedGroups)
-                            .addOnSuccessListener { println("$userID joined $groupID") }
-                            .addOnFailureListener { e -> println("Error updating user: ${e.message}") }
-                    }
-                }
-            }
+            userRef.update("joinedGroups", FieldValue.arrayUnion(groupID))
+                .addOnSuccessListener { println("$userID successfully joined $groupID") }
+                .addOnFailureListener { e -> println("Error updating user's joinedGroups: ${e.message}") }
 
             // Update group's members
-            groupRef.get().addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val members = document.get("members") as? MutableList<String> ?: mutableListOf()
-                    if (!members.contains(userID)) {
-                        members.add(userID)
-                        groupRef.update("members", members)
-                            .addOnSuccessListener { println("$userID added to $groupID") }
-                            .addOnFailureListener { e -> println("Error updating group: ${e.message}") }
-                    }
-                } else {
-                    println("Group $groupID does not exist!")
-                }
-            }
+            groupRef.update("members", FieldValue.arrayUnion(userID))
+                .addOnSuccessListener { println("$userID successfully added to $groupID") }
+                .addOnFailureListener { e -> println("Error updating group's members: ${e.message}") }
         }
     }
+
 
     private fun updateField(field: String, value: Any) {
         db.collection("students").document(email)
@@ -127,7 +108,7 @@ class Student(private val _userId: String,
     // Getters
     fun getFirstName(): String =  firstName
     fun getLastName(): String = lastName
-    fun getProfilePictureUrl(): String = if (::profilePictureUrl.isInitialized) profilePictureUrl else ""
+    fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
     fun getGradYear(): Year? = if (::gradYear.isInitialized) gradYear else null
 }
 

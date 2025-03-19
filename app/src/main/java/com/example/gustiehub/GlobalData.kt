@@ -3,28 +3,37 @@ package com.example.gustiehub
 import com.google.firebase.firestore.FirebaseFirestore
 
 object GlobalData {
-    var Gusties: Group? = null
+    var groupList = mutableListOf<Group>()
 
-    fun initializeGlobalData() {
+    fun getGroupList() {
         val db = FirebaseFirestore.getInstance()
-        val groupsRef = db.collection("groups").document("Gusties")
+        val groupsRef = db.collection("groups")
 
-        println("Initializing Gusties group...") // Debugging
-
-        groupsRef.get().addOnSuccessListener { document ->
-            if (document.exists()) {
-                println("Gusties group already exists")
-                Gusties = document.toObject(Group::class.java)
-            } else {
-                println("Creating Gusties group...") // Debugging
-                val defaultGroup = Group(name = "Gusties", creatorId = null, members = mutableListOf())
-                groupsRef.set(defaultGroup)
-                    .addOnSuccessListener { println("Gusties group created successfully!") }
-                    .addOnFailureListener { e -> println("Error creating Gusties group: ${e.message}") }
-                Gusties = defaultGroup
+        groupsRef.addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                println("Error listening for group changes: ${e.message}")
+                return@addSnapshotListener
             }
-        }.addOnFailureListener { e ->
-            println("Error checking Gusties group: ${e.message}")
+
+            snapshots?.let {
+                val updatedGroups = mutableListOf<Group>()
+                for (document in it.documents) {
+                    val group = document.toObject(Group::class.java)
+                    if (group != null) {
+                        updatedGroups.add(group)
+                    }
+                }
+                onUpdate(updatedGroups) // update views accordingly
+            }
         }
     }
+
+    fun onUpdate(updatedGroups: List<Group>) {
+        synchronized(groupList) { // prevents race conditions
+            groupList.clear()
+            groupList.addAll(updatedGroups)
+        }
+//        recyclerViewAdapter.notifyDataSetChanged() // update recyclerView
+    }
+
 }

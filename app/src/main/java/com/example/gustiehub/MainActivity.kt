@@ -23,8 +23,10 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -43,7 +45,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        GlobalData.initializeGlobalData()
+        FirebaseApp.initializeApp(this) // Ensure Firebase is initialized
+//        GlobalData.initializeGlobalData()
 
         emailInput = findViewById(R.id.email_input)
         loginButton = findViewById(R.id.login_button)
@@ -72,6 +75,30 @@ class MainActivity : AppCompatActivity() {
         }
 
         auth = Firebase.auth
+        val db = FirebaseFirestore.getInstance()
+
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            val userId = currentUser.uid
+            val email = currentUser.email ?: "null"
+
+            // Fetch user details from Firestore
+            db.collection("users").document(userId).get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val firstName = document.getString("firstName") ?: "null"
+                    val lastName = document.getString("lastName") ?: "null"
+
+                    // Create User object (triggers init block)
+                    val user = User(userId, email, firstName, lastName)
+                } else {
+                    println("User document does not exist in Firestore")
+                }
+            }.addOnFailureListener { e ->
+                println("Error fetching user document: ${e.message}")
+            }
+        } else {
+            println("No authenticated user found.")
+        }
 
         // set up sign-out button
         //findViewById<Button>(R.id.logout_button).setOnClickListener {
@@ -112,6 +139,7 @@ class MainActivity : AppCompatActivity() {
             } catch (e: GetCredentialException) {
                 Log.e(TAG, "Google Sign-In failed: ${e.localizedMessage}", e)
 
+                // CURRENTLY BUGGY:
                 // If no Google account is available, prompt the user to add one
 //                if (e is androidx.credentials.exceptions.NoCredentialException) {
 //                    Log.d(TAG, "No Google accounts found, prompting user to add one...")
@@ -121,6 +149,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // CURRENTLY BUGGY
 //    private fun promptAddGoogleAccount() {
 //        try {
 //            val intent = Intent(Settings.ACTION_ADD_ACCOUNT).apply {
@@ -169,8 +198,8 @@ class MainActivity : AppCompatActivity() {
                         startActivity(dashboardIntent)
                     } else {
                         Log.w(TAG, "Unauthorized email domain: $email")
-                        auth.signOut() // Sign out the user
-                        updateUI(null) // Reset UI
+                        auth.signOut() // sign out user
+                        updateUI(null) // reset UI
                     }
                 } else {
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
@@ -204,6 +233,17 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "User signed in: ${user.email}")
         } else {
             Log.d(TAG, "No user signed in")
+        }
+    }
+
+    private fun onUserSignedUp(userId: String, email: String, firstName: String, lastName: String) {
+        val newUser = User(userId, email, firstName, lastName)
+        newUser.createUserProfile(userId, email, firstName, lastName) { success, error ->
+            if (success) {
+                println("User profile created successfully")
+            } else {
+                println("Error creating user profile: $error")
+            }
         }
     }
 
