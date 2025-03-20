@@ -6,24 +6,35 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class GroupsAdapter(private val groups: List<String>) :
-    RecyclerView.Adapter<GroupsAdapter.GroupViewHolder>() {
+class GroupsAdapter(
+    private var groupList: List<Group>,
+    private val onItemClick: (Group) -> Unit
+) : RecyclerView.Adapter<GroupsAdapter.GroupViewHolder>() {
 
     class GroupViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val groupNameTextView: TextView = itemView.findViewById(R.id.group_name_text_view)
+        val nameTextView: TextView = itemView.findViewById(R.id.group_name_text)
+        val descriptionTextView: TextView = itemView.findViewById(R.id.group_description_text)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.group_list_item, parent, false)
+            .inflate(R.layout.group_item, parent, false)
         return GroupViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: GroupViewHolder, position: Int) {
-        holder.groupNameTextView.text = groups[position]
+        val group = groupList[position]
+        holder.nameTextView.text = group.name
+        holder.descriptionTextView.text = group.description
+        holder.itemView.setOnClickListener {
+            onItemClick(group)
+        }
     }
 
-    override fun getItemCount(): Int {
-        return groups.size
+    fun updateGroups(newGroups: List<Group>) {
+        groupList = newGroups
+        notifyDataSetChanged()
     }
+
+    override fun getItemCount() = groupList.size
 }

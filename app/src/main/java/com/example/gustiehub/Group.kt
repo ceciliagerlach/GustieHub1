@@ -3,24 +3,25 @@ package com.example.gustiehub
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
-class Group(private val _name:String, private val _creatorId:String) {
-    val name = _name
-    private val creatorId = _creatorId
-    private val members: MutableList<String> = mutableListOf(creatorId)
-    val description: String = ""
+data class Group(
+    var name: String = "",
+    private var creatorId: String = "",
+    private var members: MutableList<String> = mutableListOf(),
+    var description: String = "") {
 
     private val db= FirebaseFirestore.getInstance()
 
-    init{
-        createGroup()
-    }
+//    init {
+//        createGroup()
+//    }
 
     //create a new group in firestore
     fun createGroup() {
         val groupData = hashMapOf(
             "name" to name,
             "creatorId" to creatorId,
-            "members" to members
+            "members" to members,
+            "description" to description
         )
 
         db.collection("groups").document(name)
@@ -61,8 +62,6 @@ class Group(private val _name:String, private val _creatorId:String) {
     }
     //get the members of a group
     fun getMembers(): List<String> = members
-    //get the name of a group
-    fun getName(): String = name
     //get the creatorId of a group
     fun getCreatorId(): String = creatorId
 }
