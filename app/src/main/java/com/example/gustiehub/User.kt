@@ -110,7 +110,38 @@ class User(private val _userId: String,
     fun getLastName(): String = lastName
     fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
     fun getGradYear(): Year? = if (::gradYear.isInitialized) gradYear else null
+
+    //function for letting user create a group
+    fun initalizeGroup(groupName: String, onComplete: (Boolean, String?) -> Unit){
+        val user = auth.currentUser
+        user?.let {
+            val userID = it.uid
+            val groupRef = db.collection("groups").document(groupName)
+            val groupData = hashMapOf(
+                "name" to groupName,
+                "creatorId" to userID,
+                "members" to listOf(userID) // add the creator as a member
+            )
+
+            groupRef.set(groupData)
+                .addOnSuccessListener {
+                    // After creating the group, add it to the user's joinedGroups
+                    joinGroup(groupName)
+
+                    println("Group $groupName created and user $userID added as member")
+                    onComplete(true, null)
+                }
+                .addOnFailureListener { e ->
+                    println("Error creating group: ${e.message}")
+                    onComplete(false, e.message)
+                }
+        } ?: run {
+            println("No authenticated user found.")
+            onComplete(false, "No authenticated user found.")
+        }
+    }
 }
+
 
 // TODO: Create function leaveGroup
 // TODO: Create function createGroup
