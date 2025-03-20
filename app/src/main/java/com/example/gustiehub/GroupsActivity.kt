@@ -31,7 +31,7 @@ class GroupsActivity : AppCompatActivity(){
             NewGroupDialog()
         }
 
-        val recyclerView: RecyclerView = findViewById(R.id.groupsRecyclerView)
+       recyclerView = findViewById(R.id.groupsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = GroupAdapter(groupList) { selectedGroup ->
             val intent = Intent(this, GroupsActivity::class.java)
@@ -48,7 +48,7 @@ class GroupsActivity : AppCompatActivity(){
                 }
                 groupList.clear()
                 groupList.addAll(updatedGroups)
-                adapter.notifyDataSetChanged()
+                adapter.updateGroups(updatedGroups)
             }
         }
     }
@@ -81,7 +81,7 @@ class GroupsActivity : AppCompatActivity(){
     }
 
     class GroupAdapter(
-        private val groupList: List<Group>,
+        private var groupList: List<Group>,
         private val onItemClick: (Group) -> Unit
     ) : RecyclerView.Adapter<GroupAdapter.GroupViewHolder>() {
 
@@ -104,6 +104,11 @@ class GroupsActivity : AppCompatActivity(){
             holder.itemView.setOnClickListener {
                 onItemClick(group)
             }
+        }
+
+        fun updateGroups(newGroups: List<Group>) {
+            groupList = newGroups
+            notifyDataSetChanged()
         }
 
         override fun getItemCount() = groupList.size
