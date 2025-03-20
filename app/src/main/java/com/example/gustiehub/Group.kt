@@ -4,9 +4,10 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class Group(private val _name:String, private val _creatorId:String) {
-    private val name = _name
+    val name = _name
     private val creatorId = _creatorId
     private val members: MutableList<String> = mutableListOf(creatorId)
+    val description: String = ""
 
     private val db= FirebaseFirestore.getInstance()
 
