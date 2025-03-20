@@ -5,7 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 object GlobalData {
     var groupList = mutableListOf<Group>()
 
-    fun getGroupList() {
+    fun getGroupList(onGroupsUpdated: (List<Group>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val groupsRef = db.collection("groups")
 
@@ -23,17 +23,18 @@ object GlobalData {
                         updatedGroups.add(group)
                     }
                 }
-                onUpdate(updatedGroups) // update views accordingly
+                println("Fetched ${updatedGroups.size} groups from Firestore.")
+                onGroupsUpdated(updatedGroups) // update views accordingly
             }
         }
     }
 
-    fun onUpdate(updatedGroups: List<Group>) {
-        synchronized(groupList) { // prevents race conditions
-            groupList.clear()
-            groupList.addAll(updatedGroups)
-        }
+//    fun onUpdate(updatedGroups: List<Group>) {
+//        synchronized(groupList) { // prevents race conditions
+//            groupList.clear()
+//            groupList.addAll(updatedGroups)
+//        }
 //        recyclerViewAdapter.notifyDataSetChanged() // update recyclerView
-    }
+//    }
 
 }

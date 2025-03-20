@@ -2,19 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/discover_groups"
+    android:id="@+id/group_display"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
-
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="vertical"
-        android:padding="32dp">
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,6 +21,7 @@
             android:gravity="center">
 
             <TextView
+                android:id="@+id/group_name_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="14dp"
@@ -44,6 +42,7 @@
                 android:layout_gravity="center"/>
 
             <TextView
+                android:id="@+id/group_description_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:maxLines="3"
