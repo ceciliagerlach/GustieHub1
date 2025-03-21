@@ -34,16 +34,6 @@
         android:icon="@drawable/group_icon"
         app:showAsAction="withText">
 
-        <menu
-            android:id="@+id/group_menu">
-
-            <item
-                android:id="@+id/group_item"
-                android:title="Group Name"
-                app:showAsAction="withText"/>
-
-        </menu>
-
     </item>
 
 </menu>
