@@ -17,20 +17,20 @@ class Post (private val _creatorId: String,
     init {
 
     }
-
-    fun getCreatorId(): String {
-        return this.creatorId
-    }
-
-    fun getGroup(): String {
-        return this.group
-    }
-
-    fun getText(): String {
-        return this.text
-    }
-
-    fun setText(newText: String) {
-        this.text = newText
-    }
+//
+//    fun getCreatorId(): String {
+//        return this.creatorId
+//    }
+//
+//    fun getGroup(): String {
+//        return this.group
+//    }
+//
+//    fun getText(): String {
+//        return this.text
+//    }
+//
+//    fun setText(newText: String) {
+//        this.text = newText
+//    }
 }
