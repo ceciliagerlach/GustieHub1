@@ -35,6 +35,7 @@ class User(private val _userId: String,
             "joinedGroups" to mutableListOf<String>() // You can add default group here if needed
         )
 
+        // add user to FireBase
         db.collection("users").document(userId)
             .set(userData)
             .addOnSuccessListener {
