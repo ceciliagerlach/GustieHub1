@@ -4,6 +4,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 object GlobalData {
     var groupList = mutableListOf<Group>()
+    var userDict = mutableMapOf<String,User>()
 
     fun getGroupList(onGroupsUpdated: (List<Group>) -> Unit) {
         val db = FirebaseFirestore.getInstance()

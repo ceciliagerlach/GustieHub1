@@ -47,6 +47,9 @@ class User(private val _userId: String,
                 println("Error creating user profile: ${e.message}")
                 onComplete(false, e.message)
             }
+
+        // add user to local dictionary
+        GlobalData.userDict.put(userId, this)
     }
 
 //    fun addUserToGustiesGroup(userId: String) {
