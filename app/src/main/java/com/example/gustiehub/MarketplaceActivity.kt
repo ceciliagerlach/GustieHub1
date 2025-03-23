@@ -6,9 +6,16 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.auth.FirebaseAuth
 
 class MarketplaceActivity: AppCompatActivity(){
+    private lateinit var menuRecyclerView: RecyclerView
+    private lateinit var menuAdapter: MenuAdapter
+    private val groupList = mutableListOf<Group>()
+    private val filteredGroupList = mutableListOf<Group>()
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
@@ -16,6 +23,24 @@ class MarketplaceActivity: AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_marketplace)
+
+        // list of groups in tab
+        val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        menuRecyclerView = findViewById(R.id.recycler_menu)
+        menuRecyclerView.layoutManager = LinearLayoutManager(this)
+        menuAdapter = MenuAdapter(filteredGroupList) { selectedGroup ->
+            val intent = Intent(this, GroupsActivity::class.java)
+            intent.putExtra("groupName", selectedGroup.name)
+            startActivity(intent)
+        }
+        menuRecyclerView.adapter = menuAdapter
+        GlobalData.getFilteredGroupList(userID){ updatedGroups ->
+            runOnUiThread {
+                groupList.clear()
+                groupList.addAll(updatedGroups)
+                menuAdapter.updateGroups(updatedGroups)
+            }
+        }
 
         //set up drawer layout and handle clicks for menu items
         navView = findViewById(R.id.nav_view)
