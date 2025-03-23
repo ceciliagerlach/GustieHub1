@@ -15,9 +15,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 
 class DashboardActivity : AppCompatActivity() {
+    // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
-    lateinit var actionBarDrawerToggle: ActionBarDrawerToggle
 
     companion object {
         private const val EXTRA_EMAIL = "com.example.gustiehub.email"
@@ -55,6 +55,10 @@ class DashboardActivity : AppCompatActivity() {
                     val intent = Intent(this, EventsActivity::class.java)
                     startActivity(intent)
                 }
+                R.id.groups -> {
+                    val intent = Intent(this, GroupsActivity::class.java)
+                    startActivity(intent)
+                }
             }
             drawerLayout.closeDrawer(GravityCompat.START)
             true
@@ -66,9 +70,7 @@ class DashboardActivity : AppCompatActivity() {
         val menuButton: ImageView = findViewById(R.id.menu)
         val announcementsButton: Button = findViewById(R.id.see_all_announcements_button)
         val activityButton: Button = findViewById(R.id.see_all_activity_button)
-        val myGroupsButton: ImageButton = findViewById(R.id.my_groups_button)
-        val marketplaceButton: ImageButton = findViewById(R.id.marketplace_button)
-        val eventsButton: ImageButton = findViewById(R.id.events_button)
+        val eventsButton: Button = findViewById(R.id.see_all_events_button)
 
         //handling clicks for buttons
         messageButton.setOnClickListener {
@@ -77,14 +79,6 @@ class DashboardActivity : AppCompatActivity() {
         }
         profileButton.setOnClickListener {
             val intent = Intent(this, ProfileActivity::class.java)
-            startActivity(intent)
-        }
-        myGroupsButton.setOnClickListener {
-            val intent = Intent(this, GroupsActivity::class.java)
-            startActivity(intent)
-        }
-        marketplaceButton.setOnClickListener {
-            val intent = Intent(this, MarketplaceActivity::class.java)
             startActivity(intent)
         }
         menuButton.setOnClickListener {

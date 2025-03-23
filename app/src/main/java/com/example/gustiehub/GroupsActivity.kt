@@ -9,36 +9,64 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.example.gustiehub.GlobalData.groupList
+import com.google.android.material.navigation.NavigationView
 
-class GroupsActivity : AppCompatActivity(){
-
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: GroupAdapter
+class GroupsActivity : AppCompatActivity() {
+    // variables for recycler view, displaying list of groups
+    private lateinit var groupsRecyclerView: RecyclerView
+    private lateinit var groupsAdapter: GroupsAdapter
+    private val groupsNameList = mutableListOf<String>()
     private val groupList = mutableListOf<Group>()
+    private val db = FirebaseFirestore.getInstance()
+    // variables for toolbar and tabbed navigation
+    lateinit var navView: NavigationView
+    lateinit var drawerLayout: DrawerLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_groups)
         val createGroupButton = findViewById<ImageButton>(R.id.create_groups_button)
 
+        groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
+        groupsRecyclerView.layoutManager = LinearLayoutManager(this)
+        groupsAdapter = GroupsAdapter(groupList,onItemClick = { selectedGroup ->
+            val intent = Intent(this, GroupsActivity::class.java)
+            intent.putExtra("groupName", selectedGroup.name)
+            startActivity(intent)
+        },
+        onJoinGroupClick = { selectedGroup ->
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                val userId = user.uid
+                val currentUser = User(userId, user.email ?: "", "", "")
+                currentUser.joinGroup(selectedGroup.name)
+                Toast.makeText(this, "Joined group: ${selectedGroup.name}", Toast.LENGTH_SHORT)
+                    .show()
+            } else {
+                Toast.makeText(this, "User not authenticated", Toast.LENGTH_LONG).show()
+            }
+
+        } )
+        groupsRecyclerView.adapter = groupsAdapter
+
+        //firebase function for listening from firebase
+        listenForGroupsUpdates()
+
         createGroupButton.setOnClickListener {
             NewGroupDialog()
         }
 
-       recyclerView = findViewById(R.id.groupsRecyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = GroupAdapter(groupList) { selectedGroup ->
-            val intent = Intent(this, GroupsActivity::class.java)
-            intent.putExtra("groupName", selectedGroup.name)
-            startActivity(intent)
-        }
-        recyclerView.adapter = adapter
         GlobalData.getGroupList { updatedGroups ->
             runOnUiThread {
                 if (updatedGroups.isEmpty()) {
@@ -48,9 +76,62 @@ class GroupsActivity : AppCompatActivity(){
                 }
                 groupList.clear()
                 groupList.addAll(updatedGroups)
-                adapter.updateGroups(updatedGroups)
+                groupsAdapter.updateGroups(updatedGroups)
             }
         }
+
+        //set up drawer layout and handle clicks for menu items
+        navView = findViewById(R.id.nav_view)
+        drawerLayout = findViewById(R.id.tab_layout)
+        navView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.dashboard -> {
+                    val intent = Intent(this, DashboardActivity::class.java)
+                    startActivity(intent)
+                }
+                R.id.announcements -> {
+                    val intent = Intent(this, AnnouncementsActivity::class.java)
+                    startActivity(intent)
+                }
+                R.id.marketplace -> {
+                    val intent = Intent(this, MarketplaceActivity::class.java)
+                    startActivity(intent)
+                }
+                R.id.events -> {
+                    val intent = Intent(this, EventsActivity::class.java)
+                    startActivity(intent)
+                }
+                R.id.groups -> {
+                    drawerLayout.closeDrawer(GravityCompat.START)
+                }
+            }
+            drawerLayout.closeDrawer(GravityCompat.START)
+            true
+        }
+        // opening menu
+        val menuButton: ImageView = findViewById(R.id.menu)
+        menuButton.setOnClickListener {
+            val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
+            drawerLayout.openDrawer(GravityCompat.START)
+        }
+    }
+
+    private fun listenForGroupsUpdates() {
+        db.collection("groups")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Toast.makeText(this, "Error fetching groups", Toast.LENGTH_SHORT).show()
+                    return@addSnapshotListener
+                }
+                groupsNameList.clear()
+                for (document in snapshot!!.documents) {
+                    val groupName = document.getString("name")
+                    if (groupName != null) {
+                        groupsNameList.add(groupName)
+                    }
+                }
+                groupsAdapter.notifyDataSetChanged()
+            }
     }
 
     private fun NewGroupDialog() {
@@ -70,48 +151,23 @@ class GroupsActivity : AppCompatActivity(){
         buttonConfirm.setOnClickListener {
             val groupName = editTextGroupName.text.toString()
             if (groupName.isNotEmpty()) {
-                Toast.makeText(this, "Group Created: $groupName", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
+                val user = FirebaseAuth.getInstance().currentUser
+                if (user != null) {
+                    val userId = user.uid
+                    val group = Group(groupName, userId)
+                    group.createGroup()
+                    val currentUser = User(userId, user.email ?: "", "", "")
+                    currentUser.joinGroup(groupName)
+                    Toast.makeText(this, "Group Created: $groupName", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(this, "User not authenticated", Toast.LENGTH_LONG).show()
+                }
             } else {
                 editTextGroupName.error = "Group name cannot be empty"
             }
-
         }
         dialog.show()
-    }
-
-    class GroupAdapter(
-        private var groupList: List<Group>,
-        private val onItemClick: (Group) -> Unit
-    ) : RecyclerView.Adapter<GroupAdapter.GroupViewHolder>() {
-
-        class GroupViewHolder(itemview: View) : RecyclerView.ViewHolder(itemview) {
-            val nameTextView: TextView = itemView.findViewById(R.id.group_name_text)
-            val descriptionTextView: TextView = itemView.findViewById(R.id.group_description_text)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupViewHolder {
-            // Create a new view, which defines the UI of the list item
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.group_item, parent, false)
-            return GroupViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: GroupViewHolder, position: Int) {
-            val group = groupList[position]
-            holder.nameTextView.text = group.name
-            holder.descriptionTextView.text = group.description
-            holder.itemView.setOnClickListener {
-                onItemClick(group)
-            }
-        }
-
-        fun updateGroups(newGroups: List<Group>) {
-            groupList = newGroups
-            notifyDataSetChanged()
-        }
-
-        override fun getItemCount() = groupList.size
     }
 }
 
