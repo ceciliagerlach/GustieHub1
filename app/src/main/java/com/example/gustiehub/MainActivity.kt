@@ -30,6 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.Year
 import kotlin.math.sign
 
 class MainActivity : AppCompatActivity() {
@@ -236,9 +237,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun onUserSignedUp(userId: String, email: String, firstName: String, lastName: String) {
+    private fun onUserSignedUp(userId: String, email: String, firstName: String, lastName: String, gradYear: Year) {
         val newUser = User(userId, email, firstName, lastName)
-        newUser.createUserProfile(userId, email, firstName, lastName) { success, error ->
+        newUser.createUserProfile(userId, email, firstName, lastName, gradYear) { success, error ->
             if (success) {
                 println("User profile created successfully")
             } else {
