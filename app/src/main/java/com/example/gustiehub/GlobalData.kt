@@ -4,7 +4,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 object GlobalData {
     var groupList = mutableListOf<Group>()
+
+    // will these be used? Not sure yet
     var userDict = mutableMapOf<String,User>()
+    var groupDict = mutableMapOf<String, Group>()
 
     fun getGroupList(onGroupsUpdated: (List<Group>) -> Unit) {
         val db = FirebaseFirestore.getInstance()

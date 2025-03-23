@@ -29,6 +29,9 @@ data class Group(
             .addOnSuccessListener { println("Group created: $name") }
             .addOnFailureListener { e -> println("Error creating group: ${e.message}") }
 
+        // add group to local dictionary
+        GlobalData.groupDict.put(name, this)
+
     }
 
     //add a member to a group
