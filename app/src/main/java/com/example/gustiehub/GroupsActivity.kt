@@ -43,6 +43,28 @@ class GroupsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_groups)
         val createGroupButton = findViewById<ImageButton>(R.id.create_groups_button)
 
+        groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
+        groupsRecyclerView.layoutManager = LinearLayoutManager(this)
+        groupsAdapter = GroupsAdapter(groupList,onItemClick = { selectedGroup ->
+            val intent = Intent(this, GroupsActivity::class.java)
+            intent.putExtra("groupName", selectedGroup.name)
+            startActivity(intent)
+        },
+        onJoinGroupClick = { selectedGroup ->
+            val user = FirebaseAuth.getInstance().currentUser
+            if (user != null) {
+                val userId = user.uid
+                val currentUser = User(userId, user.email ?: "", "", "")
+                currentUser.joinGroup(selectedGroup.name)
+                Toast.makeText(this, "Joined group: ${selectedGroup.name}", Toast.LENGTH_SHORT)
+                    .show()
+            } else {
+                Toast.makeText(this, "User not authenticated", Toast.LENGTH_LONG).show()
+            }
+
+        } )
+        groupsRecyclerView.adapter = groupsAdapter
+
         //firebase function for listening from firebase
         listenForGroupsUpdates()
 
