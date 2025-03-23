@@ -35,6 +35,7 @@ class User(private val _userId: String,
             "joinedGroups" to mutableListOf<String>() // You can add default group here if needed
         )
 
+        // add user to FireBase
         db.collection("users").document(userId)
             .set(userData)
             .addOnSuccessListener {
@@ -47,6 +48,9 @@ class User(private val _userId: String,
                 println("Error creating user profile: ${e.message}")
                 onComplete(false, e.message)
             }
+
+        // add user to local dictionary
+        GlobalData.userDict.put(userId, this)
     }
 
 //    fun addUserToGustiesGroup(userId: String) {
