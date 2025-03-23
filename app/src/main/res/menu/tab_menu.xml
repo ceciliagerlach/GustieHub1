@@ -30,9 +30,19 @@
 
     <item
         android:id="@+id/groups"
-        android:title="@string/group_text"
+        android:title="@string/discover_groups_text"
         android:icon="@drawable/group_icon"
-        app:showAsAction="withText">
+        app:showAsAction="withText"/>
+
+    <item
+        android:id="@+id/my_groups"
+        android:title="@string/group_text">
+
+        <menu>
+            <item
+                android:title=""
+                app:showAsAction="never"/>
+        </menu>
 
     </item>
 

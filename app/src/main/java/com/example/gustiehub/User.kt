@@ -110,6 +110,7 @@ class User(private val _userId: String,
     fun getLastName(): String = lastName
     fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
     fun getGradYear(): Year? = if (::gradYear.isInitialized) gradYear else null
+    fun getJoinedGroups(): List<String> = joinedGroups
 
     //function for letting user create a group
     fun initalizeGroup(groupName: String, onComplete: (Boolean, String?) -> Unit){
