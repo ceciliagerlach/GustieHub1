@@ -36,6 +36,7 @@ class User(private val _userId: String,
             "joinedGroups" to mutableListOf<String>() // You can add default group here if needed
         )
 
+        // add user to FireBase
         db.collection("users").document(userId)
             .set(userData)
             .addOnSuccessListener {
@@ -114,6 +115,7 @@ class User(private val _userId: String,
     fun getLastName(): String = lastName
     fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
     fun getGradYear(): Year? = if (::gradYear.isInitialized) gradYear else null
+    fun getJoinedGroups(): List<String> = joinedGroups
 
     // function for letting user create a group
     fun createGroup(groupName: String, onComplete: (Boolean, String?) -> Unit){

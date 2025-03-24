@@ -3,7 +3,9 @@ package com.example.gustiehub
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -25,9 +27,12 @@ import com.google.android.material.navigation.NavigationView
 class GroupsActivity : AppCompatActivity() {
     // variables for recycler view, displaying list of groups
     private lateinit var groupsRecyclerView: RecyclerView
+    private lateinit var menuRecyclerView: RecyclerView
     private lateinit var groupsAdapter: GroupsAdapter
+    private lateinit var menuAdapter: MenuAdapter
     private val groupsNameList = mutableListOf<String>()
     private val groupList = mutableListOf<Group>()
+    private val filteredGroupList = mutableListOf<Group>()
     private val db = FirebaseFirestore.getInstance()
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
@@ -40,7 +45,7 @@ class GroupsActivity : AppCompatActivity() {
 
         groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
         groupsRecyclerView.layoutManager = LinearLayoutManager(this)
-        groupsAdapter = GroupsAdapter(groupList,onItemClick = { selectedGroup ->
+        groupsAdapter = GroupsAdapter(groupList, onItemClick = { selectedGroup ->
             val intent = Intent(this, GroupsActivity::class.java)
             intent.putExtra("groupName", selectedGroup.name)
             startActivity(intent)
@@ -67,22 +72,44 @@ class GroupsActivity : AppCompatActivity() {
             NewGroupDialog()
         }
 
+        // list in discover groups
+        //groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
+        //groupsRecyclerView.layoutManager = LinearLayoutManager(this)
+        //groupsAdapter = GroupsAdapter(groupList) { selectedGroup ->
+            //val intent = Intent(this, GroupsActivity::class.java)
+            //intent.putExtra("groupName", selectedGroup.name)
+            //startActivity(intent)
+        //}
+        groupsRecyclerView.adapter = groupsAdapter
         GlobalData.getGroupList { updatedGroups ->
             runOnUiThread {
-                if (updatedGroups.isEmpty()) {
-                    println("No groups found!") // Debugging log
-                } else {
-                    println("Updating RecyclerView with ${updatedGroups.size} groups.") // Debugging log
-                }
                 groupList.clear()
                 groupList.addAll(updatedGroups)
                 groupsAdapter.updateGroups(updatedGroups)
             }
         }
 
+        // list of groups in tab
+        val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        menuRecyclerView = findViewById(R.id.recycler_menu)
+        menuRecyclerView.layoutManager = LinearLayoutManager(this)
+        menuAdapter = MenuAdapter(filteredGroupList) { selectedGroup ->
+            val intent = Intent(this, GroupsActivity::class.java)
+            intent.putExtra("groupName", selectedGroup.name)
+            startActivity(intent)
+        }
+        menuRecyclerView.adapter = menuAdapter
+        GlobalData.getFilteredGroupList(userID){ updatedGroups ->
+            runOnUiThread {
+                groupList.clear()
+                groupList.addAll(updatedGroups)
+                menuAdapter.updateGroups(updatedGroups)
+            }
+        }
+
         //set up drawer layout and handle clicks for menu items
-        navView = findViewById(R.id.nav_view)
-        drawerLayout = findViewById(R.id.tab_layout)
+        drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
+        navView = findViewById<NavigationView>(R.id.nav_view)
         navView.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.dashboard -> {
@@ -169,5 +196,6 @@ class GroupsActivity : AppCompatActivity() {
         }
         dialog.show()
     }
+
 }
 

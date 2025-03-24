@@ -6,7 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 data class Group(
     var name: String = "",
     private var creatorId: String = "",
-    private var members: MutableList<String> = mutableListOf(),
+    var members: MutableList<String> = mutableListOf(),
     var description: String = "") {
 
     private val db= FirebaseFirestore.getInstance()
@@ -64,9 +64,9 @@ data class Group(
             }
     }
     //get the members of a group
-    fun getMembers(): List<String> = members
+    //fun getMembers(): List<String> = members
     //get the creatorId of a group
-    fun getCreatorId(): String = creatorId
+    //fun getCreatorId(): String = creatorId
 }
 
 // TODO: Add post structure to Group + Firebase, capable of changing order
