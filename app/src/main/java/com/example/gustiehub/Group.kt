@@ -16,7 +16,7 @@ data class Group(
 //    }
 
     //create a new group in firestore
-    fun createGroup() {
+    fun initializeGroup() {
         val groupData = hashMapOf(
             "name" to name,
             "creatorId" to creatorId,
@@ -28,6 +28,9 @@ data class Group(
             .set(groupData)
             .addOnSuccessListener { println("Group created: $name") }
             .addOnFailureListener { e -> println("Error creating group: ${e.message}") }
+
+        // add group to local dictionary
+        GlobalData.groupDict.put(name, this)
 
     }
 

@@ -21,17 +21,18 @@ class User(private val _userId: String,
     private val auth = FirebaseAuth.getInstance()
 
     init {
-        // Automatically save student data
-        this.joinGroup("Gusties")
+        // automatically save student data
+//        this.joinGroup("Gusties")
     }
 
     // save new student info to Firestore
-    fun createUserProfile(userId: String, email: String, firstName: String, lastName: String, onComplete: (Boolean, String?) -> Unit) {
+    fun createUserProfile(userId: String, email: String, firstName: String, lastName: String, gradYear: Year, onComplete: (Boolean, String?) -> Unit) {
         val userData = hashMapOf(
             "userID" to userId,
             "firstName" to firstName,
             "lastName" to lastName,
             "email" to email,
+            "gradYear" to gradYear,
             "joinedGroups" to mutableListOf<String>() // You can add default group here if needed
         )
 
@@ -50,7 +51,7 @@ class User(private val _userId: String,
             }
 
         // add user to local dictionary
-        GlobalData.userDict.put(userId, this)
+        GlobalData.userDict[userId] = this
     }
 
 //    fun addUserToGustiesGroup(userId: String) {
@@ -116,38 +117,114 @@ class User(private val _userId: String,
     fun getGradYear(): Year? = if (::gradYear.isInitialized) gradYear else null
     fun getJoinedGroups(): List<String> = joinedGroups
 
-    //function for letting user create a group
-    fun initalizeGroup(groupName: String, onComplete: (Boolean, String?) -> Unit){
+    // function for letting user create a group
+    fun createGroup(groupName: String, onComplete: (Boolean, String?) -> Unit){
         val user = auth.currentUser
+
         user?.let {
             val userID = it.uid
             val groupRef = db.collection("groups").document(groupName)
-            val groupData = hashMapOf(
-                "name" to groupName,
-                "creatorId" to userID,
-                "members" to listOf(userID) // add the creator as a member
-            )
 
-            groupRef.set(groupData)
-                .addOnSuccessListener {
-                    // After creating the group, add it to the user's joinedGroups
-                    joinGroup(groupName)
-
-                    println("Group $groupName created and user $userID added as member")
-                    onComplete(true, null)
-                }
-                .addOnFailureListener { e ->
-                    println("Error creating group: ${e.message}")
+            groupRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    println("Group $groupName already exists.")
+                    onComplete(false, "Group already exists.")
+                    return@addOnSuccessListener
+                } else {
+                    val groupData = hashMapOf(
+                        "name" to groupName,
+                        "creatorId" to userID,
+                        "members" to listOf(userID) // creator is the first member
+                    )
+                    groupRef.set(groupData)
+                        .addOnSuccessListener {
+                            val userRef = db.collection("users").document(userID)
+                            // joinGroup() currently updates group members too
+                            userRef.update("joinedGroups", FieldValue.arrayUnion(groupName))
+                                .addOnSuccessListener {
+                                    println("Group $groupName created successfully, user $userID added.")
+                                    onComplete(true, null)
+                                }
+                                .addOnFailureListener { e ->
+                                    println("Group created, but failed to update user: ${e.message}")
+                                    onComplete(false, "Group created, but failed to update user.")
+                                }
+                        }
+                        .addOnFailureListener { e ->
+                            println("Error creating group: ${e.message}")
+                            onComplete(false, e.message)
+                        }
+                }.addOnFailureListener { e ->
+                    println("Error checking if group exists: ${e.message}")
                     onComplete(false, e.message)
                 }
+            }
         } ?: run {
             println("No authenticated user found.")
             onComplete(false, "No authenticated user found.")
         }
     }
+
+    fun createPost(group: String, text: String) {
+        val postData = hashMapOf(
+            "creatorId" to userId,
+            "group" to group,
+            "text" to text,
+            "timestamp" to System.currentTimeMillis() // add timestamp for ordering
+        )
+
+        db.collection("posts")
+            .add(postData) // firestore generates a unique ID
+            .addOnSuccessListener { documentReference ->
+                println("Post created with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                println("Error creating post: ${e.message}")
+            }
+    }
+
+    fun editPost(postID: String, newText: String, onComplete: (Boolean, String?) -> Unit) {
+        val user = auth.currentUser
+
+        user?.let {
+            val userID = it.uid
+            val postRef = db.collection("posts").document(postID)
+
+            postRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val postCreatorId = document.getString("creatorId")
+
+                    // only the original creator can edit the post
+                    if (postCreatorId == userID) {
+                        postRef.update("text", newText)
+                            .addOnSuccessListener {
+                                println("Post $postID updated successfully.")
+                                onComplete(true, null)
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error updating post: ${e.message}")
+                                onComplete(false, e.message)
+                            }
+                    } else {
+                        println("User $userID is not the creator of post $postID.")
+                        onComplete(false, "You do not have permission to edit this post.")
+                    }
+                } else {
+                    println("Post $postID not found.")
+                    onComplete(false, "Post not found.")
+                }
+            }.addOnFailureListener { e ->
+                println("Error retrieving post: ${e.message}")
+                onComplete(false, e.message)
+            }
+        } ?: run {
+            println("No authenticated user found.")
+            onComplete(false, "No authenticated user found.")
+        }
+    }
+
 }
 
 
 // TODO: Create function leaveGroup
-// TODO: Create function createGroup
 // TODO: Create sign up screen requesting first + last name (prof pic can be done later)
