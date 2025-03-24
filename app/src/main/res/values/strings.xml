@@ -15,4 +15,13 @@
     <string name="join_text">Join Group</string>
     <string name="nav_open">Open</string>
     <string name="nav_close">Close</string>
+    <string name="new_group">Create New Group</string>
+    <string name="new_group_name">Group Name</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="study_areas">Majors/Minors</string>
+    <string name="class_year">Class Year</string>
+    <string name="user_state">Home State</string>
+    <string name="full_name">Your Name</string>
+    <string name="creating_profile">Tell us about you...</string>
 </resources>
