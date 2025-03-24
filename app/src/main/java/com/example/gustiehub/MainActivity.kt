@@ -190,20 +190,31 @@ class MainActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
+                    val email = user?.email
+                    val userId = user?.uid
 
                     // check email belongs to Gustavus
-                    val email = user?.email
-                    if (email != null && email.endsWith(CLIENT_EMAIL_DOMAIN)) {
+                    if (email != null && email.endsWith(CLIENT_EMAIL_DOMAIN) && userId != null) {
                         Log.d(TAG, "Sign-in successful: $email")
-                        updateUI(user)
 
-                        // move to dashboard view if valid email/password
-                        val dashboardIntent = DashboardActivity.newIntent(this, email)
-                        startActivity(dashboardIntent)
+                        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+                        userRef.get().addOnSuccessListener { document ->
+                            if (document.exists()) {
+                                // user exists => go to dashboard
+                                val dashboardIntent = DashboardActivity.newIntent(this, email)
+                                startActivity(dashboardIntent)
+                            } else {
+                                // user doesn't exist => go to profile setup
+                                val profileIntent = Intent(this, ProfileActivity::class.java)
+                                startActivity(profileIntent)
+                            }
+                        }.addOnFailureListener {
+                            Log.w(TAG, "Failed to check user existence: ${it.message}")
+                        }
                     } else {
                         Log.w(TAG, "Unauthorized email domain: $email")
-                        auth.signOut() // sign out user
-                        updateUI(null) // reset UI
+                        auth.signOut()
+                        updateUI(null)
                     }
                 } else {
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
