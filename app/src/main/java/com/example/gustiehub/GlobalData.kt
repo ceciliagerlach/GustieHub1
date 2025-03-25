@@ -57,7 +57,7 @@ object GlobalData {
             }
         }
     }
-                
+
     fun getFilteredGroupList(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val groupsRef = db.collection("groups")
@@ -84,14 +84,5 @@ object GlobalData {
             }
         }
     }
-
-
-//    fun onUpdate(updatedGroups: List<Group>) {
-//        synchronized(groupList) { // prevents race conditions
-//            groupList.clear()
-//            groupList.addAll(updatedGroups)
-//        }
-//        recyclerViewAdapter.notifyDataSetChanged() // update recyclerView
-//    }
 
 }
