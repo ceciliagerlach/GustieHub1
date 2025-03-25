@@ -62,13 +62,7 @@ class MainActivity : AppCompatActivity() {
             val email = emailInput.text.toString()
             Log.d(TAG, "Login button clicked with email: $email")
 
-            if (email.isNotEmpty() && email.endsWith(CLIENT_EMAIL_DOMAIN)) {
-                Log.d(TAG, "Valid Gustavus email. Proceeding with sign-in.")
-                signIn()
-            } else {
-                Log.w(TAG, "Invalid email entered")
-                Toast.makeText(this, "Enter a Gustavus email address", Toast.LENGTH_SHORT).show()
-            }
+            signIn()
         }
 
         // *****************************************************************************
@@ -206,6 +200,7 @@ class MainActivity : AppCompatActivity() {
                         Log.w(TAG, "Unauthorized email domain: $email")
                         auth.signOut()
                         updateUI(null)
+                        Toast.makeText(this, "Use a Gustavus email address", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
