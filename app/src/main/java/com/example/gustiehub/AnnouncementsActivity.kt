@@ -78,5 +78,16 @@ class AnnouncementsActivity : AppCompatActivity(){
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
+        // handling clicks for toolbar
+        val messageButton: ImageView = findViewById(R.id.messaging)
+        val profileButton: ImageView = findViewById(R.id.profile)
+        messageButton.setOnClickListener {
+            val intent = Intent(this, MessageActivity::class.java)
+            startActivity(intent)
+        }
+        profileButton.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

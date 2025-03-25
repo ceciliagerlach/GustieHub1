@@ -3,6 +3,7 @@ package com.example.gustiehub
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.ImageButton
@@ -104,6 +105,7 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(intent)
         }
         profileButton.setOnClickListener {
+            Log.d("ProfileActivity", "ProfileActivity started!")
             val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
