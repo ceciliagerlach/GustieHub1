@@ -54,7 +54,7 @@ class GroupsActivity : AppCompatActivity() {
             val user = FirebaseAuth.getInstance().currentUser
             if (user != null) {
                 val userId = user.uid
-                val currentUser = User(userId, user.email ?: "", "", "")
+                val currentUser = User(userId, user.email ?: "", "", "", _gradYear = 0, "", _areasOfStudy = "")
                 currentUser.joinGroup(selectedGroup.name)
                 Toast.makeText(this, "Joined group: ${selectedGroup.name}", Toast.LENGTH_SHORT)
                     .show()
@@ -183,7 +183,7 @@ class GroupsActivity : AppCompatActivity() {
                     val userId = user.uid
                     val group = Group(groupName, userId)
                     group.createGroup()
-                    val currentUser = User(userId, user.email ?: "", "", "")
+                    val currentUser = User(userId, user.email ?: "", "", "", _gradYear = 0, _homeState = "", _areasOfStudy = "")
                     currentUser.joinGroup(groupName)
                     Toast.makeText(this, "Group Created: $groupName", Toast.LENGTH_SHORT).show()
                     dialog.dismiss()
