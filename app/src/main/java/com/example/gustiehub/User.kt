@@ -8,31 +8,43 @@ import java.time.Year
 class User(private val _userId: String,
            private val _email: String,
            private val _firstName: String,
-           private val _lastName: String) {
+           private val _lastName: String,
+           private val _gradYear: Int,
+           private val _homeState: String,
+           private val _areasOfStudy: String) {
+
+    // initialize values for FireBase
     private val userId = _userId
     private val email = _email
     private var firstName = _firstName
     private var lastName = _lastName
+    private  var gradYear = _gradYear
+    private var homeState = _homeState
+    private var areasOfStudy = _areasOfStudy
+
     private lateinit var profilePicture: String // store as URL?
-    private lateinit var gradYear: Year
     private var joinedGroups: MutableList<String> = mutableListOf("Gusties") // store group names
 
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    init {
-        // automatically save student data
+//    init {
+//        // automatically save student data
 //        this.joinGroup("Gusties")
-    }
+//    }
 
     // save new student info to Firestore
-    fun createUserProfile(userId: String, email: String, firstName: String, lastName: String, gradYear: Year, onComplete: (Boolean, String?) -> Unit) {
+    fun createUserProfile(userId: String, email: String, firstName: String,
+                          lastName: String, gradYear: Int, homeState: String,
+                          areasOfStudy: String, onComplete: (Boolean, String?) -> Unit) {
         val userData = hashMapOf(
             "userID" to userId,
             "firstName" to firstName,
             "lastName" to lastName,
             "email" to email,
             "gradYear" to gradYear,
+            "homeState" to homeState,
+            "areasOfStudy" to areasOfStudy,
             "joinedGroups" to mutableListOf<String>() // You can add default group here if needed
         )
 
@@ -78,9 +90,9 @@ class User(private val _userId: String,
         updateField("profilePicture", _profilePicture)
     }
 
-    fun setGradYear(_gradYear: Year) {
+    fun setGradYear(_gradYear: Int) {
         this.gradYear = _gradYear
-        updateField("gradYear", _gradYear.toString())
+        updateField("gradYear", _gradYear)
     }
 
     fun joinGroup(groupID: String) {
@@ -114,7 +126,7 @@ class User(private val _userId: String,
     fun getFirstName(): String =  firstName
     fun getLastName(): String = lastName
     fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
-    fun getGradYear(): Year? = if (::gradYear.isInitialized) gradYear else null
+    fun getGradYear(): Int = gradYear
     fun getJoinedGroups(): List<String> = joinedGroups
 
     // function for letting user create a group
