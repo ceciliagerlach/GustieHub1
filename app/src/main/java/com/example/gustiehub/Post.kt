@@ -1,36 +1,17 @@
 package com.example.gustiehub
 
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.ServerTimestamp
 
-class Post (private val _creatorId: String,
-            private val _group: String,
-            private val _text: String){
-    private val creatorId = _creatorId
-    private val group = _group
-    private var text = _text
+data class Post(
+    val creatorId: String = "",
+    val group: String = "",
+    val text: String = "",
+    val comments: List<Map<String, Any>> = emptyList(),
+    val commentsEnabled: Boolean = true
 
-    private val db = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
 
-    init {
-
-    }
-//
-//    fun getCreatorId(): String {
-//        return this.creatorId
-//    }
-//
-//    fun getGroup(): String {
-//        return this.group
-//    }
-//
-//    fun getText(): String {
-//        return this.text
-//    }
-//
-//    fun setText(newText: String) {
-//        this.text = newText
-//    }
-}
+    // don't know if we need this yet
+//    @ServerTimestamp
+//    val timestamp: Timestamp? = null // Firestore auto-generates this on creation
+)

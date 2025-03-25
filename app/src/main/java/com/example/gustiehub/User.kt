@@ -28,15 +28,10 @@ class User(private val _userId: String,
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-//    init {
-//        // automatically save student data
-//        this.joinGroup("Gusties")
-//    }
-
-    // save new student info to Firestore
     fun createUserProfile(userId: String, email: String, firstName: String,
                           lastName: String, gradYear: Int, homeState: String,
                           areasOfStudy: String, onComplete: (Boolean, String?) -> Unit) {
+        """ Saves new student info to Firestore""".trimMargin()
         val userData = hashMapOf(
             "userID" to userId,
             "firstName" to firstName,
@@ -74,27 +69,6 @@ class User(private val _userId: String,
 //            .addOnFailureListener { it.printStackTrace() }
 //    }
 
-    // Setters
-    fun setFirstName(_firstName: String) {
-        this.firstName = _firstName
-        updateField("firstName", _firstName)
-    }
-
-    fun setLastName(_lastName: String) {
-        this.lastName = _lastName
-        updateField("lastName", _lastName)
-    }
-
-    fun setProfilePicture(_profilePicture: String) {
-        this.profilePicture = _profilePicture
-        updateField("profilePicture", _profilePicture)
-    }
-
-    fun setGradYear(_gradYear: Int) {
-        this.gradYear = _gradYear
-        updateField("gradYear", _gradYear)
-    }
-
     fun joinGroup(groupID: String) {
         val user = auth.currentUser
         user?.let {
@@ -114,8 +88,12 @@ class User(private val _userId: String,
         }
     }
 
-
     private fun updateField(field: String, value: Any) {
+        """ Updates the specified field to have the specified value of any
+            | attribute of a student in Firestore
+            | @param field: String
+            | @param value: String
+            | @return: None""".trimMargin()
         db.collection("students").document(email)
             .update(field, value)
             .addOnSuccessListener { println("Updated $field for $email") }
@@ -235,7 +213,100 @@ class User(private val _userId: String,
         }
     }
 
+    fun commentOnPost(postID: String, comment: String, onComplete: (Boolean, String?) -> Unit) {
+        val user = auth.currentUser
+
+        user?.let {
+            val userID = it.uid
+            val postRef = db.collection("posts").document(postID)
+
+            postRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val newComment = mapOf(
+                        "userID" to userID,
+                        "comment" to comment,
+                        "timestamp" to System.currentTimeMillis()
+                    )
+
+                    postRef.update("comments", FieldValue.arrayUnion(newComment))
+                        .addOnSuccessListener {
+                            println("Comment added to post $postID successfully.")
+                            onComplete(true, null)
+                        }
+                        .addOnFailureListener { e ->
+                            println("Error updating post: ${e.message}")
+                            onComplete(false, e.message)
+                        }
+                } else {
+                    println("Post $postID does not exist.")
+                    onComplete(false, "Post does not exist.")
+                }
+            }.addOnFailureListener { e ->
+                println("Error fetching post: ${e.message}")
+                onComplete(false, e.message)
+            }
+        } ?: onComplete(false, "User not authenticated.")
+    } // end commentOnPost
+
+    fun disablePost(postID: String, onComplete: (Boolean, String?) -> Unit) {
+        val user = auth.currentUser
+
+        user?.let {
+            val userID = it.uid
+            val postRef = db.collection("posts").document(postID)
+
+            postRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    postRef.update("commentsEnabled", false)
+                        .addOnSuccessListener {
+                            println("Comments disabled on $postID.")
+                            onComplete(true, null)
+                        }
+                        .addOnFailureListener { e ->
+                            println("Error disabling comments: ${e.message}")
+                            onComplete(false, e.message)
+                        }
+                } else {
+                    println("Post $postID does not exist.")
+                    onComplete(false, "Post does not exist.")
+                }
+            }.addOnFailureListener { e ->
+                println("Error fetching post: ${e.message}")
+                onComplete(false, e.message)
+            }
+        } ?: onComplete(false, "User not authenticated.")
+    }
+
+    fun enablePost(postID: String, onComplete: (Boolean, String?) -> Unit) {
+        val user = auth.currentUser
+
+        user?.let {
+            val userID = it.uid
+            val postRef = db.collection("posts").document(postID)
+
+            postRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    postRef.update("commentsEnabled", true)
+                        .addOnSuccessListener {
+                            println("Comments enabled on $postID.")
+                            onComplete(true, null)
+                        }
+                        .addOnFailureListener { e ->
+                            println("Error enabling comments: ${e.message}")
+                            onComplete(false, e.message)
+                        }
+                } else {
+                    println("Post $postID does not exist.")
+                    onComplete(false, "Post does not exist.")
+                }
+            }.addOnFailureListener { e ->
+                println("Error fetching post: ${e.message}")
+                onComplete(false, e.message)
+            }
+        } ?: onComplete(false, "User not authenticated.")
+    }
 }
 
 
 // TODO: Create function leaveGroup
+// TODO: Create report functionality + button
