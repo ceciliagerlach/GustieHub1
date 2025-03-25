@@ -85,27 +85,4 @@ object GlobalData {
         }
     }
 
-
-//    fun onUpdate(updatedGroups: List<Group>) {
-//        synchronized(groupList) { // prevents race conditions
-//            groupList.clear()
-//            groupList.addAll(updatedGroups)
-//        }
-//        recyclerViewAdapter.notifyDataSetChanged() // update recyclerView
-//    }
-//                val updatedGroups = mutableListOf<Group>()
-//                for (document in it.documents) {
-//                    val group = document.toObject(Group::class.java)
-//                    if (group != null) {
-//                        if (userId in group.members) {
-//                            updatedGroups.add(group)
-//                        }
-//                    }
-//                }
-//                println("Fetched ${updatedGroups.size} groups from Firestore.")
-//                onGroupsUpdated(updatedGroups) // update views accordingly
-//            }
-//        }
-//    }
-
 }

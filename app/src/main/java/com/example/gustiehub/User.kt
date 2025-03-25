@@ -239,4 +239,3 @@ class User(private val _userId: String,
 
 
 // TODO: Create function leaveGroup
-// TODO: Create sign up screen requesting first + last name (prof pic can be done later)
