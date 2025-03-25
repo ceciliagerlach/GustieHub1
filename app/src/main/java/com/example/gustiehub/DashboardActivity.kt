@@ -49,7 +49,7 @@ class DashboardActivity : AppCompatActivity() {
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuAdapter = MenuAdapter(filteredGroupList) { selectedGroup ->
-            val intent = Intent(this, GroupsActivity::class.java)
+            val intent = Intent(this, GroupPageActivity::class.java)
             intent.putExtra("groupName", selectedGroup.name)
             startActivity(intent)
         }

@@ -53,7 +53,10 @@
             android:name=".EventsActivity"
             android:exported="true">
         </activity>
-
+        <activity
+            android:name=".GroupPageActivity"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>

@@ -76,7 +76,7 @@
                     android:text="@string/discover_groups_text"
                     android:textColor="@color/black"
                     android:textStyle="bold"
-                    android:textSize="30sp" />
+                    android:textSize="30sp"/>
 
                 <ImageButton
                     android:id="@+id/create_groups_button"

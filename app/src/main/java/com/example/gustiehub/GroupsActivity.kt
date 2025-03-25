@@ -46,7 +46,7 @@ class GroupsActivity : AppCompatActivity() {
         groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
         groupsRecyclerView.layoutManager = LinearLayoutManager(this)
         groupsAdapter = GroupsAdapter(groupList, onItemClick = { selectedGroup ->
-            val intent = Intent(this, GroupsActivity::class.java)
+            val intent = Intent(this, GroupPageActivity::class.java)
             intent.putExtra("groupName", selectedGroup.name)
             startActivity(intent)
         },

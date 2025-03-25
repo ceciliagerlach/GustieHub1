@@ -24,4 +24,6 @@
     <string name="user_state">Home State</string>
     <string name="full_name">Your Name</string>
     <string name="creating_profile">Tell us about you...</string>
+    <string name="make_post">Write a post</string>
+    <string name="recent_posts">Recent Posts</string>
 </resources>
