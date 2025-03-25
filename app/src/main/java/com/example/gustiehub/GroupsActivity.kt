@@ -23,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.example.gustiehub.GlobalData.groupList
 import com.google.android.material.navigation.NavigationView
+import com.example.gustiehub.GlobalData
 
 class GroupsActivity : AppCompatActivity() {
     // variables for recycler view, displaying list of groups
@@ -182,7 +183,7 @@ class GroupsActivity : AppCompatActivity() {
                 if (user != null) {
                     val userId = user.uid
                     val group = Group(groupName, userId)
-                    group.createGroup()
+                    group.initializeGroup()
                     val currentUser = User(userId, user.email ?: "", "", "", _gradYear = 0, _homeState = "", _areasOfStudy = "")
                     currentUser.joinGroup(groupName)
                     Toast.makeText(this, "Group Created: $groupName", Toast.LENGTH_SHORT).show()

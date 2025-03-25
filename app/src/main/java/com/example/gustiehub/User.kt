@@ -55,6 +55,11 @@ class User(private val _userId: String,
                 println("User profile created for $userId")
                 this.joinGroup("Gusties") // add new user to Gusties group
 //                addUserToGustiesGroup(userId)
+                //add user to class year group
+                gradYear?.let { year ->
+                    val classGroupName = "Class of $year"
+                    this.joinGroup(classGroupName) // Auto-join class group
+                }
                 onComplete(true, null)
             }
             .addOnFailureListener { e ->

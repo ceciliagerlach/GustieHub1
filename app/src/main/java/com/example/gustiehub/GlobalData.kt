@@ -56,7 +56,7 @@ object GlobalData {
                 println("Error fetching recent posts: ${e.message}")
             }
         }
-                
+    }
     fun getFilteredGroupList(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val groupsRef = db.collection("groups")
@@ -92,19 +92,19 @@ object GlobalData {
 //        }
 //        recyclerViewAdapter.notifyDataSetChanged() // update recyclerView
 //    }
-                val updatedGroups = mutableListOf<Group>()
-                for (document in it.documents) {
-                    val group = document.toObject(Group::class.java)
-                    if (group != null) {
-                        if (userId in group.members) {
-                            updatedGroups.add(group)
-                        }
-                    }
-                }
-                println("Fetched ${updatedGroups.size} groups from Firestore.")
-                onGroupsUpdated(updatedGroups) // update views accordingly
-            }
-        }
-    }
+//                val updatedGroups = mutableListOf<Group>()
+//                for (document in it.documents) {
+//                    val group = document.toObject(Group::class.java)
+//                    if (group != null) {
+//                        if (userId in group.members) {
+//                            updatedGroups.add(group)
+//                        }
+//                    }
+//                }
+//                println("Fetched ${updatedGroups.size} groups from Firestore.")
+//                onGroupsUpdated(updatedGroups) // update views accordingly
+//            }
+//        }
+
 
 }
