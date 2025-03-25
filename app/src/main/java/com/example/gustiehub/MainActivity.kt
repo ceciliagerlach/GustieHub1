@@ -1,9 +1,11 @@
 package com.example.gustiehub
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.Menu
 import android.widget.Button
 import android.widget.EditText
@@ -92,9 +94,16 @@ class MainActivity : AppCompatActivity() {
                 if (document.exists()) {
                     val firstName = document.getString("firstName") ?: "null"
                     val lastName = document.getString("lastName") ?: "null"
+                    val gradYear = document.getLong("gradYear")?.toInt() ?: -1  // Handle gradYear as Int
+                    val homeState = document.getString("homeState") ?: "Unknown"
+                    val areasOfStudy = document.getString("areasOfStudy") ?: "Undeclared"
+
+                    if (gradYear == -1) {
+                        println("Invalid gradYear value in Firestore")
+                    }
 
                     // Create User object (triggers init block)
-                    val user = User(userId, email, firstName, lastName)
+                    val user = User(userId, email, firstName, lastName, gradYear, homeState, areasOfStudy)
                 } else {
                     println("User document does not exist in Firestore")
                 }
@@ -144,27 +153,9 @@ class MainActivity : AppCompatActivity() {
             } catch (e: GetCredentialException) {
                 Log.e(TAG, "Google Sign-In failed: ${e.localizedMessage}", e)
 
-                // CURRENTLY BUGGY:
-                // If no Google account is available, prompt the user to add one
-//                if (e is androidx.credentials.exceptions.NoCredentialException) {
-//                    Log.d(TAG, "No Google accounts found, prompting user to add one...")
-//                    promptAddGoogleAccount()
-//                }
             }
         }
     }
-
-    // CURRENTLY BUGGY
-//    private fun promptAddGoogleAccount() {
-//        try {
-//            val intent = Intent(Settings.ACTION_ADD_ACCOUNT).apply {
-//                putExtra(android.provider.Settings.EXTRA_ACCOUNT_TYPES, arrayOf("com.google"))
-//            }
-//            startActivity(intent)
-//        } catch (e: Exception) {
-//            Log.e(TAG, "Failed to open account settings", e)
-//        }
-//    }
 
     /**
      * Handles the received credential and signs in with Firebase
@@ -191,20 +182,30 @@ class MainActivity : AppCompatActivity() {
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
+                    val email = user?.email
+                    val userId = user?.uid
 
                     // check email belongs to Gustavus
-                    val email = user?.email
-                    if (email != null && email.endsWith(CLIENT_EMAIL_DOMAIN)) {
+                    if (email != null && email.endsWith(CLIENT_EMAIL_DOMAIN) && userId != null) {
                         Log.d(TAG, "Sign-in successful: $email")
-                        updateUI(user)
 
-                        // move to dashboard view if valid email/password
-                        val dashboardIntent = DashboardActivity.newIntent(this, email)
-                        startActivity(dashboardIntent)
+                        val userRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+                        userRef.get().addOnSuccessListener { document ->
+                            if (document.exists()) {
+                                // user exists => go to dashboard
+                                val dashboardIntent = DashboardActivity.newIntent(this, email)
+                                startActivity(dashboardIntent)
+                            } else {
+                                // user doesn't exist => go to profile setup
+                                showProfileCreationDialog(userId, email)
+                            }
+                        }.addOnFailureListener {
+                            Log.w(TAG, "Failed to check user existence: ${it.message}")
+                        }
                     } else {
                         Log.w(TAG, "Unauthorized email domain: $email")
-                        auth.signOut() // sign out user
-                        updateUI(null) // reset UI
+                        auth.signOut()
+                        updateUI(null)
                     }
                 } else {
                     Log.w(TAG, "signInWithCredential:failure", task.exception)
@@ -241,9 +242,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun onUserSignedUp(userId: String, email: String, firstName: String, lastName: String, gradYear: Year) {
-        val newUser = User(userId, email, firstName, lastName)
-        newUser.createUserProfile(userId, email, firstName, lastName, gradYear) { success, error ->
+    private fun onUserSignedUp(userId: String, email: String, firstName: String,
+                               lastName: String, gradYear: Int, homeState: String,
+                               areasOfStudy: String) {
+        val newUser = User(userId, email, firstName, lastName,
+            gradYear, homeState, areasOfStudy)
+        newUser.createUserProfile(userId, email, firstName, lastName,
+            gradYear, homeState, areasOfStudy) { success, error ->
             if (success) {
                 println("User profile created successfully")
             } else {
@@ -251,5 +256,69 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun showProfileCreationDialog(userId: String, email: String) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.new_user_dialog, null)
+        val dialogBuilder = AlertDialog.Builder(this).setView(dialogView)
+        val dialog = dialogBuilder.create()
+
+        // access UI elements
+        val firstNameField = dialogView.findViewById<EditText>(R.id.firstName)
+        val lastNameField = dialogView.findViewById<EditText>(R.id.lastName)
+        val gradYearField = dialogView.findViewById<EditText>(R.id.classYear)
+        val homeStateField = dialogView.findViewById<EditText>(R.id.homeState)
+        val areasOfStudyField = dialogView.findViewById<EditText>(R.id.areasOfStudy)
+//        val cancelButton = dialogView.findViewById<Button>(R.id.buttonCancel)
+        val confirmButton = dialogView.findViewById<Button>(R.id.buttonConfirm)
+
+        confirmButton.setOnClickListener {
+            val firstName = firstNameField.text.toString().trim()
+            val lastName = lastNameField.text.toString().trim()
+            val gradYearInput = gradYearField.text.toString().trim()
+
+            val gradYear: Int? = try {
+                val yearInt = gradYearInput.toInt()
+                if (yearInt in 1900..2050) {
+                    yearInt // Return the valid year
+                } else {
+                    null // Invalid year
+                }
+            } catch (e: NumberFormatException) {
+                null // Handle non-numeric input
+            }
+
+            if (gradYear == null) {
+                Toast.makeText(this, "Please enter a valid graduation year (e.g., 2025).", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val homeState = homeStateField.text.toString().trim()
+            val areasOfStudy = areasOfStudyField.text.toString().trim()
+
+            if (firstName.isNotEmpty() && lastName.isNotEmpty()) {
+                val user = User(userId, email, firstName, lastName, gradYear, homeState, areasOfStudy)
+
+                user.createUserProfile(userId, email, firstName, lastName,
+                    gradYear, homeState, areasOfStudy) { success, error ->
+                    if (success) {
+                        Log.d(TAG, "User profile created successfully.")
+                        dialog.dismiss()
+
+                        // go to Dashboard
+                        val dashboardIntent = DashboardActivity.newIntent(this, email)
+                        startActivity(dashboardIntent)
+                    } else {
+                        Log.e(TAG, "Error creating user profile: $error")
+                        Toast.makeText(this, "Failed to create profile: $error", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } else {
+                Toast.makeText(this, "Please fill in all required fields.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        dialog.show()
+    }
+
 
 }
