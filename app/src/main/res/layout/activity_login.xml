@@ -31,19 +31,6 @@
             android:textSize="25sp"
             android:gravity="center"
             android:text="@string/login" />
-
-        <EditText
-            android:id="@+id/email_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:hint="@string/email_input"
-            android:textColor="@color/black"
-            android:textColorHint="@color/black"
-            android:textSize="20sp"
-            android:background="@drawable/rounded_corner_text_box"
-            android:padding="18dp"
-            android:inputType="textEmailAddress"/>
         
         <Button
             android:id="@+id/login_button"
