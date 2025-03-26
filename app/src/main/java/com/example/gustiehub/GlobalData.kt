@@ -84,12 +84,13 @@ object GlobalData {
         }
     }
 
-    // this was modified, so I changed the name instead of deleting
-    fun getPosts(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
+    fun getPosts(groupName: String, onPostsUpdated: (List<Post>) -> Unit) {
+        println("FirestoreDebug getPosts() called")
         val db = FirebaseFirestore.getInstance()
-        val groupsRef = db.collection("groups")
+        val postsRef = db.collection("posts")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
 
-        groupsRef.addSnapshotListener { snapshots, e ->
+        postsRef.addSnapshotListener { snapshots, e ->
             if (e != null) {
                 println("Error listening for group changes: ${e.message}")
                 return@addSnapshotListener
@@ -100,14 +101,13 @@ object GlobalData {
                 for (document in it.documents) {
                     val post = document.toObject(Post::class.java)
                     if (post != null) {
-                        updatedPosts.add(post)
+                        if (groupName == post.group) {
+                            updatedPosts.add(post)
+                        }
                     }
                 }
-
-                synchronized(recentPosts) {
-                    recentPosts.clear()
-                    recentPosts.addAll(updatedPosts)
-                }
+                println("Fetched ${updatedPosts.size} groups from Firestore.")
+                onPostsUpdated(updatedPosts) // update views accordingly
             }
         }
     }
