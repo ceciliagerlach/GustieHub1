@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.Year
+import java.util.UUID
 
 class User(private val _userId: String,
            private val _email: String,
@@ -223,9 +224,10 @@ class User(private val _userId: String,
             postRef.get().addOnSuccessListener { document ->
                 if (document.exists()) {
                     val newComment = mapOf(
+                        "commentId" to UUID.randomUUID().toString(), // generate a unique comment ID
                         "userID" to userID,
                         "comment" to comment,
-                        "timestamp" to System.currentTimeMillis()
+                        "timestamp" to FieldValue.serverTimestamp()
                     )
 
                     postRef.update("comments", FieldValue.arrayUnion(newComment))
@@ -248,7 +250,7 @@ class User(private val _userId: String,
         } ?: onComplete(false, "User not authenticated.")
     } // end commentOnPost
 
-    fun disablePost(postID: String, onComplete: (Boolean, String?) -> Unit) {
+    fun disableComments(postID: String, onComplete: (Boolean, String?) -> Unit) {
         val user = auth.currentUser
 
         user?.let {
@@ -257,15 +259,20 @@ class User(private val _userId: String,
 
             postRef.get().addOnSuccessListener { document ->
                 if (document.exists()) {
-                    postRef.update("commentsEnabled", false)
-                        .addOnSuccessListener {
-                            println("Comments disabled on $postID.")
-                            onComplete(true, null)
-                        }
-                        .addOnFailureListener { e ->
-                            println("Error disabling comments: ${e.message}")
-                            onComplete(false, e.message)
-                        }
+                    val postCreatorId = document.getString("creatorId")
+
+                    // only the creator can disable comments
+                    if (postCreatorId == userID) {
+                        postRef.update("commentsEnabled", false)
+                            .addOnSuccessListener {
+                                println("Comments disabled on $postID.")
+                                onComplete(true, null)
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error disabling comments: ${e.message}")
+                                onComplete(false, e.message)
+                            }
+                    }
                 } else {
                     println("Post $postID does not exist.")
                     onComplete(false, "Post does not exist.")
@@ -277,7 +284,7 @@ class User(private val _userId: String,
         } ?: onComplete(false, "User not authenticated.")
     }
 
-    fun enablePost(postID: String, onComplete: (Boolean, String?) -> Unit) {
+    fun enableComments(postID: String, onComplete: (Boolean, String?) -> Unit) {
         val user = auth.currentUser
 
         user?.let {
@@ -286,15 +293,20 @@ class User(private val _userId: String,
 
             postRef.get().addOnSuccessListener { document ->
                 if (document.exists()) {
-                    postRef.update("commentsEnabled", true)
-                        .addOnSuccessListener {
-                            println("Comments enabled on $postID.")
-                            onComplete(true, null)
-                        }
-                        .addOnFailureListener { e ->
-                            println("Error enabling comments: ${e.message}")
-                            onComplete(false, e.message)
-                        }
+                    val postCreatorId = document.getString("creatorId")
+
+                    // only the creator can enable comments
+                    if (postCreatorId == userID) {
+                        postRef.update("commentsEnabled", true)
+                            .addOnSuccessListener {
+                                println("Comments enabled on $postID.")
+                                onComplete(true, null)
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error enabling comments: ${e.message}")
+                                onComplete(false, e.message)
+                            }
+                    }
                 } else {
                     println("Post $postID does not exist.")
                     onComplete(false, "Post does not exist.")
@@ -306,6 +318,96 @@ class User(private val _userId: String,
         } ?: onComplete(false, "User not authenticated.")
     }
 }
+
+fun editComment(postID: String, commentID: String, newComment: String, onComplete: (Boolean, String?) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    val user = FirebaseAuth.getInstance().currentUser
+
+    user?.let {
+        val postRef = db.collection("posts").document(postID)
+
+        postRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                // ensure its the commenter that wants to edit the comment
+                val comments = document.get("comments") as? MutableList<Map<String, Any>> ?: mutableListOf()
+                val commentToEdit = comments.find { it["commentId"] == commentID }
+
+                val commentUserID = commentToEdit?.get("userId") as? String
+                if (commentUserID == user.uid) {
+                    val updatedComments = comments.map { comment ->
+                        if (comment["commentId"] == commentID) {
+                            comment.toMutableMap().apply {
+                                this["comment"] = newComment
+                            }
+                        }
+                    }
+                }
+
+                postRef.update("comments", newComment)
+                    .addOnSuccessListener {
+                        println("Comment updated successfully.")
+                        onComplete(true, null)
+                    }
+                    .addOnFailureListener { e ->
+                        println("Error updating comment: ${e.message}")
+                        onComplete(false, e.message)
+                    }
+            } else {
+                println("Post $postID does not exist.")
+                onComplete(false, "Post does not exist.")
+            }
+        }.addOnFailureListener { e ->
+            println("Error fetching post: ${e.message}")
+            onComplete(false, e.message)
+        }
+    } ?: onComplete(false, "User not authenticated.")
+}
+
+
+
+fun deleteComment(postID: String, commentID: String, onComplete: (Boolean, String?) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    val user = FirebaseAuth.getInstance().currentUser
+
+    user?.let {
+        val postRef = db.collection("posts").document(postID)
+
+        postRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                val comments = document.get("comments") as? MutableList<Map<String, Any>> ?: mutableListOf()
+                // ensure its the commenter that wants to edit the comment
+                val commentToDelete = comments.find { it["commentId"] == commentID }
+                val postCreatorID = document.getString("creatorId")
+
+                val commentUserID = commentToDelete?.get("userId") as? String
+
+                // only the post creator or commenter can delete their comment
+                if (commentUserID == user.uid || postCreatorID == user.uid) {
+                    val updatedComments = comments.filterNot { comment ->
+                        comment["commentId"] == commentID
+                    }
+
+                    postRef.update("comments", updatedComments)
+                        .addOnSuccessListener {
+                            println("Comment deleted successfully.")
+                            onComplete(true, null)
+                        }
+                        .addOnFailureListener { e ->
+                            println("Error deleting comment: ${e.message}")
+                            onComplete(false, e.message)
+                        }
+                }
+            } else {
+                println("Post $postID does not exist.")
+                onComplete(false, "Post does not exist.")
+            }
+        }.addOnFailureListener { e ->
+            println("Error fetching post: ${e.message}")
+            onComplete(false, e.message)
+        }
+    } ?: onComplete(false, "User not authenticated.")
+}
+
 
 
 // TODO: Create function leaveGroup

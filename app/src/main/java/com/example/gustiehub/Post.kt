@@ -14,4 +14,11 @@ data class Post(
     // don't know if we need this yet
 //    @ServerTimestamp
 //    val timestamp: Timestamp? = null // Firestore auto-generates this on creation
-)
+) {
+    data class Comment(
+        val commentId: String = "",
+        val userId: String = "",
+        val text: String = "",
+        @ServerTimestamp val timestamp: Timestamp? = null
+    )
+}
