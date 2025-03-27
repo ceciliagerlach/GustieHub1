@@ -76,7 +76,7 @@
                     android:text="@string/discover_groups_text"
                     android:textColor="@color/black"
                     android:textStyle="bold"
-                    android:textSize="30sp" />
+                    android:textSize="30sp"/>
 
                 <ImageButton
                     android:id="@+id/create_groups_button"
@@ -118,10 +118,12 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_menu"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1.5"
-                    android:nestedScrollingEnabled="false"
-                    android:layout_marginLeft="30dp"/>
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:nestedScrollingEnabled="true"
+                    android:scrollbars="vertical"
+                    android:layout_marginLeft="64dp"
+                    android:layout_marginTop="304dp"/>
 
             </LinearLayout>
 
