@@ -68,18 +68,18 @@ class GroupsActivity : AppCompatActivity() {
         //firebase function for listening from firebase
         listenForGroupsUpdates()
 
-//        createGroupButton.setOnClickListener {
-//            NewGroupDialog()
-//        }
+        createGroupButton.setOnClickListener {
+            NewGroupDialog()
+        }
 
         // list in discover groups
-        //groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
-        //groupsRecyclerView.layoutManager = LinearLayoutManager(this)
-        //groupsAdapter = GroupsAdapter(groupList) { selectedGroup ->
-            //val intent = Intent(this, GroupsActivity::class.java)
-            //intent.putExtra("groupName", selectedGroup.name)
-            //startActivity(intent)
-        //}
+//        groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
+//        groupsRecyclerView.layoutManager = LinearLayoutManager(this)
+//        groupsAdapter = GroupsAdapter(groupList,) { selectedGroup ->
+//            val intent = Intent(this, GroupsActivity::class.java)
+//            intent.putExtra("groupName", selectedGroup.name)
+//            startActivity(intent)
+//        }
         groupsRecyclerView.adapter = groupsAdapter
         GlobalData.getGroupList { updatedGroups ->
             runOnUiThread {
@@ -161,41 +161,41 @@ class GroupsActivity : AppCompatActivity() {
             }
     }
 
-//    private fun NewGroupDialog() {
-//        val dialogView = LayoutInflater.from(this).inflate(R.layout.new_group_dialog, null)
-//        val editTextGroupName = dialogView.findViewById<EditText>(R.id.newGroupName)
-//        val buttonCancel = dialogView.findViewById<Button>(R.id.buttonCancel)
-//        val buttonConfirm = dialogView.findViewById<Button>(R.id.buttonConfirm)
-//        val dialog = AlertDialog.Builder(this)
-//            .setView(dialogView)
-//            .setCancelable(true)
-//            .create()
-//
-//        buttonCancel.setOnClickListener {
-//            dialog.dismiss()
-//        }
-//
-//        buttonConfirm.setOnClickListener {
-//            val groupName = editTextGroupName.text.toString()
-//            if (groupName.isNotEmpty()) {
-//                val user = FirebaseAuth.getInstance().currentUser
-//                if (user != null) {
-//                    val userId = user.uid
-//                    val group = Group(groupName, userId)
-//                    group.createGroup()
-//                    val currentUser = User(userId, user.email ?: "", "", "", _gradYear = 0, _homeState = "", _areasOfStudy = "")
-//                    currentUser.joinGroup(groupName)
-//                    Toast.makeText(this, "Group Created: $groupName", Toast.LENGTH_SHORT).show()
-//                    dialog.dismiss()
-//                } else {
-//                    Toast.makeText(this, "User not authenticated", Toast.LENGTH_LONG).show()
-//                }
-//            } else {
-//                editTextGroupName.error = "Group name cannot be empty"
-//            }
-//        }
-//        dialog.show()
-//    }
+    private fun NewGroupDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.new_group_dialog, null)
+        val editTextGroupName = dialogView.findViewById<EditText>(R.id.newGroupName)
+        val buttonCancel = dialogView.findViewById<Button>(R.id.buttonCancel)
+        val buttonConfirm = dialogView.findViewById<Button>(R.id.buttonConfirm)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        buttonCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        buttonConfirm.setOnClickListener {
+            val groupName = editTextGroupName.text.toString()
+            if (groupName.isNotEmpty()) {
+                val user = FirebaseAuth.getInstance().currentUser
+                if (user != null) {
+                    val userId = user.uid
+                    val group = Group(groupName, userId)
+                    group.createGroup()
+                    val currentUser = User(userId, user.email ?: "", "", "", _gradYear = 0, _homeState = "", _areasOfStudy = "")
+                    currentUser.joinGroup(groupName)
+                    Toast.makeText(this, "Group Created: $groupName", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(this, "User not authenticated", Toast.LENGTH_LONG).show()
+                }
+            } else {
+                editTextGroupName.error = "Group name cannot be empty"
+            }
+        }
+        dialog.show()
+    }
 
 }
 
