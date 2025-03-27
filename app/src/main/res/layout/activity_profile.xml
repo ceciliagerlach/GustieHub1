@@ -212,7 +212,7 @@
                 android:textSize="18sp"
                 android:paddingLeft="32dp"
                 android:paddingRight="32dp"
-                android:paddingTop="8dp" />
+                android:paddingTop="8dp"/>
 
         </LinearLayout>
 

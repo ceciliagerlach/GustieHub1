@@ -73,12 +73,11 @@
                     android:hint="@string/make_comment"
                     android:textColor="@color/black"
                     android:textColorHint="@color/black"
-                    android:textSize="20sp"
+                    android:textSize="14sp"
                     android:background="@drawable/rounded_corner_text_box"
                     android:padding="12dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="16dp"
-                    android:layout_marginEnd="16dp"
                     android:inputType="text"/>
 
                 <ImageButton

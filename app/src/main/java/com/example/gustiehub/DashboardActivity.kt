@@ -105,7 +105,6 @@ class DashboardActivity : AppCompatActivity() {
             startActivity(intent)
         }
         profileButton.setOnClickListener {
-            Log.d("ProfileActivity", "ProfileActivity started!")
             val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }

@@ -10,8 +10,11 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.example.gustiehub.GroupPageActivity.Companion.GROUP_NAME
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -28,9 +31,10 @@ class GroupPageActivity : AppCompatActivity() {
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
     private val db = FirebaseFirestore.getInstance()
+    lateinit var groupName: String
 
     companion object {
-        private const val GROUP_NAME = "com.example.gustiehub.name"
+        const val GROUP_NAME = "com.example.gustiehub.name"
 
         fun newIntent(packageContext: Context, group_name: String): Intent? {
             return Intent(packageContext, GroupPageActivity::class.java).apply {
@@ -42,19 +46,11 @@ class GroupPageActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_group_page)
-        val groupName = intent.getStringExtra("groupName").toString()
+        groupName = intent.getStringExtra("groupName").toString()
 
-        // get and set group information
+        // get and set group name
         val groupNameTextView = findViewById<TextView>(R.id.group_name_text)
-        val groupDescriptionTextView = findViewById<TextView>(R.id.group_description_text)
         groupNameTextView.text = groupName
-        db.collection("groups").document(groupName).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val description = document.getString("description")
-                    groupDescriptionTextView.text = description
-                }
-            }
 
         // list of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
@@ -72,6 +68,18 @@ class GroupPageActivity : AppCompatActivity() {
                 groupList.addAll(updatedGroups)
                 menuAdapter.updateGroups(updatedGroups)
             }
+        }
+
+        // initialize and handle clicks for message and profile buttons
+        val messageButton: ImageView = findViewById(R.id.messaging)
+        val profileButton: ImageView = findViewById(R.id.profile)
+        messageButton.setOnClickListener {
+            val intent = Intent(this, MessageActivity::class.java)
+            startActivity(intent)
+        }
+        profileButton.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
         }
 
         // opening menu
@@ -115,15 +123,30 @@ class GroupPageActivity : AppCompatActivity() {
             true
         }
 
-        // list of posts on group page
-        postsRecyclerView = findViewById(R.id.postsRecyclerView)
-        postsRecyclerView.layoutManager = LinearLayoutManager(this)
-        postsAdapter = PostAdapter(postList)
-        postsRecyclerView.adapter = postsAdapter
-        GlobalData.getPosts(groupName) { updatedPosts ->
-            runOnUiThread {
-                postsAdapter.updatePosts(updatedPosts)
+//        // list of posts on group page
+//        postsRecyclerView = findViewById(R.id.postsRecyclerView)
+//        postsRecyclerView.layoutManager = LinearLayoutManager(this)
+//        postsAdapter = PostAdapter(postList)
+//        postsRecyclerView.adapter = postsAdapter
+//        GlobalData.getPosts(groupName) { updatedPosts ->
+//            runOnUiThread {
+//                postsAdapter.updatePosts(updatedPosts)
+//            }
+//        }
+
+        // setting up view pager
+        val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
+        val viewPager = findViewById<ViewPager2>(R.id.viewPager)
+        val adapter = ViewPagerAdapter(this, groupName)
+        viewPager.adapter = adapter
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "Discussion"
+                1 -> "Information"
+                else -> null
             }
-        }
+        }.attach()
+
+
     }
 }
