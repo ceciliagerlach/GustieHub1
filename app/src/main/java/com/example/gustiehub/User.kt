@@ -55,6 +55,26 @@ class User(private val _userId: String,
                 println("User profile created for $userId")
                 this.joinGroup("Gusties") // add new user to Gusties group
 //                addUserToGustiesGroup(userId)
+
+                //add user to class year group
+                gradYear?.let { year ->
+                    val classGroupName = "Class of $year"
+                    //check to see if class group exists
+                    val classGroupRef = db.collection("groups").document(classGroupName).get()
+                    classGroupRef.addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            // class group exists, add user to it
+                            this.joinGroup(classGroupName)
+                        }
+                        else {
+                            // class group doesn't exist, create it
+                            val group = Group(classGroupName, userId)
+                            group.createGroup()
+                            this.joinGroup(classGroupName)
+
+                        }
+                    }
+                }
                 onComplete(true, null)
             }
             .addOnFailureListener { e ->
