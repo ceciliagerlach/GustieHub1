@@ -73,13 +73,13 @@ class GroupsActivity : AppCompatActivity() {
         }
 
         // list in discover groups
-        //groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
-        //groupsRecyclerView.layoutManager = LinearLayoutManager(this)
-        //groupsAdapter = GroupsAdapter(groupList) { selectedGroup ->
-            //val intent = Intent(this, GroupsActivity::class.java)
-            //intent.putExtra("groupName", selectedGroup.name)
-            //startActivity(intent)
-        //}
+//        groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
+//        groupsRecyclerView.layoutManager = LinearLayoutManager(this)
+//        groupsAdapter = GroupsAdapter(groupList,) { selectedGroup ->
+//            val intent = Intent(this, GroupsActivity::class.java)
+//            intent.putExtra("groupName", selectedGroup.name)
+//            startActivity(intent)
+//        }
         groupsRecyclerView.adapter = groupsAdapter
         GlobalData.getGroupList { updatedGroups ->
             runOnUiThread {

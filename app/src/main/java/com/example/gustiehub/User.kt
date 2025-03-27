@@ -51,6 +51,26 @@ class User(private val _userId: String,
                 println("User profile created for $userId")
                 this.joinGroup("Gusties") // add new user to Gusties group
 //                addUserToGustiesGroup(userId)
+
+                //add user to class year group
+                gradYear?.let { year ->
+                    val classGroupName = "Class of $year"
+                    //check to see if class group exists
+                    val classGroupRef = db.collection("groups").document(classGroupName).get()
+                    classGroupRef.addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            // class group exists, add user to it
+                            this.joinGroup(classGroupName)
+                        }
+                        else {
+                            // class group doesn't exist, create it
+                            val group = Group(classGroupName, userId)
+                            group.createGroup()
+                            this.joinGroup(classGroupName)
+
+                        }
+                    }
+                }
                 onComplete(true, null)
             }
             .addOnFailureListener { e ->
@@ -108,53 +128,6 @@ class User(private val _userId: String,
     fun getGradYear(): Int = gradYear
     fun getJoinedGroups(): List<String> = joinedGroups
 
-    // function for letting user create a group
-    fun createGroup(groupName: String, onComplete: (Boolean, String?) -> Unit){
-        val user = auth.currentUser
-
-        user?.let {
-            val userID = it.uid
-            val groupRef = db.collection("groups").document(groupName)
-
-            groupRef.get().addOnSuccessListener { document ->
-                if (document.exists()) {
-                    println("Group $groupName already exists.")
-                    onComplete(false, "Group already exists.")
-                    return@addOnSuccessListener
-                } else {
-                    val groupData = hashMapOf(
-                        "name" to groupName,
-                        "creatorId" to userID,
-                        "members" to listOf(userID) // creator is the first member
-                    )
-                    groupRef.set(groupData)
-                        .addOnSuccessListener {
-                            val userRef = db.collection("users").document(userID)
-                            // joinGroup() currently updates group members too
-                            userRef.update("joinedGroups", FieldValue.arrayUnion(groupName))
-                                .addOnSuccessListener {
-                                    println("Group $groupName created successfully, user $userID added.")
-                                    onComplete(true, null)
-                                }
-                                .addOnFailureListener { e ->
-                                    println("Group created, but failed to update user: ${e.message}")
-                                    onComplete(false, "Group created, but failed to update user.")
-                                }
-                        }
-                        .addOnFailureListener { e ->
-                            println("Error creating group: ${e.message}")
-                            onComplete(false, e.message)
-                        }
-                }.addOnFailureListener { e ->
-                    println("Error checking if group exists: ${e.message}")
-                    onComplete(false, e.message)
-                }
-            }
-        } ?: run {
-            println("No authenticated user found.")
-            onComplete(false, "No authenticated user found.")
-        }
-    }
 
     fun createPost(group: String, text: String) {
         val postData = hashMapOf(

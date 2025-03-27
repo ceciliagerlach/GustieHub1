@@ -57,8 +57,35 @@ object GlobalData {
             }
         }
     }
-                
+
     fun getFilteredGroupList(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val groupsRef = db.collection("groups")
+
+        groupsRef.addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                println("Error listening for group changes: ${e.message}")
+                return@addSnapshotListener
+            }
+
+            snapshots?.let {
+                val updatedGroups = mutableListOf<Group>()
+                for (document in it.documents) {
+                    val group = document.toObject(Group::class.java)
+                    if (group != null) {
+                        if (userId in group.members) {
+                            updatedGroups.add(group)
+                        }
+                    }
+                }
+                println("Fetched ${updatedGroups.size} groups from Firestore.")
+                onGroupsUpdated(updatedGroups) // update views accordingly
+            }
+        }
+    }
+
+    // this was modified, so I changed the name instead of deleting
+    fun getPosts(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val groupsRef = db.collection("groups")
 
@@ -84,14 +111,5 @@ object GlobalData {
             }
         }
     }
-
-
-//    fun onUpdate(updatedGroups: List<Group>) {
-//        synchronized(groupList) { // prevents race conditions
-//            groupList.clear()
-//            groupList.addAll(updatedGroups)
-//        }
-//        recyclerViewAdapter.notifyDataSetChanged() // update recyclerView
-//    }
 
 }
