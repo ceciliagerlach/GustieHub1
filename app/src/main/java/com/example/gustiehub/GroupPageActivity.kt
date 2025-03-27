@@ -1,8 +1,8 @@
 package com.example.gustiehub
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -10,56 +10,50 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
+import com.example.gustiehub.GroupPageActivity.Companion.GROUP_NAME
 import com.google.android.material.navigation.NavigationView
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
-class ProfileActivity : AppCompatActivity() {
+class GroupPageActivity : AppCompatActivity() {
+    // variables for recycler view, displaying list of groups and posts
+    private lateinit var postsRecyclerView: RecyclerView
+    private lateinit var postsAdapter: PostAdapter
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
+    private val postList = mutableListOf<Post>()
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
-
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
-    private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
+    lateinit var groupName: String
+
+    companion object {
+        const val GROUP_NAME = "com.example.gustiehub.name"
+
+        fun newIntent(packageContext: Context, group_name: String): Intent? {
+            return Intent(packageContext, GroupPageActivity::class.java).apply {
+                putExtra(GROUP_NAME, group_name)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("ProfileActivity", "ProfileActivity started!")
-        setContentView(R.layout.activity_profile)
+        setContentView(R.layout.activity_group_page)
+        groupName = intent.getStringExtra("groupName").toString()
 
-        // get profile views
-        val profileName: TextView = findViewById(R.id.userName)
-        val profileYear: TextView = findViewById(R.id.classYear)
-        val profileState: TextView = findViewById(R.id.homeState)
-        val profileAreas: TextView = findViewById(R.id.areasOfStudy)
-        val profileGroups: TextView = findViewById(R.id.joinedGroups)
-
-        // set user information
-        val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        db.collection("users").document(userID).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val firstname = document.getString("firstName") ?: "No Name"
-                    val lastname = document.getString("lastName") ?: "No Name"
-                    val year = document.getLong("gradYear") ?: "No Grad Year"
-                    val state = document.getString("homeState") ?: "No State"
-                    val areas = document.getString("areasOfStudy") ?: "No Areas"
-                    val groups = document.get("joinedGroups") as? List<String> ?: emptyList()
-
-                    profileName.text = firstname + " " + lastname
-                    profileYear.text = year.toString()
-                    profileState.text = state
-                    profileAreas.text = areas
-                    profileGroups.text = groups.joinToString(", ")
-                }
-            }
-
+        // get and set group name
+        val groupNameTextView = findViewById<TextView>(R.id.group_name_text)
+        groupNameTextView.text = groupName
 
         // list of groups in tab
+        val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuAdapter = MenuAdapter(filteredGroupList) { selectedGroup ->
@@ -74,6 +68,25 @@ class ProfileActivity : AppCompatActivity() {
                 groupList.addAll(updatedGroups)
                 menuAdapter.updateGroups(updatedGroups)
             }
+        }
+
+        // initialize and handle clicks for message and profile buttons
+        val messageButton: ImageView = findViewById(R.id.messaging)
+        val profileButton: ImageView = findViewById(R.id.profile)
+        messageButton.setOnClickListener {
+            val intent = Intent(this, MessageActivity::class.java)
+            startActivity(intent)
+        }
+        profileButton.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
+        }
+
+        // opening menu
+        val menuButton: ImageView = findViewById(R.id.menu)
+        menuButton.setOnClickListener {
+            val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
+            drawerLayout.openDrawer(GravityCompat.START)
         }
 
         //set up drawer layout and handle clicks for menu items
@@ -110,18 +123,30 @@ class ProfileActivity : AppCompatActivity() {
             true
         }
 
-        // opening menu
-        val menuButton: ImageView = findViewById(R.id.menu)
-        menuButton.setOnClickListener {
-            val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
-            drawerLayout.openDrawer(GravityCompat.START)
-        }
+//        // list of posts on group page
+//        postsRecyclerView = findViewById(R.id.postsRecyclerView)
+//        postsRecyclerView.layoutManager = LinearLayoutManager(this)
+//        postsAdapter = PostAdapter(postList)
+//        postsRecyclerView.adapter = postsAdapter
+//        GlobalData.getPosts(groupName) { updatedPosts ->
+//            runOnUiThread {
+//                postsAdapter.updatePosts(updatedPosts)
+//            }
+//        }
 
-        // handling clicks for toolbar
-        val messageButton: ImageView = findViewById(R.id.messaging)
-        messageButton.setOnClickListener {
-            val intent = Intent(this, MessageActivity::class.java)
-            startActivity(intent)
-        }
+        // setting up view pager
+        val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
+        val viewPager = findViewById<ViewPager2>(R.id.viewPager)
+        val adapter = ViewPagerAdapter(this, groupName)
+        viewPager.adapter = adapter
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "Discussion"
+                1 -> "Information"
+                else -> null
+            }
+        }.attach()
+
+
     }
 }

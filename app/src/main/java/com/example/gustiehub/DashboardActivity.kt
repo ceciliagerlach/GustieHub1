@@ -3,6 +3,7 @@ package com.example.gustiehub
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.ImageButton
@@ -48,7 +49,7 @@ class DashboardActivity : AppCompatActivity() {
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuAdapter = MenuAdapter(filteredGroupList) { selectedGroup ->
-            val intent = Intent(this, GroupsActivity::class.java)
+            val intent = Intent(this, GroupPageActivity::class.java)
             intent.putExtra("groupName", selectedGroup.name)
             startActivity(intent)
         }

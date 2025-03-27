@@ -57,7 +57,7 @@ object GlobalData {
             }
         }
     }
-                
+
     fun getFilteredGroupList(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val groupsRef = db.collection("groups")
@@ -69,29 +69,47 @@ object GlobalData {
             }
 
             snapshots?.let {
-                val updatedPosts = mutableListOf<Post>()
+                val updatedGroups = mutableListOf<Group>()
                 for (document in it.documents) {
-                    val post = document.toObject(Post::class.java)
-                    if (post != null) {
-                        updatedPosts.add(post)
+                    val group = document.toObject(Group::class.java)
+                    if (group != null) {
+                        if (userId in group.members) {
+                            updatedGroups.add(group)
+                        }
                     }
                 }
-
-                synchronized(recentPosts) {
-                    recentPosts.clear()
-                    recentPosts.addAll(updatedPosts)
-                }
+                println("Fetched ${updatedGroups.size} groups from Firestore.")
+                onGroupsUpdated(updatedGroups) // update views accordingly
             }
         }
     }
 
+    fun getPosts(groupName: String, onPostsUpdated: (List<Post>) -> Unit) {
+        println("FirestoreDebug getPosts() called")
+        val db = FirebaseFirestore.getInstance()
+        val postsRef = db.collection("posts")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
 
-//    fun onUpdate(updatedGroups: List<Group>) {
-//        synchronized(groupList) { // prevents race conditions
-//            groupList.clear()
-//            groupList.addAll(updatedGroups)
-//        }
-//        recyclerViewAdapter.notifyDataSetChanged() // update recyclerView
-//    }
+        postsRef.addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                println("Error listening for group changes: ${e.message}")
+                return@addSnapshotListener
+            }
+
+            snapshots?.let {
+                val updatedPosts = mutableListOf<Post>()
+                for (document in it.documents) {
+                    val post = document.toObject(Post::class.java)
+                    if (post != null) {
+                        if (groupName == post.group) {
+                            updatedPosts.add(post)
+                        }
+                    }
+                }
+                println("Fetched ${updatedPosts.size} groups from Firestore.")
+                onPostsUpdated(updatedPosts) // update views accordingly
+            }
+        }
+    }
 
 }

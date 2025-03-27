@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.Year
+import java.util.UUID
 
 class User(private val _userId: String,
            private val _email: String,
@@ -28,15 +29,10 @@ class User(private val _userId: String,
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-//    init {
-//        // automatically save student data
-//        this.joinGroup("Gusties")
-//    }
-
-    // save new student info to Firestore
     fun createUserProfile(userId: String, email: String, firstName: String,
                           lastName: String, gradYear: Int, homeState: String,
                           areasOfStudy: String, onComplete: (Boolean, String?) -> Unit) {
+        """ Saves new student info to Firestore""".trimMargin()
         val userData = hashMapOf(
             "userID" to userId,
             "firstName" to firstName,
@@ -55,6 +51,26 @@ class User(private val _userId: String,
                 println("User profile created for $userId")
                 this.joinGroup("Gusties") // add new user to Gusties group
 //                addUserToGustiesGroup(userId)
+
+                //add user to class year group
+                gradYear?.let { year ->
+                    val classGroupName = "Class of $year"
+                    //check to see if class group exists
+                    val classGroupRef = db.collection("groups").document(classGroupName).get()
+                    classGroupRef.addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            // class group exists, add user to it
+                            this.joinGroup(classGroupName)
+                        }
+                        else {
+                            // class group doesn't exist, create it
+                            val group = Group(classGroupName, userId)
+                            group.createGroup()
+                            this.joinGroup(classGroupName)
+
+                        }
+                    }
+                }
                 onComplete(true, null)
             }
             .addOnFailureListener { e ->
@@ -73,27 +89,6 @@ class User(private val _userId: String,
 //            .addOnSuccessListener { println("User added to Gusties group.") }
 //            .addOnFailureListener { it.printStackTrace() }
 //    }
-
-    // Setters
-    fun setFirstName(_firstName: String) {
-        this.firstName = _firstName
-        updateField("firstName", _firstName)
-    }
-
-    fun setLastName(_lastName: String) {
-        this.lastName = _lastName
-        updateField("lastName", _lastName)
-    }
-
-    fun setProfilePicture(_profilePicture: String) {
-        this.profilePicture = _profilePicture
-        updateField("profilePicture", _profilePicture)
-    }
-
-    fun setGradYear(_gradYear: Int) {
-        this.gradYear = _gradYear
-        updateField("gradYear", _gradYear)
-    }
 
     fun joinGroup(groupID: String) {
         val user = auth.currentUser
@@ -114,8 +109,12 @@ class User(private val _userId: String,
         }
     }
 
-
     private fun updateField(field: String, value: Any) {
+        """ Updates the specified field to have the specified value of any
+            | attribute of a student in Firestore
+            | @param field: String
+            | @param value: String
+            | @return: None""".trimMargin()
         db.collection("students").document(email)
             .update(field, value)
             .addOnSuccessListener { println("Updated $field for $email") }
@@ -129,53 +128,6 @@ class User(private val _userId: String,
     fun getGradYear(): Int = gradYear
     fun getJoinedGroups(): List<String> = joinedGroups
 
-    // function for letting user create a group
-    fun createGroup(groupName: String, onComplete: (Boolean, String?) -> Unit){
-        val user = auth.currentUser
-
-        user?.let {
-            val userID = it.uid
-            val groupRef = db.collection("groups").document(groupName)
-
-            groupRef.get().addOnSuccessListener { document ->
-                if (document.exists()) {
-                    println("Group $groupName already exists.")
-                    onComplete(false, "Group already exists.")
-                    return@addOnSuccessListener
-                } else {
-                    val groupData = hashMapOf(
-                        "name" to groupName,
-                        "creatorId" to userID,
-                        "members" to listOf(userID) // creator is the first member
-                    )
-                    groupRef.set(groupData)
-                        .addOnSuccessListener {
-                            val userRef = db.collection("users").document(userID)
-                            // joinGroup() currently updates group members too
-                            userRef.update("joinedGroups", FieldValue.arrayUnion(groupName))
-                                .addOnSuccessListener {
-                                    println("Group $groupName created successfully, user $userID added.")
-                                    onComplete(true, null)
-                                }
-                                .addOnFailureListener { e ->
-                                    println("Group created, but failed to update user: ${e.message}")
-                                    onComplete(false, "Group created, but failed to update user.")
-                                }
-                        }
-                        .addOnFailureListener { e ->
-                            println("Error creating group: ${e.message}")
-                            onComplete(false, e.message)
-                        }
-                }.addOnFailureListener { e ->
-                    println("Error checking if group exists: ${e.message}")
-                    onComplete(false, e.message)
-                }
-            }
-        } ?: run {
-            println("No authenticated user found.")
-            onComplete(false, "No authenticated user found.")
-        }
-    }
 
     fun createPost(group: String, text: String) {
         val postData = hashMapOf(
@@ -235,7 +187,201 @@ class User(private val _userId: String,
         }
     }
 
+    fun commentOnPost(postID: String, comment: String, onComplete: (Boolean, String?) -> Unit) {
+        val user = auth.currentUser
+
+        user?.let {
+            val userID = it.uid
+            val postRef = db.collection("posts").document(postID)
+
+            postRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val newComment = mapOf(
+                        "commentId" to UUID.randomUUID().toString(), // generate a unique comment ID
+                        "userID" to userID,
+                        "comment" to comment,
+                        "timestamp" to FieldValue.serverTimestamp()
+                    )
+
+                    postRef.update("comments", FieldValue.arrayUnion(newComment))
+                        .addOnSuccessListener {
+                            println("Comment added to post $postID successfully.")
+                            onComplete(true, null)
+                        }
+                        .addOnFailureListener { e ->
+                            println("Error updating post: ${e.message}")
+                            onComplete(false, e.message)
+                        }
+                } else {
+                    println("Post $postID does not exist.")
+                    onComplete(false, "Post does not exist.")
+                }
+            }.addOnFailureListener { e ->
+                println("Error fetching post: ${e.message}")
+                onComplete(false, e.message)
+            }
+        } ?: onComplete(false, "User not authenticated.")
+    } // end commentOnPost
+
+    fun disableComments(postID: String, onComplete: (Boolean, String?) -> Unit) {
+        val user = auth.currentUser
+
+        user?.let {
+            val userID = it.uid
+            val postRef = db.collection("posts").document(postID)
+
+            postRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val postCreatorId = document.getString("creatorId")
+
+                    // only the creator can disable comments
+                    if (postCreatorId == userID) {
+                        postRef.update("commentsEnabled", false)
+                            .addOnSuccessListener {
+                                println("Comments disabled on $postID.")
+                                onComplete(true, null)
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error disabling comments: ${e.message}")
+                                onComplete(false, e.message)
+                            }
+                    }
+                } else {
+                    println("Post $postID does not exist.")
+                    onComplete(false, "Post does not exist.")
+                }
+            }.addOnFailureListener { e ->
+                println("Error fetching post: ${e.message}")
+                onComplete(false, e.message)
+            }
+        } ?: onComplete(false, "User not authenticated.")
+    }
+
+    fun enableComments(postID: String, onComplete: (Boolean, String?) -> Unit) {
+        val user = auth.currentUser
+
+        user?.let {
+            val userID = it.uid
+            val postRef = db.collection("posts").document(postID)
+
+            postRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val postCreatorId = document.getString("creatorId")
+
+                    // only the creator can enable comments
+                    if (postCreatorId == userID) {
+                        postRef.update("commentsEnabled", true)
+                            .addOnSuccessListener {
+                                println("Comments enabled on $postID.")
+                                onComplete(true, null)
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error enabling comments: ${e.message}")
+                                onComplete(false, e.message)
+                            }
+                    }
+                } else {
+                    println("Post $postID does not exist.")
+                    onComplete(false, "Post does not exist.")
+                }
+            }.addOnFailureListener { e ->
+                println("Error fetching post: ${e.message}")
+                onComplete(false, e.message)
+            }
+        } ?: onComplete(false, "User not authenticated.")
+    }
+}
+
+fun editComment(postID: String, commentID: String, newComment: String, onComplete: (Boolean, String?) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    val user = FirebaseAuth.getInstance().currentUser
+
+    user?.let {
+        val postRef = db.collection("posts").document(postID)
+
+        postRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                // ensure its the commenter that wants to edit the comment
+                val comments = document.get("comments") as? MutableList<Map<String, Any>> ?: mutableListOf()
+                val commentToEdit = comments.find { it["commentId"] == commentID }
+
+                val commentUserID = commentToEdit?.get("userId") as? String
+                if (commentUserID == user.uid) {
+                    val updatedComments = comments.map { comment ->
+                        if (comment["commentId"] == commentID) {
+                            comment.toMutableMap().apply {
+                                this["comment"] = newComment
+                            }
+                        }
+                    }
+                }
+
+                postRef.update("comments", newComment)
+                    .addOnSuccessListener {
+                        println("Comment updated successfully.")
+                        onComplete(true, null)
+                    }
+                    .addOnFailureListener { e ->
+                        println("Error updating comment: ${e.message}")
+                        onComplete(false, e.message)
+                    }
+            } else {
+                println("Post $postID does not exist.")
+                onComplete(false, "Post does not exist.")
+            }
+        }.addOnFailureListener { e ->
+            println("Error fetching post: ${e.message}")
+            onComplete(false, e.message)
+        }
+    } ?: onComplete(false, "User not authenticated.")
 }
 
 
+
+fun deleteComment(postID: String, commentID: String, onComplete: (Boolean, String?) -> Unit) {
+    val db = FirebaseFirestore.getInstance()
+    val user = FirebaseAuth.getInstance().currentUser
+
+    user?.let {
+        val postRef = db.collection("posts").document(postID)
+
+        postRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                val comments = document.get("comments") as? MutableList<Map<String, Any>> ?: mutableListOf()
+                // ensure its the commenter that wants to edit the comment
+                val commentToDelete = comments.find { it["commentId"] == commentID }
+                val postCreatorID = document.getString("creatorId")
+
+                val commentUserID = commentToDelete?.get("userId") as? String
+
+                // only the post creator or commenter can delete their comment
+                if (commentUserID == user.uid || postCreatorID == user.uid) {
+                    val updatedComments = comments.filterNot { comment ->
+                        comment["commentId"] == commentID
+                    }
+
+                    postRef.update("comments", updatedComments)
+                        .addOnSuccessListener {
+                            println("Comment deleted successfully.")
+                            onComplete(true, null)
+                        }
+                        .addOnFailureListener { e ->
+                            println("Error deleting comment: ${e.message}")
+                            onComplete(false, e.message)
+                        }
+                }
+            } else {
+                println("Post $postID does not exist.")
+                onComplete(false, "Post does not exist.")
+            }
+        }.addOnFailureListener { e ->
+            println("Error fetching post: ${e.message}")
+            onComplete(false, e.message)
+        }
+    } ?: onComplete(false, "User not authenticated.")
+}
+
+
+
 // TODO: Create function leaveGroup
+// TODO: Create report functionality + button

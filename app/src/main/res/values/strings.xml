@@ -24,4 +24,10 @@
     <string name="user_state">Home State</string>
     <string name="full_name">Your Name</string>
     <string name="creating_profile">Tell us about you...</string>
+    <string name="make_post">Write a post</string>
+    <string name="recent_posts">Recent Posts</string>
+    <string name="post_button">Post</string>
+    <string name="make_comment">Write a comment</string>
+    <string name="group_description">Description</string>
+    <string name="group_members">Members</string>
 </resources>
