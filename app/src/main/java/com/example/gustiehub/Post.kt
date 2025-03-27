@@ -5,7 +5,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
-data class Post (
+data class Post(
     val creatorId: String = "",
     val creatorName: String = "",
     val group: String = "",
@@ -15,3 +15,15 @@ data class Post (
     val timestamp: Timestamp = Timestamp.now()
 )
 
+
+    // don't know if we need this yet
+//    @ServerTimestamp
+//    val timestamp: Timestamp? = null // Firestore auto-generates this on creation
+) {
+    data class Comment(
+        val commentId: String = "",
+        val userId: String = "",
+        val text: String = "",
+        @ServerTimestamp val timestamp: Timestamp? = null
+    )
+}

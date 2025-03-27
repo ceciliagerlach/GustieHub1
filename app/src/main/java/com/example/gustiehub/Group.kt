@@ -11,12 +11,9 @@ data class Group(
 
     private val db= FirebaseFirestore.getInstance()
 
-//    init {
-//        createGroup()
-//    }
 
     //create a new group in firestore
-    fun initializeGroup() {
+    fun createGroup() {
         val groupData = hashMapOf(
             "name" to name,
             "creatorId" to creatorId,

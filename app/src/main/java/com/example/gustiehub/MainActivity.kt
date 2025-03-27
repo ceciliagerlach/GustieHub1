@@ -40,7 +40,6 @@ import java.time.Year
 import kotlin.math.sign
 
 class MainActivity : AppCompatActivity() {
-    lateinit var emailInput: EditText
     lateinit var loginButton: Button
 
     private val SERVER_CLIENT_ID = "183734578676-c4vnp76b0k2cbu26f2qb6ujjikr6hknb.apps.googleusercontent.com"
@@ -55,13 +54,9 @@ class MainActivity : AppCompatActivity() {
         FirebaseApp.initializeApp(this) // Ensure Firebase is initialized
 //        GlobalData.initializeGlobalData()
 
-        emailInput = findViewById(R.id.email_input)
         loginButton = findViewById(R.id.login_button)
 
         loginButton.setOnClickListener {
-            val email = emailInput.text.toString()
-            Log.d(TAG, "Login button clicked with email: $email")
-
             signIn()
         }
 
