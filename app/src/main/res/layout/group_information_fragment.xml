@@ -62,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="start"
-            android:text="Frija Reinert, Cecilia Gerlach, etc (each on new line)"
+            android:text=""
             android:textColor="@color/black"
             android:textSize="20sp"
             android:lineSpacingExtra="6dp"/>
