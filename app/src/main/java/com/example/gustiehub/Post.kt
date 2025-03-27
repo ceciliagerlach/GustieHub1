@@ -4,6 +4,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ServerTimestamp
 
 data class Post(
     val creatorId: String = "",
@@ -19,7 +20,7 @@ data class Post(
     // don't know if we need this yet
 //    @ServerTimestamp
 //    val timestamp: Timestamp? = null // Firestore auto-generates this on creation
-) {
+{
     data class Comment(
         val commentId: String = "",
         val userId: String = "",
