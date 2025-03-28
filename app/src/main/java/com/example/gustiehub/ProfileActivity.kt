@@ -10,6 +10,7 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -37,6 +38,7 @@ class ProfileActivity : AppCompatActivity() {
         val profileState: TextView = findViewById(R.id.homeState)
         val profileAreas: TextView = findViewById(R.id.areasOfStudy)
         val profileGroups: TextView = findViewById(R.id.joinedGroups)
+        val profileImageView: ImageView = findViewById(R.id.profileImage)
 
         // set user information
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
@@ -55,6 +57,17 @@ class ProfileActivity : AppCompatActivity() {
                     profileState.text = state
                     profileAreas.text = areas
                     profileGroups.text = groups.joinToString(", ")
+
+                    // load profile picture if it exists
+                    val profilePictureUrl = document.getString("profilePicture")
+                    if (!profilePictureUrl.isNullOrEmpty()) {
+                        Glide.with(this)
+                            .load(profilePictureUrl)  // URL from Firestore
+                            .into(profileImageView)  // set the ImageView with the loaded image
+                    } else {
+                        // set a default image if no profile picture is available
+                        profileImageView.setImageResource(R.drawable.sample_profile_picture)
+                    }
                 }
             }
 

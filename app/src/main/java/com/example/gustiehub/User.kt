@@ -31,7 +31,7 @@ class User(private val _userId: String,
 
     fun createUserProfile(userId: String, email: String, firstName: String,
                           lastName: String, gradYear: Int, homeState: String,
-                          areasOfStudy: String, onComplete: (Boolean, String?) -> Unit) {
+                          areasOfStudy: String, profilePictureURL: String, onComplete: (Boolean, String?) -> Unit) {
         """ Saves new student info to Firestore""".trimMargin()
         val userData = hashMapOf(
             "userID" to userId,
@@ -41,7 +41,8 @@ class User(private val _userId: String,
             "gradYear" to gradYear,
             "homeState" to homeState,
             "areasOfStudy" to areasOfStudy,
-            "joinedGroups" to mutableListOf<String>() // You can add default group here if needed
+            "joinedGroups" to mutableListOf<String>(), // You can add default group here if needed
+            "profilePicture" to profilePictureURL
         )
 
         // add user to FireBase
@@ -53,7 +54,7 @@ class User(private val _userId: String,
 //                addUserToGustiesGroup(userId)
 
                 //add user to class year group
-                gradYear?.let { year ->
+                gradYear.let { year ->
                     val classGroupName = "Class of $year"
                     //check to see if class group exists
                     val classGroupRef = db.collection("groups").document(classGroupName).get()
@@ -61,8 +62,7 @@ class User(private val _userId: String,
                         if (document.exists()) {
                             // class group exists, add user to it
                             this.joinGroup(classGroupName)
-                        }
-                        else {
+                        } else {
                             // class group doesn't exist, create it
                             val group = Group(classGroupName, userId)
                             group.createGroup()

@@ -2,6 +2,7 @@ package com.example.gustiehub
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -9,8 +10,11 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -33,9 +37,11 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.time.Year
 import kotlin.math.sign
 
@@ -46,6 +52,15 @@ class MainActivity : AppCompatActivity() {
     private val CLIENT_EMAIL_DOMAIN = "@gustavus.edu"
     private lateinit var auth: FirebaseAuth
     private  val TAG = "MainActivity"
+    private var onPhotoSelected: ((Uri?) -> Unit)? = null
+    private lateinit var profilePictureURL: String
+
+    // Registers a photo picker activity launcher in single-select mode
+    val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        // Callback is invoked after the user selects a media item or closes the
+        // photo picker
+        onPhotoSelected?.invoke(uri)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -234,11 +249,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun onUserSignedUp(userId: String, email: String, firstName: String,
                                lastName: String, gradYear: Int, homeState: String,
-                               areasOfStudy: String) {
+                               areasOfStudy: String, profilePictureURL: String) {
         val newUser = User(userId, email, firstName, lastName,
             gradYear, homeState, areasOfStudy)
         newUser.createUserProfile(userId, email, firstName, lastName,
-            gradYear, homeState, areasOfStudy) { success, error ->
+            gradYear, homeState, areasOfStudy, profilePictureURL) { success, error ->
             if (success) {
                 println("User profile created successfully")
             } else {
@@ -260,6 +275,25 @@ class MainActivity : AppCompatActivity() {
         val areasOfStudyField = dialogView.findViewById<EditText>(R.id.areasOfStudy)
 //        val cancelButton = dialogView.findViewById<Button>(R.id.buttonCancel)
         val confirmButton = dialogView.findViewById<Button>(R.id.buttonConfirm)
+
+        val photoPickerButton = dialogView.findViewById<Button>(R.id.photoPicker)
+        val profileImageView = dialogView.findViewById<ImageView>(R.id.profileImage)
+        var photoUri: Uri? = null
+
+        photoPickerButton.setOnClickListener {
+            Log.d("PhotoPicker", "Photo picker button clicked")
+            uploadPhoto { uri ->
+                Log.d("PhotoPicker", "Received URI: $uri")
+                if (uri != null) {
+                    Log.d("PhotoPicker", "Set image URI: $uri")
+                    profileImageView?.setImageURI(uri)
+                    uploadImageToFirebase(uri, userId)
+                } else {
+                    Log.d("PhotoPicker", "No media selected")
+                }
+            }
+        }
+
 
         confirmButton.setOnClickListener {
             val firstName = firstNameField.text.toString().trim()
@@ -289,7 +323,7 @@ class MainActivity : AppCompatActivity() {
                 val user = User(userId, email, firstName, lastName, gradYear, homeState, areasOfStudy)
 
                 user.createUserProfile(userId, email, firstName, lastName,
-                    gradYear, homeState, areasOfStudy) { success, error ->
+                    gradYear, homeState, areasOfStudy, profilePictureURL) { success, error ->
                     if (success) {
                         Log.d(TAG, "User profile created successfully.")
                         dialog.dismiss()
@@ -309,6 +343,80 @@ class MainActivity : AppCompatActivity() {
 
         dialog.show()
     }
+
+//    private fun uploadPhoto(onPhotoSelected: (Uri?) -> Unit) {
+//        // Registers a photo picker activity launcher in single-select mode.
+//        val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+//            // Callback is invoked after the user selects a media item or closes the photo picker.
+//            if (uri != null) {
+//                Log.d("PhotoPicker", "Selected URI: $uri")
+//                onPhotoSelected(uri)  // Pass the URI to the callback function
+//            } else {
+//                Log.d("PhotoPicker", "No media selected")
+//                onPhotoSelected(null)  // No photo selected, pass null
+//            }
+//        }
+//
+//        pickMedia.launch(
+//            PickVisualMediaRequest.Builder()
+//                .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
+//                .build())
+//    }
+
+    private fun uploadPhoto(onPhotoSelected: (Uri?) -> Unit) {
+        this.onPhotoSelected = onPhotoSelected // Store the callback function
+        pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+    }
+
+    // actually stores the image on Firebase
+    private fun uploadImageToFirebase(uri: Uri?, userId: String) {
+        if (uri != null) {
+            // Create a reference to Firebase Storage
+            val storageRef = FirebaseStorage.getInstance().reference
+
+            // Create a unique path for the user's profile image (e.g., profile_images/userId.png)
+            val profileImageRef = storageRef.child("profile_images/$userId.png")
+            // Upload the image to Firebase Storage
+            val uploadTask = profileImageRef.putFile(uri)
+                .addOnSuccessListener {
+                    Log.d(TAG, "Image upload successful")
+                }
+                .addOnFailureListener { exception ->
+                    Log.e(TAG, "Failed to upload image: ${exception.message}")
+                }
+
+            // Add listeners for success and failure
+            uploadTask.addOnFailureListener { exception ->
+                Log.e("Upload", "Failed to upload image: ${exception.message}")
+                Toast.makeText(this, "Failed to upload image", Toast.LENGTH_SHORT).show()
+            }.addOnSuccessListener { taskSnapshot ->
+                Log.d("Upload", "Image uploaded successfully: ${taskSnapshot.metadata?.path}")
+
+                // Get the download URL after successful upload
+                profileImageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                    profilePictureURL = downloadUri.toString()
+                }
+            }
+        }
+    }
+
+//
+//    // updates the profilePicture attribute for the specific user
+//    private fun saveProfileImageUrlToFirestore(imageUrl: String) {
+//        val userId = FirebaseAuth.getInstance().currentUser?.uid
+//        if (userId != null) {
+//            val db = FirebaseFirestore.getInstance()
+//            db.collection("users").document(userId)
+//                .update("profilePicture", imageUrl) // Update the profilePicture field
+//                .addOnSuccessListener {
+//                    Log.d(TAG, "Profile image URL saved to Firestore")
+//                }
+//                .addOnFailureListener { e ->
+//                    Log.e(TAG, "Error saving profile image URL: ${e.message}")
+//                }
+//        }
+//    }
+
 
 
 }
