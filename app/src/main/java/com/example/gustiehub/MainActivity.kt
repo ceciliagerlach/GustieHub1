@@ -344,25 +344,6 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-//    private fun uploadPhoto(onPhotoSelected: (Uri?) -> Unit) {
-//        // Registers a photo picker activity launcher in single-select mode.
-//        val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-//            // Callback is invoked after the user selects a media item or closes the photo picker.
-//            if (uri != null) {
-//                Log.d("PhotoPicker", "Selected URI: $uri")
-//                onPhotoSelected(uri)  // Pass the URI to the callback function
-//            } else {
-//                Log.d("PhotoPicker", "No media selected")
-//                onPhotoSelected(null)  // No photo selected, pass null
-//            }
-//        }
-//
-//        pickMedia.launch(
-//            PickVisualMediaRequest.Builder()
-//                .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly)
-//                .build())
-//    }
-
     private fun uploadPhoto(onPhotoSelected: (Uri?) -> Unit) {
         this.onPhotoSelected = onPhotoSelected // Store the callback function
         pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
@@ -400,22 +381,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-//
-//    // updates the profilePicture attribute for the specific user
-//    private fun saveProfileImageUrlToFirestore(imageUrl: String) {
-//        val userId = FirebaseAuth.getInstance().currentUser?.uid
-//        if (userId != null) {
-//            val db = FirebaseFirestore.getInstance()
-//            db.collection("users").document(userId)
-//                .update("profilePicture", imageUrl) // Update the profilePicture field
-//                .addOnSuccessListener {
-//                    Log.d(TAG, "Profile image URL saved to Firestore")
-//                }
-//                .addOnFailureListener { e ->
-//                    Log.e(TAG, "Error saving profile image URL: ${e.message}")
-//                }
-//        }
-//    }
 
 
 
