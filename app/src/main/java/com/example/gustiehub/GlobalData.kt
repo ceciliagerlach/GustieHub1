@@ -11,7 +11,7 @@ object GlobalData {
     var userDict = mutableMapOf<String,User>()
     var groupDict = mutableMapOf<String, Group>()
 
-    fun getGroupList(onGroupsUpdated: (List<Group>) -> Unit) {
+    fun getGroupList(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
         """ Fetches created groups and updates the global variable groupList accordingly.
             |@return: None
         """.trimMargin()
@@ -30,7 +30,11 @@ object GlobalData {
                 for (document in it.documents) {
                     val group = document.toObject(Group::class.java)
                     if (group != null) {
-                        updatedGroups.add(group)
+                        if (userId !in group.members) {
+                            if (!group.name.matches(Regex("^Class of \\d{4}$"))) {
+                                updatedGroups.add(group)
+                            }
+                        }
                     }
                 }
                 println("Fetched ${updatedGroups.size} groups from Firestore.")
@@ -39,24 +43,24 @@ object GlobalData {
         }
     }
 
-    fun fetchRecentPosts(limit: Long = 20) {
-        """ Fetches most recent posts (defaults to 20) and updates the global variable
-            |recentPosts accordingly.
-            |@input limit: the # of most recent posts to fetch
-            |@return: None
-        """.trimMargin()
-
-        val db = FirebaseFirestore.getInstance()
-        val postsRef = db.collection("posts")
-            .orderBy("timestamp", Query.Direction.DESCENDING) // fetch most recent posts first
-            .limit(limit)   // only fetch limit many posts
-
-        postsRef.addSnapshotListener { snapshots, e ->
-            if (e != null) {
-                println("Error fetching recent posts: ${e.message}")
-            }
-        }
-    }
+//    fun fetchRecentPosts(limit: Long = 20) {
+//        """ Fetches most recent posts (defaults to 20) and updates the global variable
+//            |recentPosts accordingly.
+//            |@input limit: the # of most recent posts to fetch
+//            |@return: None
+//        """.trimMargin()
+//
+//        val db = FirebaseFirestore.getInstance()
+//        val postsRef = db.collection("posts")
+//            .orderBy("timestamp", Query.Direction.DESCENDING) // fetch most recent posts first
+//            .limit(limit)   // only fetch limit many posts
+//
+//        postsRef.addSnapshotListener { snapshots, e ->
+//            if (e != null) {
+//                println("Error fetching recent posts: ${e.message}")
+//            }
+//        }
+//    }
 
     fun getFilteredGroupList(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
         val db = FirebaseFirestore.getInstance()

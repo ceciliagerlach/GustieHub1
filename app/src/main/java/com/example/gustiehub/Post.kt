@@ -13,13 +13,9 @@ data class Post(
     val text: String = "",
     val comments: List<Map<String, Any>> = emptyList(),
     val commentsEnabled: Boolean = true,
-    val timestamp: Timestamp = Timestamp.now()
+    @ServerTimestamp val timestamp: Timestamp? = null
 )
 
-
-    // don't know if we need this yet
-//    @ServerTimestamp
-//    val timestamp: Timestamp? = null // Firestore auto-generates this on creation
 {
     data class Comment(
         val commentId: String = "",

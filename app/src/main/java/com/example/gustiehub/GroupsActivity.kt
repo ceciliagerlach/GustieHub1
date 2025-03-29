@@ -80,8 +80,9 @@ class GroupsActivity : AppCompatActivity() {
             //intent.putExtra("groupName", selectedGroup.name)
             //startActivity(intent)
         //}
+        val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         groupsRecyclerView.adapter = groupsAdapter
-        GlobalData.getGroupList { updatedGroups ->
+        GlobalData.getGroupList(userID) { updatedGroups ->
             runOnUiThread {
                 groupList.clear()
                 groupList.addAll(updatedGroups)
@@ -90,7 +91,6 @@ class GroupsActivity : AppCompatActivity() {
         }
 
         // list of groups in tab
-        val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuAdapter = MenuAdapter(filteredGroupList) { selectedGroup ->

@@ -123,17 +123,6 @@ class GroupPageActivity : AppCompatActivity() {
             true
         }
 
-//        // list of posts on group page
-//        postsRecyclerView = findViewById(R.id.postsRecyclerView)
-//        postsRecyclerView.layoutManager = LinearLayoutManager(this)
-//        postsAdapter = PostAdapter(postList)
-//        postsRecyclerView.adapter = postsAdapter
-//        GlobalData.getPosts(groupName) { updatedPosts ->
-//            runOnUiThread {
-//                postsAdapter.updatePosts(updatedPosts)
-//            }
-//        }
-
         // setting up view pager
         val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
         val viewPager = findViewById<ViewPager2>(R.id.viewPager)
@@ -146,7 +135,6 @@ class GroupPageActivity : AppCompatActivity() {
                 else -> null
             }
         }.attach()
-
 
     }
 }
