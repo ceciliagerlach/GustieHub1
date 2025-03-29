@@ -164,6 +164,7 @@ class GroupsActivity : AppCompatActivity() {
     private fun NewGroupDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.new_group_dialog, null)
         val editTextGroupName = dialogView.findViewById<EditText>(R.id.newGroupName)
+        val editTextGroupDescription = dialogView.findViewById<EditText>(R.id.newGroupDescription)
         val buttonCancel = dialogView.findViewById<Button>(R.id.buttonCancel)
         val buttonConfirm = dialogView.findViewById<Button>(R.id.buttonConfirm)
         val dialog = AlertDialog.Builder(this)
@@ -177,11 +178,12 @@ class GroupsActivity : AppCompatActivity() {
 
         buttonConfirm.setOnClickListener {
             val groupName = editTextGroupName.text.toString()
+            val groupDescription = editTextGroupDescription.text.toString()
             if (groupName.isNotEmpty()) {
                 val user = FirebaseAuth.getInstance().currentUser
                 if (user != null) {
                     val userId = user.uid
-                    val group = Group(groupName, userId)
+                    val group = Group(groupName, userId,description = groupDescription)
                     group.createGroup()
                     val currentUser = User(userId, user.email ?: "", "", "", _gradYear = 0, _homeState = "", _areasOfStudy = "")
                     currentUser.joinGroup(groupName)

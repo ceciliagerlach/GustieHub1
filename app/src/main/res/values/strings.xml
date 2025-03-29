@@ -32,4 +32,5 @@
     <string name="group_description">Description</string>
     <string name="group_members">Members</string>
     <string name="upload_image">Upload Image</string>
+    <string name="new_group_description">Group Description</string>
 </resources>

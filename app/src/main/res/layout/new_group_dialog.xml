@@ -21,6 +21,14 @@
         android:hint="@string/new_group_name"
         android:textSize="20sp"
         android:padding="10dp"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/newGroupDescription"
+        android:hint="@string/new_group_description"
+        android:textSize="20sp"
+        android:padding="10dp"/>
     
     <LinearLayout
         android:layout_width="match_parent"
