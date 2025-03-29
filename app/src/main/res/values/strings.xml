@@ -10,6 +10,7 @@
     <string name="group_text">My Groups</string>"
     <string name="marketplace_text">Marketplace</string>
     <string name="events_text">Events</string>
+    <string name="upcoming_events">Upcoming Events</string>
     <string name="dashboard_text">Dashboard</string>
     <string name="discover_groups_text">Discover Groups</string>
     <string name="join_text">Join Group</string>
