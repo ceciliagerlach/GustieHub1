@@ -13,8 +13,11 @@ import com.google.firebase.auth.FirebaseAuth
 
 class EventsActivity: AppCompatActivity() {
     private lateinit var menuRecyclerView: RecyclerView
+    private lateinit var eventsRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
+    private lateinit var eventsAdapter: EventsAdapter
     private val groupList = mutableListOf<Group>()
+    private val eventsList = mutableListOf<Event>()
     private val filteredGroupList = mutableListOf<Group>()
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
@@ -22,7 +25,20 @@ class EventsActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_marketplace)
+        setContentView(R.layout.activity_events)
+
+        // list of events
+        eventsRecyclerView = findViewById<RecyclerView>(R.id.eventsRecyclerView)
+        eventsRecyclerView.layoutManager = LinearLayoutManager(this)
+        eventsAdapter = EventsAdapter(eventsList)
+        eventsRecyclerView.adapter = eventsAdapter
+        GlobalData.getEvents { updatedEvents ->
+            runOnUiThread {
+                eventsList.clear()
+                eventsList.addAll(updatedEvents)
+                eventsAdapter.updateEvents(updatedEvents)
+            }
+        }
 
         // list of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
