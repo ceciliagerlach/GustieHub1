@@ -16,8 +16,7 @@ data class Post(
     val timestamp: Timestamp = Timestamp.now()
 )
 
-
-    // don't know if we need this yet
+// don't know if we need this yet
 //    @ServerTimestamp
 //    val timestamp: Timestamp? = null // Firestore auto-generates this on creation
 {
