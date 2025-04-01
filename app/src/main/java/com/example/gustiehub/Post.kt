@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ServerTimestamp
 
 data class Post(
+    val postId: String = "",
     val creatorId: String = "",
     val creatorName: String = "",
     val group: String = "",

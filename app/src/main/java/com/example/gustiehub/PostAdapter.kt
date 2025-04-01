@@ -9,12 +9,14 @@ import androidx.recyclerview.widget.RecyclerView
 
 class PostAdapter(
     private var postList: List<Post>,
-    private val onUsernameClick: (String) -> Unit
+    private val onUsernameClick: (String) -> Unit,
+    private val onCommentClick: (String) -> Unit
 ) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val usernameTextView: TextView = itemView.findViewById(R.id.user_name)
         val descriptionTextView: TextView = itemView.findViewById(R.id.post_text)
+        val commentButton: Button = itemView.findViewById(R.id.comment_button)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -29,6 +31,9 @@ class PostAdapter(
         holder.descriptionTextView.text = post.text
         holder.usernameTextView.setOnClickListener {
             onUsernameClick(post.creatorId)
+        }
+        holder.commentButton.setOnClickListener {
+            onCommentClick(post.postId) // send postId when comment button is clicked
         }
     }
 

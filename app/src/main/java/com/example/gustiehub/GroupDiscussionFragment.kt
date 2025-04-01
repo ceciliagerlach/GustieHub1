@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,20 +31,44 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         // list of posts on group page
         postsRecyclerView = view.findViewById(R.id.postsRecyclerView)
         postsRecyclerView.layoutManager = LinearLayoutManager(activity)
-        postsAdapter = PostAdapter(postList) { userId ->
-            val intent = Intent(requireContext(), ProfileActivity::class.java)
-            intent.putExtra("userId", userId)
-            startActivity(intent)
-        }
+
+        postsAdapter = PostAdapter(postList,
+            onUsernameClick = { userId ->
+                val intent = Intent(requireContext(), ProfileActivity::class.java)
+                intent.putExtra("userId", userId)
+                startActivity(intent)
+            },
+            onCommentClick = { postId ->
+                showComment(postId) // Call function to show comment input
+            }
+        )
         postsRecyclerView.adapter = postsAdapter
         GlobalData.getPosts(groupName) { updatedPosts ->
             requireActivity().runOnUiThread {
                 postsAdapter.updatePosts(updatedPosts)
             }
         }
+    }
+         fun showComment(postId: String) {
+//            val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_comment, null)
+//            val editText = dialogView.findViewById<EditText>(R.id.commentEditText)
+//
+//            AlertDialog.Builder(requireContext())
+//                .setTitle("Add a Comment")
+//                .setView(dialogView)
+//                .setPositiveButton("Post") { _, _ ->
+//                    val commentText = editText.text.toString().trim()
+//                    if (commentText.isNotEmpty()) {
+//                        postComment(postId, commentText)
+//                    }
+//                }
+//                .setNegativeButton("Cancel", null)
+//                .show()
+
 //        // posting
 //        val postText: EditText = requireView().findViewById(R.id.write_post)
 //        val postButton: ImageButton = requireView().findViewById(R.id.post_button)

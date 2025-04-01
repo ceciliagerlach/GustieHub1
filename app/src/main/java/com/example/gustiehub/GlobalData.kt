@@ -106,7 +106,8 @@ object GlobalData {
                     val post = document.toObject(Post::class.java)
                     if (post != null) {
                         if (groupName == post.group) {
-                            updatedPosts.add(post)
+                            val postId = document.id
+                            updatedPosts.add(post.copy(postId = postId))
                         }
                     }
                 }
