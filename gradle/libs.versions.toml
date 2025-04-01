@@ -16,6 +16,7 @@ playServicesAuth = "21.3.0"
 firebaseAuthKtx = "23.2.0"
 materialVersion = "1.13.0-alpha11"
 runtimeAndroid = "1.7.8"
+glide = "4.16.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,6 +41,8 @@ play-services-auth = { group = "com.google.android.gms", name = "play-services-a
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 androidx-runtime-android = { group = "androidx.compose.runtime", name = "runtime-android", version.ref = "runtimeAndroid" }
 material-v1130alpha11 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+glideCompiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

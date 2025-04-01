@@ -96,7 +96,7 @@ object GlobalData {
 
         postsRef.addSnapshotListener { snapshots, e ->
             if (e != null) {
-                println("Error listening for group changes: ${e.message}")
+                println("Error listening for post changes: ${e.message}")
                 return@addSnapshotListener
             }
 
@@ -110,8 +110,33 @@ object GlobalData {
                         }
                     }
                 }
-                println("Fetched ${updatedPosts.size} groups from Firestore.")
+                println("Fetched ${updatedPosts.size} posts from Firestore.")
                 onPostsUpdated(updatedPosts) // update views accordingly
+            }
+        }
+    }
+
+    fun getEvents(onEventsUpdated: (List<Event>) -> Unit) {
+        println("FirestoreDebug getEvents() called")
+        val db = FirebaseFirestore.getInstance()
+        val eventsRef = db.collection("events")
+            .orderBy("date", Query.Direction.ASCENDING)
+        eventsRef.addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                println("Error listening for event changes: ${e.message}")
+                return@addSnapshotListener
+            }
+
+            snapshots?.let {
+                val updatedPosts = mutableListOf<Event>()
+                for (document in it.documents) {
+                    val event = document.toObject(Event::class.java)
+                    if (event != null) {
+                            updatedPosts.add(event)
+                    }
+                }
+                println("Fetched ${updatedPosts.size} events from Firestore.")
+                onEventsUpdated(updatedPosts) // update views accordingly
             }
         }
     }

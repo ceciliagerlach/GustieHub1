@@ -10,6 +10,7 @@
     <string name="group_text">My Groups</string>"
     <string name="marketplace_text">Marketplace</string>
     <string name="events_text">Events</string>
+    <string name="upcoming_events">Upcoming Events</string>
     <string name="dashboard_text">Dashboard</string>
     <string name="discover_groups_text">Discover Groups</string>
     <string name="join_text">Join Group</string>
@@ -30,4 +31,13 @@
     <string name="make_comment">Write a comment</string>
     <string name="group_description">Description</string>
     <string name="group_members">Members</string>
+    <string name="upload_image">Upload Image</string>
+    <string name="new_group_description">Group Description</string>
+    <string name="new_event">New Event</string>
+    <string name="event_name">Event Name</string>
+    <string name="event_location">Event Location</string>
+    <string name="event_description">Event Description</string>
+    <string name="event_time">Event Time</string>
+    <string name="event_date">Event Date</string>
+    <string name="event_group">Event Group</string>
 </resources>
