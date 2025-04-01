@@ -43,6 +43,7 @@ class GroupsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_groups)
         val createGroupButton = findViewById<ImageButton>(R.id.create_groups_button)
 
+        // display list of groups
         groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
         groupsRecyclerView.layoutManager = LinearLayoutManager(this)
         groupsAdapter = GroupsAdapter(groupList, onItemClick = { selectedGroup ->
@@ -72,14 +73,6 @@ class GroupsActivity : AppCompatActivity() {
             NewGroupDialog()
         }
 
-        // list in discover groups
-        //groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
-        //groupsRecyclerView.layoutManager = LinearLayoutManager(this)
-        //groupsAdapter = GroupsAdapter(groupList) { selectedGroup ->
-            //val intent = Intent(this, GroupsActivity::class.java)
-            //intent.putExtra("groupName", selectedGroup.name)
-            //startActivity(intent)
-        //}
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         groupsRecyclerView.adapter = groupsAdapter
         GlobalData.getGroupList(userID) { updatedGroups ->
@@ -94,7 +87,7 @@ class GroupsActivity : AppCompatActivity() {
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuAdapter = MenuAdapter(filteredGroupList) { selectedGroup ->
-            val intent = Intent(this, GroupsActivity::class.java)
+            val intent = Intent(this, GroupPageActivity::class.java)
             intent.putExtra("groupName", selectedGroup.name)
             startActivity(intent)
         }
@@ -140,6 +133,18 @@ class GroupsActivity : AppCompatActivity() {
         menuButton.setOnClickListener {
             val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
             drawerLayout.openDrawer(GravityCompat.START)
+        }
+
+        // initialize and handle clicks for message and profile buttons
+        val messageButton: ImageView = findViewById(R.id.messaging)
+        val profileButton: ImageView = findViewById(R.id.profile)
+        messageButton.setOnClickListener {
+            val intent = Intent(this, MessageActivity::class.java)
+            startActivity(intent)
+        }
+        profileButton.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
         }
     }
 

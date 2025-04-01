@@ -159,7 +159,7 @@ class ProfileActivity : AppCompatActivity() {
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        // handling clicks for toolbar
+        // handling clicks for message button
         val messageButton: ImageView = findViewById(R.id.messaging)
         messageButton.setOnClickListener {
             val intent = Intent(this, MessageActivity::class.java)

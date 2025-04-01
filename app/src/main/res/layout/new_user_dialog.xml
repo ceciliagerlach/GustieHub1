@@ -117,14 +117,15 @@
         android:id="@+id/areasOfStudy"
         android:textSize="18sp"
         android:textColor="@color/black"
-        android:inputType="text"/>
+        android:inputType="text"
+        android:paddingBottom="12dp"/>
 
     <com.google.android.material.button.MaterialButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:text="@string/upload_image"
         android:id="@+id/photoPicker"
-        android:layout_marginTop="20sp"
+        android:textSize="18sp"
         android:backgroundTint="@color/material_dynamic_neutral60"/>
 
     <Button
@@ -133,6 +134,7 @@
         android:layout_height="match_parent"
         android:text="@string/confirm"
         android:textSize="18sp"
-        android:backgroundTint="@color/gold"/>
+        android:backgroundTint="@color/gold"
+        android:layout_marginTop="12dp"/>
 
 </LinearLayout>

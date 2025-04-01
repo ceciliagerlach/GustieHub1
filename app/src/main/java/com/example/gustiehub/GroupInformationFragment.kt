@@ -46,13 +46,13 @@ class GroupInformationFragment(val groupName: String) : Fragment() {
         for (member in members) {
             println("Member ID: $member")
             val userDocument = db.collection("users").document(member).get().await()
-                    if (userDocument.exists()) {
-                        val firstName = userDocument.getString("firstName") ?: ""
-                        val lastName = userDocument.getString("lastName") ?: ""
-                        val fullName = "$firstName $lastName"
-                        memberNames.add(fullName)
-                        println("Updated List: $memberNames")
-                    }
+            if (userDocument.exists()) {
+                val firstName = userDocument.getString("firstName") ?: ""
+                val lastName = userDocument.getString("lastName") ?: ""
+                val fullName = "$firstName $lastName"
+                memberNames.add(fullName)
+                println("Updated List: $memberNames")
+            }
         }
         println("Member Names: $memberNames")
         return memberNames

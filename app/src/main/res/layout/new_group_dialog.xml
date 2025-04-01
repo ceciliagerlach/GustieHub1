@@ -12,33 +12,51 @@
         android:layout_gravity="center"
         android:textSize="25sp"
         android:text="@string/new_group"
+        android:textColor="@color/black"
+        android:paddingBottom="12dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:textSize="18sp"
+        android:text="@string/new_group_name"
         android:textColor="@color/black"/>
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/newGroupName"
-        android:hint="@string/new_group_name"
-        android:textSize="20sp"
-        android:padding="10dp"/>
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:inputType="text"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:textSize="18sp"
+        android:text="@string/new_group_description"
+        android:textColor="@color/black"
+        android:paddingTop="12dp"/>
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/newGroupDescription"
-        android:hint="@string/new_group_description"
-        android:textSize="20sp"
-        android:padding="10dp"/>
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:inputType="text"/>
     
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:paddingTop="16dp">
+        android:paddingTop="12dp">
 
         <Button
-            android:id= "@+id/buttonCancel"
+            android:id="@+id/buttonCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/cancel"
@@ -53,9 +71,7 @@
             android:textSize="18sp"
             android:layout_marginStart="10dp"
             android:backgroundTint="@color/gold"/>
+
     </LinearLayout>
-
-        
-
 
 </LinearLayout>
