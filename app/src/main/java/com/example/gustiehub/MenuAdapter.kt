@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 class MenuAdapter (
     private var menuItems: List<Group>,
-    private val onItemClick: (Group) -> Unit,
+    private val onItemClick: (Group) -> Unit
 ) : RecyclerView.Adapter<MenuAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

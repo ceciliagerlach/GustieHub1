@@ -1,5 +1,6 @@
 package com.example.gustiehub
 
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
@@ -129,12 +130,15 @@ class User(private val _userId: String,
     fun getJoinedGroups(): List<String> = joinedGroups
 
 
-    fun createPost(group: String, text: String) {
+    fun createPost(name: String, group: String, text: String) {
         val postData = hashMapOf(
             "creatorId" to userId,
+            "creatorName" to name,
             "group" to group,
             "text" to text,
-            "timestamp" to System.currentTimeMillis() // add timestamp for ordering
+            "timestamp" to Timestamp.now(), // add timestamp for ordering
+            "comments" to emptyList<Map<String, Any>>(),
+            "commentsEnabled" to true
         )
 
         db.collection("posts")
@@ -149,7 +153,6 @@ class User(private val _userId: String,
 
     fun editPost(postID: String, newText: String, onComplete: (Boolean, String?) -> Unit) {
         val user = auth.currentUser
-
         user?.let {
             val userID = it.uid
             val postRef = db.collection("posts").document(postID)

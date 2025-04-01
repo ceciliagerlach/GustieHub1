@@ -24,13 +24,13 @@ class ProfileActivity : AppCompatActivity() {
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
-    private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d("ProfileActivity", "ProfileActivity started!")
         setContentView(R.layout.activity_profile)
+        val receivingId = intent.getStringExtra("userId")
+        val userId: String = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
         // get profile views
         val profileName: TextView = findViewById(R.id.userName)
@@ -41,36 +41,65 @@ class ProfileActivity : AppCompatActivity() {
         val profileImageView: ImageView = findViewById(R.id.profileImage)
 
         // set user information
-        val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        db.collection("users").document(userID).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val firstname = document.getString("firstName") ?: "No Name"
-                    val lastname = document.getString("lastName") ?: "No Name"
-                    val year = document.getLong("gradYear") ?: "No Grad Year"
-                    val state = document.getString("homeState") ?: "No State"
-                    val areas = document.getString("areasOfStudy") ?: "No Areas"
-                    val groups = document.get("joinedGroups") as? List<String> ?: emptyList()
+        if (receivingId.isNullOrEmpty()) {
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val firstname = document.getString("firstName") ?: "No Name"
+                        val lastname = document.getString("lastName") ?: "No Name"
+                        val year = document.getLong("gradYear") ?: "No Grad Year"
+                        val state = document.getString("homeState") ?: "No State"
+                        val areas = document.getString("areasOfStudy") ?: "No Areas"
+                        val groups = document.get("joinedGroups") as? List<String> ?: emptyList()
 
-                    profileName.text = firstname + " " + lastname
-                    profileYear.text = year.toString()
-                    profileState.text = state
-                    profileAreas.text = areas
-                    profileGroups.text = groups.joinToString(", ")
-
-                    // load profile picture if it exists
-                    val profilePictureUrl = document.getString("profilePicture")
-                    if (!profilePictureUrl.isNullOrEmpty()) {
-                        Glide.with(this)
+                        profileName.text = firstname + " " + lastname
+                        profileYear.text = year.toString()
+                        profileState.text = state
+                        profileAreas.text = areas
+                        profileGroups.text = groups.joinToString(", ")
+                        
+                        // load profile picture if it exists
+                        val profilePictureUrl = document.getString("profilePicture")
+                        if (!profilePictureUrl.isNullOrEmpty()) {
+                          Glide.with(this)
                             .load(profilePictureUrl)  // URL from Firestore
                             .into(profileImageView)  // set the ImageView with the loaded image
-                    } else {
-                        // set a default image if no profile picture is available
-                        profileImageView.setImageResource(R.drawable.sample_profile_picture)
+                        } else {
+                          // set a default image if no profile picture is available
+                          profileImageView.setImageResource(R.drawable.sample_profile_picture)
+                        }
+                    }
+                }
+        } else {
+            db.collection("users").document(receivingId).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val firstname = document.getString("firstName") ?: "No Name"
+                        val lastname = document.getString("lastName") ?: "No Name"
+                        val year = document.getLong("gradYear") ?: "No Grad Year"
+                        val state = document.getString("homeState") ?: "No State"
+                        val areas = document.getString("areasOfStudy") ?: "No Areas"
+                        val groups = document.get("joinedGroups") as? List<String> ?: emptyList()
+
+                        profileName.text = firstname + " " + lastname
+                        profileYear.text = year.toString()
+                        profileState.text = state
+                        profileAreas.text = areas
+                        profileGroups.text = groups.joinToString(", ")
+
+                        // load profile picture if it exists
+                        val profilePictureUrl = document.getString("profilePicture")
+                        if (!profilePictureUrl.isNullOrEmpty()) {
+                          Glide.with(this)
+                            .load(profilePictureUrl)  // URL from Firestore
+                            .into(profileImageView)  // set the ImageView with the loaded image
+                        } else {
+                          // set a default image if no profile picture is available
+                          profileImageView.setImageResource(R.drawable.sample_profile_picture)
                     }
                 }
             }
-
+        }
 
         // list of groups in tab
         menuRecyclerView = findViewById(R.id.recycler_menu)
@@ -81,7 +110,7 @@ class ProfileActivity : AppCompatActivity() {
             startActivity(intent)
         }
         menuRecyclerView.adapter = menuAdapter
-        GlobalData.getFilteredGroupList(userID) { updatedGroups ->
+        GlobalData.getFilteredGroupList(userId) { updatedGroups ->
             runOnUiThread {
                 groupList.clear()
                 groupList.addAll(updatedGroups)

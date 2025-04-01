@@ -8,7 +8,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class PostAdapter(
-    private var postList: List<Post>
+    private var postList: List<Post>,
+    private val onUsernameClick: (String) -> Unit
 ) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -26,6 +27,9 @@ class PostAdapter(
         val post = postList[position]
         holder.usernameTextView.text = post.creatorName
         holder.descriptionTextView.text = post.text
+        holder.usernameTextView.setOnClickListener {
+            onUsernameClick(post.creatorId)
+        }
     }
 
     fun updatePosts(newPosts: List<Post>) {
