@@ -44,24 +44,23 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
                 postsAdapter.updatePosts(updatedPosts)
             }
         }
-        // posting
-        val postText: EditText = requireView().findViewById(R.id.write_post)
-        val postButton: ImageButton = requireView().findViewById(R.id.post_button)
-        postButton.setOnClickListener {
-            if (postText.text.isNotEmpty()) {
-                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-                db.collection("users").document(userId).get()
-                    .addOnSuccessListener { document ->
-                        val firstname = document.getString("firstName") ?: ""
-                        val lastname = document.getString("lastName") ?: ""
-                        val fullName = "$firstname $lastname"
-                        val user = User(userId, "", firstname, lastname, 0, "", "")
-                        user.createPost(fullName, groupName, postText.text.toString())
-                        Toast.makeText(requireContext(), "Post created", Toast.LENGTH_SHORT).show()
-                        postText.text.clear()
-                    }
-            }
-        }
+//        // posting
+//        val postText: EditText = requireView().findViewById(R.id.write_post)
+//        val postButton: ImageButton = requireView().findViewById(R.id.post_button)
+//        postButton.setOnClickListener {
+//            if (postText.text.isNotEmpty()) {
+//                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+//                db.collection("users").document(userId).get()
+//                    .addOnSuccessListener { document ->
+//                        val firstname = document.getString("firstName") ?: ""
+//                        val lastname = document.getString("lastName") ?: ""
+//                        val fullName = "$firstname $lastname"
+//                        val user = User(userId, "", firstname, lastname, 0, "", "")
+//                        user.createPost(fullName, groupName, postText.text.toString())
+//                        Toast.makeText(requireContext(), "Post created", Toast.LENGTH_SHORT).show()
+//                        postText.text.clear()
+//                    }
+//            }
+//        }
     }
-
 }
