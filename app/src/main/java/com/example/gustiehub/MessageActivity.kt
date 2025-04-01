@@ -78,7 +78,12 @@ class MessageActivity: AppCompatActivity() {
             val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
             drawerLayout.openDrawer(GravityCompat.START)
         }
-
+        // initialize and handle clicks for profile button
+        val profileButton: ImageView = findViewById(R.id.profile)
+        profileButton.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
 

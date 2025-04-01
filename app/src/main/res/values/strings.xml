@@ -33,7 +33,7 @@
     <string name="group_members">Members</string>
     <string name="upload_image">Upload Image</string>
     <string name="new_group_description">Group Description</string>
-    <string name="new_event">New Event</string>
+    <string name="new_event">Create New Event</string>
     <string name="event_name">Event Name</string>
     <string name="event_location">Event Location</string>
     <string name="event_description">Event Description</string>

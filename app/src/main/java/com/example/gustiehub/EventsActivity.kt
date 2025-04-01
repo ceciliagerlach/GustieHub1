@@ -102,14 +102,24 @@ class EventsActivity: AppCompatActivity() {
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
+        // handling clicks for buttons
+        val messageButton: ImageView = findViewById(R.id.messaging)
+        val profileButton: ImageView = findViewById(R.id.profile)
+        messageButton.setOnClickListener {
+            val intent = Intent(this, MessageActivity::class.java)
+            startActivity(intent)
+        }
+        profileButton.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
+        }
+
         //firebase function for listening from firebase
         listenForEventsUpdate()
         val createEventButton = findViewById<ImageButton>(R.id.create_events_button)
         createEventButton.setOnClickListener {
             NewEventsDialog()
         }
-
-
     }
 
     private fun listenForEventsUpdate() {
