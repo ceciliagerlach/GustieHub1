@@ -40,6 +40,14 @@
                     android:paddingRight="14dp"/>
 
                 <!--space for report button here in a horiztonal layout across from user name-->
+                <ImageButton
+                    android:id="@+id/report_button"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@color/white"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/report_flag"/>
+
 
             </LinearLayout>
 
