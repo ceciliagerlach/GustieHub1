@@ -200,15 +200,15 @@ class User(private val _userId: String,
             postRef.get().addOnSuccessListener { document ->
                 if (document.exists()) {
                     val newComment = mapOf(
-                        "commentId" to UUID.randomUUID().toString(), // generate a unique comment ID
-                        "userID" to userID,
-                        "comment" to comment,
-                        "timestamp" to FieldValue.serverTimestamp()
+                        "commentId" to UUID.randomUUID().toString(), // automatically generates a unique Id
+                        "userId" to userID,
+                        "text" to comment,
+                        "timestamp" to Timestamp.now()
                     )
 
                     postRef.update("comments", FieldValue.arrayUnion(newComment))
                         .addOnSuccessListener {
-                            println("Comment added to post $postID successfully.")
+                            println("Comment added successfully.")
                             onComplete(true, null)
                         }
                         .addOnFailureListener { e ->
@@ -216,7 +216,7 @@ class User(private val _userId: String,
                             onComplete(false, e.message)
                         }
                 } else {
-                    println("Post $postID does not exist.")
+                    println("Post does not exist.")
                     onComplete(false, "Post does not exist.")
                 }
             }.addOnFailureListener { e ->

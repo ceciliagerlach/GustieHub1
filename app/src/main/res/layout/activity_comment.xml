@@ -150,7 +150,7 @@
                         android:layout_gravity="center"/>
 
                     <EditText
-                        android:id="@+id/write_post"
+                        android:id="@+id/write_comment"
                         android:layout_width="0dp"
                         android:layout_weight="5"
                         android:layout_height="wrap_content"
