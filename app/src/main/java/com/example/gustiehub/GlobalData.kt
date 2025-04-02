@@ -2,6 +2,10 @@ package com.example.gustiehub
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 object GlobalData {
     var groupList = mutableListOf<Group>()
@@ -129,15 +133,39 @@ object GlobalData {
 
             snapshots?.let {
                 val updatedPosts = mutableListOf<Event>()
+                val currentDate = Calendar.getInstance().time
+
                 for (document in it.documents) {
                     val event = document.toObject(Event::class.java)
-                    if (event != null) {
+                    if (event != null && isFutureOrToday(event.date)) {
                             updatedPosts.add(event)
                     }
                 }
                 println("Fetched ${updatedPosts.size} events from Firestore.")
                 onEventsUpdated(updatedPosts) // update views accordingly
             }
+        }
+    }
+
+    /**
+     * Converts a date string (e.g., "April 12") to a Date object and checks if it's today or in the future.
+     */
+    fun isFutureOrToday(dateStr: String): Boolean {
+        return try {
+            val dateFormat = SimpleDateFormat("MMMM d", Locale.ENGLISH)
+            val eventDate = dateFormat.parse(dateStr)
+
+            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+            val eventCalendar = Calendar.getInstance().apply {
+                time = eventDate!!
+                set(Calendar.YEAR, currentYear) 
+            }
+
+            val today = Calendar.getInstance()
+            !eventCalendar.before(today)
+        } catch (e: ParseException) {
+            println("Error parsing date: $dateStr")
+            false
         }
     }
 
