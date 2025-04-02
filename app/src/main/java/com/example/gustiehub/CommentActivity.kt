@@ -26,6 +26,7 @@ class CommentActivity : AppCompatActivity() {
     private lateinit var commentInput: EditText
     private lateinit var commentButton: ImageButton
     private lateinit var postId: String
+    private lateinit var groupName: String
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
     private val groupList = mutableListOf<Group>()
@@ -40,6 +41,7 @@ class CommentActivity : AppCompatActivity() {
 
         // Get postId from intent
         postId = intent.getStringExtra("postId") ?: return
+        groupName = intent.getStringExtra("groupName") ?: return
 
         // Set up RecyclerView
         commentsRecyclerView = findViewById(R.id.commentsRecyclerView)
@@ -48,7 +50,7 @@ class CommentActivity : AppCompatActivity() {
             // Handle comment reporting if needed
         }
         commentsRecyclerView.adapter = commentAdapter
-        commentInput = findViewById(R.id.write_comment) // Make sure this ID matches your XML
+        commentInput = findViewById(R.id.write_comment)
         commentButton = findViewById(R.id.comment_button)
 
         // Fetch comments from Firestore
@@ -57,6 +59,14 @@ class CommentActivity : AppCompatActivity() {
         // Set onClickListener for comment submission
         commentButton.setOnClickListener {
             submitComment()
+        }
+
+        // set onClickListener for back button
+        val backButton: ImageButton = findViewById(R.id.back_button)
+        backButton.setOnClickListener {
+            val intent = Intent(this, GroupPageActivity::class.java)
+            intent.putExtra("groupName", groupName)
+            startActivity(intent)
         }
 
         // list of groups in tab
@@ -106,7 +116,7 @@ class CommentActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(GravityCompat.START)
             true
         }
-        
+
         // opening menu
         val menuButton: ImageView = findViewById(R.id.menu)
         menuButton.setOnClickListener {

@@ -36,6 +36,7 @@ class PostAdapter(
             Log.d("CommentButton", "Clicked, opening CommentActivity for postId: ${post.postId}")
             val intent = Intent(holder.itemView.context, CommentActivity::class.java).apply {
                 putExtra("postId", post.postId)
+                putExtra("groupName", post.group)
             }
             holder.itemView.context.startActivity(intent)
         }
