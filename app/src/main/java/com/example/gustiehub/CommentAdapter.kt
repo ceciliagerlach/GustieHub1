@@ -28,7 +28,7 @@ class CommentAdapter(
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         val comment = commentList[position]
 
-        // Fetch username from Firestore
+        // fetch username from Firestore
         val db = FirebaseFirestore.getInstance()
         db.collection("users").document(comment.userId).get()
             .addOnSuccessListener { document ->

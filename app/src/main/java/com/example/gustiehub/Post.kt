@@ -12,9 +12,9 @@ data class Post(
     val creatorName: String = "",
     val group: String = "",
     val text: String = "",
-    val comments: List<Map<String, Any>> = emptyList(),
+    val comments: List<Comment> = emptyList(),
     val commentsEnabled: Boolean = true,
-    @ServerTimestamp val timestamp: Timestamp? = null
+    val timestamp: com.google.firebase.Timestamp? = null,
 )
 
 {
@@ -22,6 +22,6 @@ data class Post(
         val commentId: String = "",
         val userId: String = "",
         val text: String = "",
-        @ServerTimestamp val timestamp: Timestamp? = null
+        val timestamp: com.google.firebase.Timestamp? = null,
     )
 }
