@@ -70,6 +70,13 @@
                 android:gravity="end"
                 android:paddingRight="14dp"/>
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/commentsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:visibility="gone"/>
+
         </LinearLayout>
 
         <View

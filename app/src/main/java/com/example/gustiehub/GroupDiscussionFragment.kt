@@ -2,6 +2,7 @@ package com.example.gustiehub
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +21,9 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
     private lateinit var postsRecyclerView: RecyclerView
     private lateinit var postsAdapter: PostAdapter
     private val postList = mutableListOf<Post>()
+    private lateinit var commentsRecyclerView: RecyclerView
+    private lateinit var commentsAdapter: CommentAdapter
+
     val db = FirebaseFirestore.getInstance()
 
     override fun onCreateView(
@@ -43,7 +47,8 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
                 startActivity(intent)
             },
             onCommentClick = { postId ->
-                showComment(postId) // Call function to show comment input
+                showComment(postId)
+                fetchPostAndComments(postId)
             }
         )
         postsRecyclerView.adapter = postsAdapter
@@ -52,22 +57,56 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
                 postsAdapter.updatePosts(updatedPosts)
             }
         }
+
+        commentsRecyclerView = view.findViewById(R.id.commentsRecyclerView)
+        commentsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
+        commentsAdapter = CommentAdapter(emptyList()) { commentId ->
+            // Handle reporting a comment
+        }
+        commentsRecyclerView.adapter = commentsAdapter
+
     }
-         fun showComment(postId: String) {
-//            val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_comment, null)
-//            val editText = dialogView.findViewById<EditText>(R.id.commentEditText)
-//
-//            AlertDialog.Builder(requireContext())
-//                .setTitle("Add a Comment")
-//                .setView(dialogView)
-//                .setPositiveButton("Post") { _, _ ->
-//                    val commentText = editText.text.toString().trim()
-//                    if (commentText.isNotEmpty()) {
-//                        postComment(postId, commentText)
-//                    }
-//                }
-//                .setNegativeButton("Cancel", null)
-//                .show()
+    fun showComment(postId: String) {
+        GlobalData.getComments(postId) { comments ->
+            requireActivity().runOnUiThread {
+                // Assuming you have a commentsRecyclerView in your fragment layout
+                commentsRecyclerView.visibility = View.VISIBLE
+                commentsAdapter.updateComments(comments)
+            }
+        }
+    }
+
+    fun fetchPostAndComments(postId: String) {
+        val postRef = FirebaseFirestore.getInstance().collection("posts").document(postId)
+
+        postRef.get().addOnSuccessListener { document ->
+            if (document.exists()) {
+                val post = document.toObject(Post::class.java)  // Your post object
+                val commentsMap = document.get("comments") as? Map<String, Map<String, String>> // Fetch the comments map
+
+                val comments = mutableListOf<Post.Comment>()
+
+                // Deserialize the comments from the map
+                commentsMap?.forEach { (commentId, commentData) ->
+                    val comment = Post.Comment(
+                        commentId = commentId,
+                        userId = commentData["userId"] ?: "",
+                        text = commentData["text"] ?: ""
+                    )
+                    comments.add(comment)
+                }
+
+                // Pass the comments to the comment adapter
+                commentsAdapter.updateComments(comments)
+            } else {
+                // Handle case where post doesn't exist
+            }
+        }.addOnFailureListener { exception ->
+            // Handle errors when fetching the post
+            Log.e("Firestore", "Error getting post: ", exception)
+        }
+    }
+
 
 //        // posting
 //        val postText: EditText = requireView().findViewById(R.id.write_post)
@@ -87,5 +126,4 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
 //                    }
 //            }
 //        }
-    }
 }

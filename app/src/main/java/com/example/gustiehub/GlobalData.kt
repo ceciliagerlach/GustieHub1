@@ -117,6 +117,27 @@ object GlobalData {
         }
     }
 
+    fun getComments(postId: String, onCommentsUpdated: (List<Post.Comment>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("posts").document(postId).collection("comments")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    println("Error getting comments: ${e.message}")
+                    return@addSnapshotListener
+                }
+
+                snapshots?.let {
+                    val comments = it.documents.mapNotNull { doc ->
+                        doc.toObject(Post.Comment::class.java)
+                    }
+                    onCommentsUpdated(comments)
+                }
+            }
+    }
+
+
+
     fun getEvents(onEventsUpdated: (List<Event>) -> Unit) {
         println("FirestoreDebug getEvents() called")
         val db = FirebaseFirestore.getInstance()
