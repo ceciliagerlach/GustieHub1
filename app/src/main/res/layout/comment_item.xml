@@ -12,7 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingLeft="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -51,31 +52,13 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/post_text"
+                android:id="@+id/comment_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="14dp"
                 android:textSize="18sp"
-                android:text="This is the space for the post's text... It can be super long and go ontol multiple lines or really short. "
+                android:text="This is the space for the comment's text..."
                 android:textColor="@color/black"/>
-
-            <TextView
-                android:id="@+id/view_comments_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="View Comments"
-                android:textColor="#A000"
-                android:paddingBottom="14dp"
-                android:textSize="14sp"
-                android:gravity="end"
-                android:paddingRight="14dp"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/commentsRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:visibility="gone"/>
 
         </LinearLayout>
 

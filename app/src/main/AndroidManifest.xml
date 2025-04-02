@@ -13,6 +13,9 @@
         android:theme="@style/Theme.GustieHub"
         tools:targetApi="31">
         <activity
+            android:name=".CommentActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -23,31 +26,31 @@
         </activity>
         <activity
             android:name=".DashboardActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".AnnouncementsActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".MarketplaceActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".MessageActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".GroupsActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".ProfileActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".SeeAllActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".EventsActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".GroupPageActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
     </application>
 
 </manifest>
