@@ -1,9 +1,10 @@
 package com.example.gustiehub
 
+import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
@@ -15,6 +16,7 @@ class PostAdapter(
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val usernameTextView: TextView = itemView.findViewById(R.id.user_name)
         val descriptionTextView: TextView = itemView.findViewById(R.id.post_text)
+        val viewCommentsButton: TextView = itemView.findViewById(R.id.view_comments_button)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -29,6 +31,13 @@ class PostAdapter(
         holder.descriptionTextView.text = post.text
         holder.usernameTextView.setOnClickListener {
             onUsernameClick(post.creatorId)
+        }
+        holder.viewCommentsButton.setOnClickListener {
+            Log.d("CommentButton", "Clicked, opening CommentActivity for postId: ${post.postId}")
+            val intent = Intent(holder.itemView.context, CommentActivity::class.java).apply {
+                putExtra("postId", post.postId)
+            }
+            holder.itemView.context.startActivity(intent)
         }
     }
 
