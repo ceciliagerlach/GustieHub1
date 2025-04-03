@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class DashboardActivity : AppCompatActivity() {
     private lateinit var menuRecyclerView: RecyclerView
@@ -27,6 +29,12 @@ class DashboardActivity : AppCompatActivity() {
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
+
+    // variables for displaying 2 most recent announcements + events
+    private lateinit var announcementPreview1: TextView
+    private lateinit var announcementPreview2: TextView
+    private lateinit var eventPreview1: TextView
+    private lateinit var eventPreview2: TextView
 
     companion object {
         private const val EXTRA_EMAIL = "com.example.gustiehub.email"
@@ -41,6 +49,16 @@ class DashboardActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
+
+        // initialize TextViews
+        announcementPreview1 = findViewById(R.id.announcement_preview1)
+        announcementPreview2 = findViewById(R.id.announcement_preview2)
+        eventPreview1 = findViewById(R.id.event_preview1)
+        eventPreview2 = findViewById(R.id.event_preview2)
+
+        // fetch two most recent of each
+        fetchRecentAnnouncements(2)
+        fetchRecentEvents(2)
 
         val email = intent.getStringExtra(EXTRA_EMAIL)
 
@@ -124,5 +142,53 @@ class DashboardActivity : AppCompatActivity() {
             val intent = Intent(this, EventsActivity::class.java)
             startActivity(intent)
         }
+    }
+
+    private fun fetchRecentAnnouncements(limit: Long) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("announcements")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .limit(limit)   // only display the limit most recent
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    Log.d("Dashboard", "No announcements found")
+                } else {
+                    Log.d("Dashboard", "Announcements retrieved: ${documents.documents}")
+                }
+
+                val announcements = documents.map { it.getString("text") ?: "No Content" }
+                runOnUiThread {
+                    announcementPreview1.text = announcements.getOrNull(0) ?: "No announcements"
+                    announcementPreview2.text = announcements.getOrNull(1) ?: "No announcements"
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Dashboard", "Error fetching announcements", e)
+            }
+    }
+
+    private fun fetchRecentEvents(limit: Long) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("events")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .limit(limit)   // only display the limit most recent
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    Log.d("Dashboard", "No posts found")
+                } else {
+                    Log.d("Dashboard", "Posts retrieved: ${documents.documents}")
+                }
+
+                val posts = documents.map { it.getString("text") ?: "No Content" }
+                runOnUiThread {
+                    eventPreview1.text = posts.getOrNull(0) ?: "No events"
+                    eventPreview2.text = posts.getOrNull(1) ?: "No events"
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Dashboard", "Error fetching posts", e)
+            }
     }
 }
