@@ -5,8 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Switch
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 
 class PostAdapter(
     private var postList: List<Post>,
@@ -17,6 +19,7 @@ class PostAdapter(
         val usernameTextView: TextView = itemView.findViewById(R.id.user_name)
         val descriptionTextView: TextView = itemView.findViewById(R.id.post_text)
         val viewCommentsButton: TextView = itemView.findViewById(R.id.view_comments_button)
+        val enableCommentsSwitch: Switch = itemView.findViewById(R.id.commentSwitch)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -39,6 +42,28 @@ class PostAdapter(
                 putExtra("groupName", post.group)
             }
             holder.itemView.context.startActivity(intent)
+        }
+        holder.enableCommentsSwitch.isChecked = post.commentsEnabled
+        holder.enableCommentsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            val user = FirebaseAuth.getInstance().currentUser
+            val userId = user?.uid ?: return@setOnCheckedChangeListener
+            val userObject = User(userId, "", "", "", 0, "", "")
+
+            if (isChecked) {
+                userObject.enableComments(post.postId) { success, error ->
+                    if (!success) {
+                        Log.e("EnableComments", "Error: $error")
+                        holder.enableCommentsSwitch.isChecked = false // Revert switch
+                    }
+                }
+            } else {
+                userObject.disableComments(post.postId) { success, error ->
+                    if (!success) {
+                        Log.e("DisableComments", "Error: $error")
+                        holder.enableCommentsSwitch.isChecked = true // Revert switch
+                    }
+                }
+            }
         }
     }
 
