@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -31,6 +32,7 @@ class CommentActivity : AppCompatActivity() {
     private lateinit var menuAdapter: MenuAdapter
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
+    val db = FirebaseFirestore.getInstance()
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
@@ -42,6 +44,19 @@ class CommentActivity : AppCompatActivity() {
         // Get postId from intent
         postId = intent.getStringExtra("postId") ?: return
         groupName = intent.getStringExtra("groupName") ?: return
+
+        // display post information
+        val postUserName: TextView = findViewById(R.id.user_name)
+        val postText: TextView = findViewById(R.id.post_text)
+        db.collection("posts").document(postId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val username = document.getString("creatorName") ?: "Unknown User"
+                    val text = document.getString("text") ?: "No Content"
+                    postUserName.text = username
+                    postText.text = text
+                }
+            }
 
         // Set up RecyclerView
         commentsRecyclerView = findViewById(R.id.commentsRecyclerView)
