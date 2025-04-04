@@ -18,7 +18,6 @@ data class Event(
 )  {
 
     private val db = FirebaseFirestore.getInstance()
-    private val auth = FirebaseAuth.getInstance()
 
     fun createEvent() {
         val eventData = hashMapOf(
