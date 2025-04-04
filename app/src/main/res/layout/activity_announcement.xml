@@ -60,6 +60,32 @@
 
             </Toolbar>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="10dp"
+                    android:text="@string/announcements_text"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="30sp"/>
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/announcementsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="vertical"
+                android:padding="16dp"/>
+
         </LinearLayout>
 
         <com.google.android.material.navigation.NavigationView
