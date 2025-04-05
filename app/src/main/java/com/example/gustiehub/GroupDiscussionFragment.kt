@@ -53,13 +53,13 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
                 postsAdapter.updatePosts(updatedPosts)
             }
         }
-        // Listen for new posts
         val createPostButton = view.findViewById<ImageButton>(R.id.create_posts_button)
         fun newPostDialog(){
             val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.new_post_dialog, null)
             val editTextPost = dialogView.findViewById<EditText>(R.id.newPostContent)
             val buttonCancel = dialogView.findViewById<Button>(R.id.buttonCancel)
             val buttonConfirm = dialogView.findViewById<Button>(R.id.buttonConfirm)
+            val enableCommentsSwitch = dialogView.findViewById<Switch>(R.id.commentSwitch)
             val dialog = AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .setCancelable(true)
@@ -68,7 +68,9 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
                 dialog.dismiss()
             }
             buttonConfirm.setOnClickListener {
+                //switch to enable comments should be moved to the dialog box.
                 val postContent = editTextPost.text.toString()
+                val commentsEnabled = enableCommentsSwitch.isChecked
                 if (postContent.isNotEmpty()) {
                     val user = FirebaseAuth.getInstance().currentUser
                     //get user information from firebase instance
@@ -79,6 +81,66 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
                         //val userObject = GlobalData.userDict[userId]
                         if (userObject != null) {
                             userObject.createPost(username, groupName, postContent)
+                            val postRef = db.collection("posts")
+                                .whereEqualTo("creatorName", username)
+                                .whereEqualTo("group", groupName)
+                                .whereEqualTo("text", postContent)
+                                .limit(1)
+                            postRef.get()
+                                .addOnSuccessListener { querySnapshot ->
+                                    if (!querySnapshot.isEmpty) {
+                                        val postDocument = querySnapshot.documents[0]
+                                        val postID = postDocument.id
+                                        if (commentsEnabled) {
+                                            userObject.enableComments(postID) { success, error ->
+                                                if (success) {
+                                                    Toast.makeText(
+                                                        requireContext(),
+                                                        "Post Created with comments enabled",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                } else {
+                                                    Toast.makeText(
+                                                        requireContext(),
+                                                        "Failed to enable comments: $error",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                                dialog.dismiss()
+                                            }
+                                        } else {
+                                            userObject.disableComments(postID) { success, error ->
+                                                if (success) {
+                                                    Toast.makeText(
+                                                        requireContext(),
+                                                        "Post Created with comments disabled",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                } else {
+                                                    Toast.makeText(
+                                                        requireContext(),
+                                                        "Failed to disable comments: $error",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                                dialog.dismiss()
+                                            }
+                                        }
+                                    } else {
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Post not found",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                                .addOnFailureListener { e ->
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "Error finding post: ${e.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                         }
                         Toast.makeText(requireContext(), "Post Created", Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
