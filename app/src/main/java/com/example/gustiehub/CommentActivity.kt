@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -41,7 +42,7 @@ class CommentActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_comment)
 
-        // Get postId from intent
+        // get postId from intent
         postId = intent.getStringExtra("postId") ?: return
         groupName = intent.getStringExtra("groupName") ?: return
 
@@ -58,7 +59,7 @@ class CommentActivity : AppCompatActivity() {
                 }
             }
 
-        // Set up RecyclerView
+        // set up RecyclerView
         commentsRecyclerView = findViewById(R.id.commentsRecyclerView)
         commentsRecyclerView.layoutManager = LinearLayoutManager(this)
         commentAdapter = CommentAdapter(emptyList()) { commentId ->
@@ -70,6 +71,25 @@ class CommentActivity : AppCompatActivity() {
 
         // Fetch comments from Firestore
         fetchComments()
+
+        // get and set profile photo for comment submission
+        val profileImageView: ImageView = findViewById(R.id.profile_post)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // load profile picture if it exists
+                    val profilePictureUrl = document.getString("profilePicture")
+                    if (!profilePictureUrl.isNullOrEmpty()) {
+                        Glide.with(this)
+                            .load(profilePictureUrl)  // URL from Firestore
+                            .into(profileImageView)  // set the ImageView with the loaded image
+                    } else {
+                        // set a default image if no profile picture is available
+                        profileImageView.setImageResource(R.drawable.sample_profile_picture)
+                    }
+                }
+            }
 
         // Set onClickListener for comment submission
         commentButton.setOnClickListener {
