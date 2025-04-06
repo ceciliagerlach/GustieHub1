@@ -43,5 +43,6 @@
     <string name="new_post">New Post</string>
     <string name="post_content">Post Content</string>
     <string name="enable_comments">Enable Comments</string>
-    <string name="send_message">Send</string>"
+    <string name="send_message">Send</string>
+    <string name="direct_messaging">Chats</string>
 </resources>
