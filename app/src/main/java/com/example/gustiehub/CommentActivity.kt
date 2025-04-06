@@ -191,7 +191,7 @@ class CommentActivity : AppCompatActivity() {
                         val userId = commentMap["userId"] as? String ?: return@mapNotNull null
                         val text = commentMap["text"] as? String ?: return@mapNotNull null
                         val timestamp = commentMap["timestamp"] as? Timestamp
-                        Post.Comment(commentId, userId, text, timestamp)
+                        Comment(commentId, userId, text, timestamp)
                     }
 
                     commentAdapter.updateComments(comments)

@@ -121,7 +121,7 @@ object GlobalData {
         }
     }
 
-    fun getComments(postId: String, onCommentsUpdated: (List<Post.Comment>) -> Unit) {
+    fun getComments(postId: String, onCommentsUpdated: (List<Comment>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         db.collection("posts").document(postId).collection("comments")
             .orderBy("timestamp", Query.Direction.ASCENDING)
@@ -133,7 +133,7 @@ object GlobalData {
 
                 snapshots?.let {
                     val comments = it.documents.mapNotNull { doc ->
-                        doc.toObject(Post.Comment::class.java)
+                        doc.toObject(Comment::class.java)
                     }
                     onCommentsUpdated(comments)
                 }
