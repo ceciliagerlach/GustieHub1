@@ -17,8 +17,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class MessageActivity: AppCompatActivity() {
     private lateinit var menuRecyclerView: RecyclerView
+    private lateinit var chatRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
+    private lateinit var chatAdapter: ChatAdapter
     private val groupList = mutableListOf<Group>()
+    private val chatList = mutableListOf<Conversation>()
     private val filteredGroupList = mutableListOf<Group>()
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
@@ -88,6 +91,24 @@ class MessageActivity: AppCompatActivity() {
             val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
+
+        // list of conversations with other users
+        chatRecyclerView = findViewById(R.id.chatRecyclerView)
+        chatRecyclerView.layoutManager = LinearLayoutManager(this)
+        chatAdapter = ChatAdapter(chatList) { selectedChat ->
+            val intent = Intent(this, ChatActivity::class.java)
+            intent.putExtra("userName", selectedChat.nameOfUser)
+            startActivity(intent)
+        }
+        chatRecyclerView.adapter = chatAdapter
+        GlobalData.getConversations(userID){ updatedChats ->
+            runOnUiThread {
+                chatList.clear()
+                chatList.addAll(updatedChats)
+                chatAdapter.updateChats(updatedChats)
+            }
+        }
+
 
         // ******* Functions ************************************
         fun getOrCreateConversation(userId1: String, userId2: String, onComplete: (String?) -> Unit) {

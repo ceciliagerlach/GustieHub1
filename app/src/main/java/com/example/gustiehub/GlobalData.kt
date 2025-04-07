@@ -140,8 +140,6 @@ object GlobalData {
             }
     }
 
-
-
     fun getEvents(onEventsUpdated: (List<Event>) -> Unit) {
         println("FirestoreDebug getEvents() called")
         val db = FirebaseFirestore.getInstance()
@@ -167,6 +165,32 @@ object GlobalData {
                 onEventsUpdated(updatedPosts) // update views accordingly
             }
         }
+    }
+
+    fun getConversations(userId: String, onConversationsUpdated: (List<Conversation>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val conversationsRef = db.collection("conversations")
+            .orderBy("lastUpdated", Query.Direction.DESCENDING)
+         conversationsRef.addSnapshotListener { snapshots, e ->
+             if (e != null) {
+                 println("Error listening for chat changes: ${e.message}")
+                 return@addSnapshotListener
+             }
+
+             snapshots?.let {
+                 val updatedChats = mutableListOf<Conversation>()
+                 for (document in it.documents) {
+                     val chat = document.toObject(Conversation::class.java)
+                     if (chat != null) {
+                         if (userId in chat.userIds) {
+                             updatedChats.add(chat)
+                         }
+                     }
+                 }
+                 println("Fetched ${updatedChats.size} events from Firestore.")
+                 onConversationsUpdated(updatedChats) // update views accordingly
+             }
+         }
     }
 
     /**
