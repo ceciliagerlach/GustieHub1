@@ -2,7 +2,6 @@ package com.example.gustiehub
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -12,14 +11,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MessageActivity: AppCompatActivity() {
     private lateinit var menuRecyclerView: RecyclerView
-    private lateinit var chatRecyclerView: RecyclerView
+    private lateinit var messageRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
-    private lateinit var chatAdapter: ChatAdapter
+    private lateinit var messageAdapter: MessageAdapter
     private val groupList = mutableListOf<Group>()
     private val chatList = mutableListOf<Conversation>()
     private val filteredGroupList = mutableListOf<Group>()
@@ -93,19 +91,19 @@ class MessageActivity: AppCompatActivity() {
         }
 
         // list of conversations with other users
-        chatRecyclerView = findViewById(R.id.chatRecyclerView)
-        chatRecyclerView.layoutManager = LinearLayoutManager(this)
-        chatAdapter = ChatAdapter(chatList) { selectedChat ->
+        messageRecyclerView = findViewById(R.id.chatRecyclerView)
+        messageRecyclerView.layoutManager = LinearLayoutManager(this)
+        messageAdapter = MessageAdapter(chatList) { selectedChat ->
             val intent = Intent(this, ChatActivity::class.java)
-            intent.putExtra("userName", selectedChat.nameOfUser)
+            intent.putStringArrayListExtra("userIds", ArrayList(selectedChat.userIds))
             startActivity(intent)
         }
-        chatRecyclerView.adapter = chatAdapter
+        messageRecyclerView.adapter = messageAdapter
         GlobalData.getConversations(userID){ updatedChats ->
             runOnUiThread {
                 chatList.clear()
                 chatList.addAll(updatedChats)
-                chatAdapter.updateChats(updatedChats)
+                messageAdapter.updateChats(updatedChats)
             }
         }
 

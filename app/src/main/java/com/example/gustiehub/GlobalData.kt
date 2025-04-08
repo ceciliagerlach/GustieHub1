@@ -193,6 +193,29 @@ object GlobalData {
          }
     }
 
+    fun getMessages(conversationId: String, onMessagesUpdated: (List<Message>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val messagesRef = db.collection("conversations").document(conversationId)
+            .collection("messages")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+        messagesRef.addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                println("Error listening for message changes: ${e.message}")
+                return@addSnapshotListener
+            }
+            snapshots?.let {
+                val updatedMessages = mutableListOf<Message>()
+                for (document in it.documents) {
+                    val message = document.toObject(Message::class.java)
+                    if (message != null) {
+                        updatedMessages.add(message)
+                    }
+                }
+                onMessagesUpdated(updatedMessages) // update views accordingly
+            }
+        }
+    }
+
     /**
      * Converts a date string (e.g., "April 12") to a Date object and checks if it's today or in the future.
      */
