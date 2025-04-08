@@ -287,7 +287,7 @@ class MainActivity : AppCompatActivity() {
                 if (uri != null) {
                     Log.d("PhotoPicker", "Set image URI: $uri")
                     profileImageView?.setImageURI(uri)
-                    uploadImageToFirebase(uri, userId)
+                    uploadProfileImageToFirebase(uri, userId)
                 } else {
                     Log.d("PhotoPicker", "No media selected")
                 }
@@ -350,7 +350,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // actually stores the image on Firebase
-    private fun uploadImageToFirebase(uri: Uri?, userId: String) {
+    private fun uploadProfileImageToFirebase(uri: Uri?, userId: String) {
         if (uri != null) {
             // Create a reference to Firebase Storage
             val storageRef = FirebaseStorage.getInstance().reference

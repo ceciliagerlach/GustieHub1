@@ -20,6 +20,8 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class DashboardActivity : AppCompatActivity() {
     private lateinit var menuRecyclerView: RecyclerView
@@ -172,8 +174,7 @@ class DashboardActivity : AppCompatActivity() {
 
     private fun fetchRecentEvents(limit: Long) {
         db.collection("events")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(limit)   // only display the limit most recent
+            .orderBy("date", Query.Direction.ASCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 if (documents.isEmpty) {
@@ -182,7 +183,21 @@ class DashboardActivity : AppCompatActivity() {
                     Log.d("Dashboard", "Posts retrieved: ${documents.documents}")
                 }
 
-                val posts = documents.map { it.getString("text") ?: "No Content" }
+                // Filter only future or today's events
+                val futureEvents = documents
+                    .filter {
+                        val date = it.getString("date") ?: return@filter false
+                        GlobalData.isFutureOrToday(date)
+                    }
+                    .take(limit.toInt()) // only take up to `limit` events
+
+                // Map to display format
+                val posts = futureEvents.map {
+                    val eventName = it.getString("eventName") ?: "No Name"
+                    val date = it.getString("date") ?: "No Date"
+                    "$date -- $eventName"
+                }
+
                 runOnUiThread {
                     eventPreview1.text = posts.getOrNull(0) ?: "No events"
                     eventPreview2.text = posts.getOrNull(1) ?: "No events"
@@ -192,6 +207,7 @@ class DashboardActivity : AppCompatActivity() {
                 Log.e("Dashboard", "Error fetching posts", e)
             }
     }
+
 
     fun fetchRecentGroupPosts(userId: String, limit: Long) {
 
