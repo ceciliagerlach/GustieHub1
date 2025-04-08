@@ -2,6 +2,7 @@ package com.example.gustiehub
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -13,9 +14,12 @@ import com.google.firebase.auth.FirebaseAuth
 
 class AnnouncementsActivity : AppCompatActivity(){
     private lateinit var menuRecyclerView: RecyclerView
+    private lateinit var announcementRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
+    private lateinit var announcementAdapter: AnnouncementAdapter
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
+    private val announcementList = mutableListOf<Announcement>()
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
@@ -23,6 +27,19 @@ class AnnouncementsActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_announcement)
+
+        // list of announcements
+        announcementRecyclerView = findViewById<RecyclerView>(R.id.announcementsRecyclerView)
+        announcementRecyclerView.layoutManager = LinearLayoutManager(this)
+        announcementAdapter = AnnouncementAdapter(announcementList)
+        announcementRecyclerView.adapter = announcementAdapter
+        GlobalData.getAnnouncements { updatedAnnouncements ->
+            runOnUiThread {
+                announcementList.clear()
+                announcementList.addAll(updatedAnnouncements)
+                announcementAdapter.updateAnnouncements(updatedAnnouncements)
+            }
+        }
 
         // list of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""

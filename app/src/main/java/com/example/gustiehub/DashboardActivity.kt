@@ -161,7 +161,11 @@ class DashboardActivity : AppCompatActivity() {
                     Log.d("Dashboard", "Announcements retrieved: ${documents.documents}")
                 }
 
-                val announcements = documents.map { it.getString("text") ?: "No Content" }
+                val announcements = documents.map {
+                    val header = it.getString("header") ?: "No Content"
+                    val text = it.getString("text") ?: "No Content"
+                    "$header -- $text"
+                }
                 runOnUiThread {
                     announcementPreview1.text = announcements.getOrNull(0) ?: "No announcements"
                     announcementPreview2.text = announcements.getOrNull(1) ?: "No announcements"
@@ -187,7 +191,7 @@ class DashboardActivity : AppCompatActivity() {
                 val futureEvents = documents
                     .filter {
                         val date = it.getString("date") ?: return@filter false
-                        GlobalData.isFutureOrToday(date)
+                        GlobalData.isFuture(date)
                     }
                     .take(limit.toInt()) // only take up to `limit` events
 
