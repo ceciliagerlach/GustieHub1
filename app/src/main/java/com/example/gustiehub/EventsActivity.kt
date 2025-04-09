@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.SearchView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -113,6 +114,14 @@ class EventsActivity: AppCompatActivity() {
             val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
+
+        // invoking the search dialog
+        val searchButton: SearchView = findViewById(R.id.searchView)
+        searchButton.setOnClickListener {
+            onSearchRequested()
+            //TODO: somehow connect to search activity
+        }
+        //TODO: on dismiss listener too?
 
         //firebase function for listening from firebase
         listenForEventsUpdate()

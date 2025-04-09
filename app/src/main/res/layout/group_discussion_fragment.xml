@@ -7,30 +7,41 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingLeft="16dp"
+        android:paddingTop="16dp"
+        android:paddingRight="16dp">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="start"
-            android:paddingTop="16dp"
             android:text="@string/recent_posts"
             android:textColor="@color/black"
-            android:textStyle="bold"
             android:textSize="20sp"
-            android:paddingBottom="16dp"/>
+            android:textStyle="bold" />
 
         <ImageButton
             android:id="@+id/create_posts_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
+            android:layout_gravity="center_vertical"
+            android:layout_marginTop="-8dp"
             android:backgroundTint="@android:color/transparent"
-            android:src="@drawable/add_group_icon"
-            android:paddingTop="16dp"/>
+            android:src="@drawable/add_group_icon" />
 
     </LinearLayout>
+
+    <SearchView
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:queryHint="@string/search_hint"
+        android:iconifiedByDefault="true"
+        android:paddingRight="10dp"
+        android:paddingBottom="10dp"
+        android:layout_marginTop="-12dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/postsRecyclerView"

@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.SearchView
 import android.widget.Switch
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -53,6 +54,7 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
                 postsAdapter.updatePosts(updatedPosts)
             }
         }
+
         val createPostButton = view.findViewById<ImageButton>(R.id.create_posts_button)
         fun newPostDialog(){
             val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.new_post_dialog, null)

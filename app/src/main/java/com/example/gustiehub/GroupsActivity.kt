@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -146,6 +147,15 @@ class GroupsActivity : AppCompatActivity() {
             val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
+
+        // invoking the search dialog
+        val searchButton: SearchView = findViewById(R.id.searchView)
+        searchButton.setOnClickListener {
+            onSearchRequested()
+            //TODO: somehow connect to search activity
+        }
+        //TODO: on dismiss listener too?
+
     }
 
     private fun listenForGroupsUpdates() {

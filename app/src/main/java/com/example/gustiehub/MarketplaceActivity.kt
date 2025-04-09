@@ -3,6 +3,7 @@ package com.example.gustiehub
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
+import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -89,5 +90,14 @@ class MarketplaceActivity: AppCompatActivity(){
             val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
+
+        // invoking the search dialog
+        val searchButton: SearchView = findViewById(R.id.searchView)
+        searchButton.setOnClickListener {
+            onSearchRequested()
+            //TODO: somehow connect to search activity
+        }
+        //TODO: on dismiss listener too?
+
     }
 }
