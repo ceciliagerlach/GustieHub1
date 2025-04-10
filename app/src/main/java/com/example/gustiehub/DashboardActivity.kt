@@ -119,7 +119,6 @@ class DashboardActivity : AppCompatActivity() {
         val profileButton: ImageView = findViewById(R.id.profile)
         val menuButton: ImageView = findViewById(R.id.menu)
         val announcementsButton: Button = findViewById(R.id.see_all_announcements_button)
-        val activityButton: Button = findViewById(R.id.see_all_activity_button)
         val eventsButton: Button = findViewById(R.id.see_all_events_button)
 
         // handling clicks for buttons
@@ -137,10 +136,6 @@ class DashboardActivity : AppCompatActivity() {
         }
         announcementsButton.setOnClickListener {
             val intent = Intent(this, AnnouncementsActivity::class.java)
-            startActivity(intent)
-        }
-        activityButton.setOnClickListener {
-            val intent = Intent(this, SeeAllActivity::class.java)
             startActivity(intent)
         }
         eventsButton.setOnClickListener {
@@ -236,11 +231,13 @@ class DashboardActivity : AppCompatActivity() {
                 db.collection("posts")
                     .whereIn("group", joinedGroups) // filter by joined groups
                     .orderBy("timestamp", Query.Direction.DESCENDING) // get most recent posts
-                    .limit(2)
+                    .limit(3)
                     .get()
                     .addOnSuccessListener { postsSnapshot ->
                         val recentPosts = postsSnapshot.documents.mapNotNull { doc ->
-                            doc.getString("text")
+                            val group = doc.getString("group")
+                            val postText = doc.getString("text")
+                            "$group -- $postText"
                         }
 
                         Log.d("Firestore", "Fetched recent posts: $recentPosts")
@@ -261,10 +258,12 @@ class DashboardActivity : AppCompatActivity() {
     private fun updateActivityPreviews(posts: List<String>) {
         val activityPreview1 = findViewById<TextView>(R.id.activity_preview1)
         val activityPreview2 = findViewById<TextView>(R.id.activity_preview2)
+        val activityPreview3 = findViewById<TextView>(R.id.activity_preview3)
 
         activityPreview1.text = posts.getOrNull(0) ?: "No recent activity"
         activityPreview2.text = posts.getOrNull(1) ?: "No recent activity"
-        Log.d("UI", "Updated activity previews: ${activityPreview1.text}, ${activityPreview2.text}")
+        activityPreview3.text = posts.getOrNull(2) ?: "No recent activity"
+        Log.d("UI", "Updated activity previews: ${activityPreview1.text}, ${activityPreview2.text}, ${activityPreview3.text}")
     }
 
 }

@@ -202,7 +202,7 @@
                     android:ellipsize="end"
                     android:padding="10dp"
                     android:textSize="16sp"
-                    android:text="Space for two most recent notifications..."
+                    android:text="Space for second most recent notification..."
                     android:textColor="@color/black"/>
 
                 <View
@@ -210,17 +210,16 @@
                     android:layout_height="1dp"
                     android:background="@color/black"/>
 
-                <Button
-                    android:id="@+id/see_all_activity_button"
+                <TextView
+                    android:id="@+id/activity_preview3"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/see_all_text"
-                    android:backgroundTint="@color/gold"
-                    android:textColor="@color/black"
-                    android:paddingStart="10dp"
-                    android:paddingBottom="10dp"
+                    android:layout_height="match_parent"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:padding="10dp"
                     android:textSize="16sp"
-                    android:gravity="start"/>
+                    android:text="Space for three most recent notifications..."
+                    android:textColor="@color/black"/>
 
             </LinearLayout>
 
