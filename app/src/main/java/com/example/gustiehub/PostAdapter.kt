@@ -19,7 +19,6 @@ class PostAdapter(
         val usernameTextView: TextView = itemView.findViewById(R.id.user_name)
         val descriptionTextView: TextView = itemView.findViewById(R.id.post_text)
         val viewCommentsButton: TextView = itemView.findViewById(R.id.view_comments_button)
-        //val enableCommentsSwitch: Switch = itemView.findViewById(R.id.commentSwitch)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -35,13 +34,19 @@ class PostAdapter(
         holder.usernameTextView.setOnClickListener {
             onUsernameClick(post.creatorId)
         }
-        holder.viewCommentsButton.setOnClickListener {
-            Log.d("CommentButton", "Clicked, opening CommentActivity for postId: ${post.postId}")
-            val intent = Intent(holder.itemView.context, CommentActivity::class.java).apply {
-                putExtra("postId", post.postId)
-                putExtra("groupName", post.group)
+        if (post.commentsEnabled) {
+            holder.viewCommentsButton.visibility = View.VISIBLE
+            holder.viewCommentsButton.setOnClickListener {
+                Log.d("CommentButton", "Clicked, opening CommentActivity for postId: ${post.postId}")
+                val intent = Intent(holder.itemView.context, CommentActivity::class.java).apply {
+                    putExtra("postId", post.postId)
+                    putExtra("groupName", post.group)
+                }
+                holder.itemView.context.startActivity(intent)
             }
-            holder.itemView.context.startActivity(intent)
+        } else {
+            holder.viewCommentsButton.visibility = View.GONE
+            holder.viewCommentsButton.setOnClickListener(null)
         }
     }
 
