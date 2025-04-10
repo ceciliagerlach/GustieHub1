@@ -74,6 +74,8 @@ class ChatAdapter (
                         }
                     }
                 }
+        } else {
+            holder.profilePictureImageView.visibility = View.GONE
         }
 
     }
