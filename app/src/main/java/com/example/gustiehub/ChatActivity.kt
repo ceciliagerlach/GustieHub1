@@ -2,6 +2,9 @@ package com.example.gustiehub
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -9,7 +12,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ChatActivity:  AppCompatActivity() {
     private lateinit var menuRecyclerView: RecyclerView
@@ -22,6 +27,8 @@ class ChatActivity:  AppCompatActivity() {
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
+    private val TAG = "ChatActivity"
+    private lateinit var conversationId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,18 +97,77 @@ class ChatActivity:  AppCompatActivity() {
         }
 
         // list of messages with user
-        val conversationId = userIds?.joinToString("_").toString()
-        chatRecyclerView = findViewById(R.id.recycler_chat)
-        chatRecyclerView.layoutManager = LinearLayoutManager(this)
-        chatAdapter = ChatAdapter(messageList)
-        chatRecyclerView.adapter = chatAdapter
-        GlobalData.getMessages(conversationId){ updatedMessages ->
-            runOnUiThread {
-                messageList.clear()
-                messageList.addAll(updatedMessages)
-                chatAdapter.updateMessages(updatedMessages)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val otherUserId = userIds?.firstOrNull { it != userId } ?: return
+
+        GlobalData.getOrCreateConversation(userId, otherUserId) { conversationId ->
+            if (conversationId != null) {
+                chatRecyclerView = findViewById(R.id.recycler_chat)
+                chatRecyclerView.layoutManager = LinearLayoutManager(this)
+                chatAdapter = ChatAdapter(messageList)
+                chatRecyclerView.adapter = chatAdapter
+
+                GlobalData.getMessages(conversationId) { updatedMessages ->
+                    runOnUiThread {
+                        messageList.clear()
+                        messageList.addAll(updatedMessages)
+                        chatAdapter.updateMessages(updatedMessages)
+                    }
+                }
+            } else {
+                Log.w(TAG, "Could not find or create conversation")
             }
         }
 
+        // listener for sending a message
+        val sendButton = findViewById<Button>(R.id.send_button)
+        val messageInput = findViewById<EditText>(R.id.message_input)
+
+        sendButton.setOnClickListener {
+            val messageText = messageInput.text.toString().trim()
+            if (messageText.isNotEmpty()) {
+                val senderId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                val receiverId = getReceiverId(userIds) // Fetch the receiver's ID
+                sendMessage(conversationId, senderId, receiverId, messageText)
+                messageInput.setText("") // Clear input after sending
+            }
+        }
+
+
+
     }
+
+    private fun sendMessage(conversationId: String, senderId: String, receiverId: String, text: String) {
+        val db = FirebaseFirestore.getInstance()
+
+        // Create message instance
+        val message = hashMapOf(
+            "senderId" to senderId,
+            "receiverId" to receiverId,
+            "text" to text,
+            "timestamp" to Timestamp.now(),
+            "read" to false // Initially, the message is unread
+        )
+
+        // Add message to Firestore under the conversation
+        db.collection("conversations").document(conversationId)
+            .collection("messages")
+            .add(message)
+            .addOnSuccessListener {
+                // Update the last message in the conversation
+                db.collection("conversations").document(conversationId)
+                    .update(
+                        mapOf(
+                            "lastMessage" to text,
+                            "lastUpdated" to Timestamp.now()
+                        )
+                    )
+            }
+    }
+
+    private fun getReceiverId(userIds: ArrayList<String>): String {
+        return userIds.first { it != FirebaseAuth.getInstance().currentUser?.uid }
+    }
+
+
 }

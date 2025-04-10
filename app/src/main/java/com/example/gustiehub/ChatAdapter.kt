@@ -13,13 +13,20 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class ChatAdapter (
+class ChatAdapter(
     private var messageList: List<Message>
-) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
-    private val VIEW_TYPE_SENT = 1;
-    private val VIEW_TYPE_RECEIVED = 2;
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private val VIEW_TYPE_SENT = 1
+    private val VIEW_TYPE_RECEIVED = 2
+
+    inner class SentMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val messageTextView: TextView = itemView.findViewById(R.id.chat_message)
+        val messageDateTextView: TextView = itemView.findViewById(R.id.message_date)
+        val messageTimeTextView: TextView = itemView.findViewById(R.id.message_time)
+    }
+
+    inner class ReceivedMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val profilePictureImageView: ImageView = itemView.findViewById(R.id.profile_picture)
         val messageTextView: TextView = itemView.findViewById(R.id.chat_message)
         val messageDateTextView: TextView = itemView.findViewById(R.id.message_date)
@@ -35,35 +42,36 @@ class ChatAdapter (
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
-        if (viewType == VIEW_TYPE_SENT) {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.user_message_item, parent, false)
-            return ChatViewHolder(view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return if (viewType == VIEW_TYPE_SENT) {
+            SentMessageViewHolder(inflater.inflate(R.layout.user_message_item, parent, false))
         } else {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.other_message_item, parent, false)
-            return ChatViewHolder(view)
+            ReceivedMessageViewHolder(inflater.inflate(R.layout.other_message_item, parent, false))
         }
     }
 
-    override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = messageList[position]
-        holder.messageTextView.text = message.text
-        // format date correctly
-        val dateFormat = SimpleDateFormat("MMMM d", Locale.getDefault())
-        val formattedDate = dateFormat.format(message.timestamp.toDate())
-        holder.messageDateTextView.text = formattedDate
-        // format time correctly
-        val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-        val formattedTime = timeFormat.format(message.timestamp.toDate())
-        holder.messageTimeTextView.text = formattedTime
-        if (getItemViewType(position) == VIEW_TYPE_RECEIVED) {
-            // load profile picture of OTHER user in the conversation
-            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-            FirebaseFirestore.getInstance().collection("users").document(userId).get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
+        val formattedDate = SimpleDateFormat("MMMM d", Locale.getDefault()).format(message.timestamp.toDate())
+        val formattedTime = SimpleDateFormat("hh:mm a", Locale.getDefault()).format(message.timestamp.toDate())
+
+        when (holder) {
+            is SentMessageViewHolder -> {
+                holder.messageTextView.text = message.text
+                holder.messageDateTextView.text = formattedDate
+                holder.messageTimeTextView.text = formattedTime
+            }
+
+            is ReceivedMessageViewHolder -> {
+                holder.messageTextView.text = message.text
+                holder.messageDateTextView.text = formattedDate
+                holder.messageTimeTextView.text = formattedTime
+
+                // Load profile picture
+                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                FirebaseFirestore.getInstance().collection("users").document(userId).get()
+                    .addOnSuccessListener { document ->
                         val profilePictureUrl = document.getString("profilePicture")
                         if (!profilePictureUrl.isNullOrEmpty()) {
                             Glide.with(holder.itemView.context)
@@ -73,18 +81,14 @@ class ChatAdapter (
                             holder.profilePictureImageView.setImageResource(R.drawable.sample_profile_picture)
                         }
                     }
-                }
-        } else {
-            holder.profilePictureImageView.visibility = View.GONE
+            }
         }
-
     }
+
+    override fun getItemCount() = messageList.size
 
     fun updateMessages(newMessages: List<Message>) {
         messageList = newMessages
         notifyDataSetChanged()
     }
-
-    override fun getItemCount() = messageList.size
-
 }

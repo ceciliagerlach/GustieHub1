@@ -1,5 +1,6 @@
 package com.example.gustiehub
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import java.text.ParseException
@@ -191,6 +192,33 @@ object GlobalData {
                  onConversationsUpdated(updatedChats) // update views accordingly
              }
          }
+    }
+
+    fun getOrCreateConversation(userId1: String, userId2: String, onComplete: (String?) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("conversations")
+            .whereArrayContains("userIds", userId1)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val existing = snapshot.documents.firstOrNull { doc ->
+                    val userIds = doc.get("userIds") as? List<*>
+                    userIds?.contains(userId2) == true
+                }
+                if (existing != null) {
+                    onComplete(existing.id)
+                } else {
+                    val newConversation = hashMapOf(
+                        "userIds" to listOf(userId1, userId2),
+                        "lastMessage" to "",
+                        "lastUpdated" to Timestamp.now()
+                    )
+                    db.collection("conversations")
+                        .add(newConversation)
+                        .addOnSuccessListener { docRef -> onComplete(docRef.id) }
+                        .addOnFailureListener { onComplete(null) }
+                }
+            }
+            .addOnFailureListener { onComplete(null) }
     }
 
     fun getMessages(conversationId: String, onMessagesUpdated: (List<Message>) -> Unit) {
