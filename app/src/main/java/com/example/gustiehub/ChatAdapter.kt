@@ -19,13 +19,6 @@ class ChatAdapter (
     private val VIEW_TYPE_SENT = 1;
     private val VIEW_TYPE_RECEIVED = 2;
 
-    class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val profilePictureImageView: ImageView = itemView.findViewById(R.id.profile_picture)
-        val messageTextView: TextView = itemView.findViewById(R.id.chat_message)
-        val messageDateTextView: TextView = itemView.findViewById(R.id.message_date)
-        val messageTimeTextView: TextView = itemView.findViewById(R.id.message_time)
-    }
-
     override fun getItemViewType(position: Int): Int {
         val message = messageList[position]
         return if (message.senderId == FirebaseAuth.getInstance().currentUser?.uid) {
@@ -33,6 +26,13 @@ class ChatAdapter (
         } else {
             VIEW_TYPE_RECEIVED
         }
+    }
+
+    class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val profilePictureImageView: ImageView = itemView.findViewById(R.id.profile_picture)
+        val messageTextView: TextView = itemView.findViewById(R.id.chat_message)
+        val messageDateTextView: TextView = itemView.findViewById(R.id.message_date)
+        val messageTimeTextView: TextView = itemView.findViewById(R.id.message_time)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
