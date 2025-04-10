@@ -203,11 +203,21 @@ object GlobalData {
             val currentYear = Calendar.getInstance().get(Calendar.YEAR)
             val eventCalendar = Calendar.getInstance().apply {
                 time = eventDate!!
-                set(Calendar.YEAR, currentYear) 
+                set(Calendar.YEAR, currentYear)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            // normalizes both today and eventCalendar to midnight, so no issues with comparing time
+            val today = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
             }
 
-            val today = Calendar.getInstance()
-            !eventCalendar.after(today)
+            !eventCalendar.before(today) // return events today and in the future
         } catch (e: ParseException) {
             println("Error parsing date: $dateStr")
             false
