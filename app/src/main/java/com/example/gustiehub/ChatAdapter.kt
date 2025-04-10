@@ -83,6 +83,7 @@ class ChatAdapter(
                     }
             }
         }
+
     }
 
     override fun getItemCount() = messageList.size
