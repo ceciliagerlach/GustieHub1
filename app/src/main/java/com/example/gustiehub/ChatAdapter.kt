@@ -68,7 +68,7 @@ class ChatAdapter(
                 holder.messageDateTextView.text = formattedDate
                 holder.messageTimeTextView.text = formattedTime
 
-                // Load profile picture
+                // load profile picture
                 val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
                 FirebaseFirestore.getInstance().collection("users").document(userId).get()
                     .addOnSuccessListener { document ->

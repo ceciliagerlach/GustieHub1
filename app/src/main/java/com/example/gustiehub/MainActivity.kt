@@ -55,9 +55,9 @@ class MainActivity : AppCompatActivity() {
     private var onPhotoSelected: ((Uri?) -> Unit)? = null
     private lateinit var profilePictureURL: String
 
-    // Registers a photo picker activity launcher in single-select mode
+    // registers a photo picker activity launcher in single-select mode
     val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        // Callback is invoked after the user selects a media item or closes the
+        // callback is invoked after the user selects a media item or closes the
         // photo picker
         onPhotoSelected?.invoke(uri)
     }
@@ -67,7 +67,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         FirebaseApp.initializeApp(this) // Ensure Firebase is initialized
-//        GlobalData.initializeGlobalData()
 
         loginButton = findViewById(R.id.login_button)
 

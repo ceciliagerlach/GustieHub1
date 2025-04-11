@@ -21,6 +21,7 @@ class MessageActivity: AppCompatActivity() {
     private val groupList = mutableListOf<Group>()
     private val chatList = mutableListOf<Conversation>()
     private val filteredGroupList = mutableListOf<Group>()
+
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout

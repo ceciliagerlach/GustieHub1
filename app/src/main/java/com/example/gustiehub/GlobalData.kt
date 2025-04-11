@@ -194,6 +194,7 @@ object GlobalData {
          }
     }
 
+    // might be redundant?
     fun getOrCreateConversation(userId1: String, userId2: String, onComplete: (String?) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         db.collection("conversations")
