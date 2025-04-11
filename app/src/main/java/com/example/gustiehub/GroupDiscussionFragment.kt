@@ -47,13 +47,13 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
         )
         postsRecyclerView.adapter = postsAdapter
 
-        // Fetch and display posts
+        // fetch and display posts
         GlobalData.getPosts(groupName) { updatedPosts ->
             requireActivity().runOnUiThread {
                 postsAdapter.updatePosts(updatedPosts)
             }
         }
-        // Listen for new posts
+        // listen for new posts
         val createPostButton = view.findViewById<ImageButton>(R.id.create_posts_button)
         fun newPostDialog(){
             val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.new_post_dialog, null)
