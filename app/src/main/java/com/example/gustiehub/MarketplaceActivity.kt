@@ -171,6 +171,7 @@ class MarketplaceActivity: AppCompatActivity(){
             if (itemName.isNotEmpty() && price.isNotEmpty() && description.isNotEmpty() && selectedPhotoUri != null) {
                 uploadItemAndCreateListing(itemName, price, description)
                 Toast.makeText(this, "Item Created: $itemName", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
             } else {
                 Toast.makeText(this, "Please fill in all fields and select an image", Toast.LENGTH_LONG).show()
                 }
