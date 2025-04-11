@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
@@ -36,6 +37,9 @@ class CommentActivity : AppCompatActivity() {
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
+
+    private var isEditing = false
+    private var editingCommentId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,8 +87,15 @@ class CommentActivity : AppCompatActivity() {
         // Set up RecyclerView
         commentsRecyclerView = findViewById(R.id.commentsRecyclerView)
         commentsRecyclerView.layoutManager = LinearLayoutManager(this)
-        commentAdapter = CommentAdapter(emptyList()) { commentId ->
+        commentAdapter = CommentAdapter(emptyList()) { comment ->
             // Handle comment reporting if needed
+            
+            
+            // Handle editing a comment
+            commentInput.setText(comment.text)
+            commentInput.requestFocus()
+            isEditing = true
+            editingCommentId = comment.commentId
         }
         commentsRecyclerView.adapter = commentAdapter
         commentInput = findViewById(R.id.write_comment)
@@ -95,7 +106,37 @@ class CommentActivity : AppCompatActivity() {
 
         // Set onClickListener for comment submission
         commentButton.setOnClickListener {
-            submitComment()
+            val text = commentInput.text.toString().trim()
+            if (text.isNotEmpty()) {
+                if (isEditing && editingCommentId != null) {
+                    // UPDATE existing comment
+                    val postRef = db.collection("posts").document(postId)
+
+                    db.runTransaction { transaction ->
+                        val snapshot = transaction.get(postRef)
+                        val post = snapshot.toObject(Post::class.java)
+
+                        if (post != null) {
+                            val updatedComments = post.comments.map { comment ->
+                                if (comment.commentId == editingCommentId) {
+                                    comment.copy(text = text, timestamp = Timestamp.now())  // update text and timestamp
+                                } else {
+                                    comment
+                                }
+                            }
+
+                            transaction.update(postRef, "comments", updatedComments)
+                        }
+                    }.addOnSuccessListener {
+                        Toast.makeText(this, "Comment updated", Toast.LENGTH_SHORT).show()
+                    }.addOnFailureListener { e ->
+                        Log.e("CommentActivity", "Failed to update comment", e)
+                        Toast.makeText(this, "Failed to update comment", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    submitComment()
+                }
+            }
         }
 
         // set onClickListener for back button
@@ -230,6 +271,12 @@ class CommentActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun resetCommentInput() {
+        isEditing = false
+        editingCommentId = null
+        commentInput.text.clear()
     }
 
 }

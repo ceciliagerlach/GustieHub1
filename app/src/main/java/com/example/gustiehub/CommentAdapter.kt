@@ -10,7 +10,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class CommentAdapter(
     private var commentList: List<Post.Comment>,
-    private val onReportClick: (String) -> Unit // Callback for reporting a comment
+//    private val onReportClick: (String) -> Unit // Callback for reporting a comment
+    private val onCommentLongClick: (Post.Comment) -> Unit  // for editing a comment
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
     class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -40,8 +41,12 @@ class CommentAdapter(
             }
 
         holder.commentTextView.text = comment.text
-        holder.reportButton.setOnClickListener {
-            onReportClick(comment.commentId)
+//        holder.reportButton.setOnClickListener {
+//            onReportClick(comment.commentId)
+//        }
+        holder.commentTextView.setOnLongClickListener {
+            onCommentLongClick(comment)
+            true
         }
     }
 
