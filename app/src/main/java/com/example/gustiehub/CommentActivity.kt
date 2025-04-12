@@ -1,19 +1,16 @@
 package com.example.gustiehub
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,6 +31,7 @@ class CommentActivity : AppCompatActivity() {
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
     val db = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
@@ -87,16 +85,11 @@ class CommentActivity : AppCompatActivity() {
         // Set up RecyclerView
         commentsRecyclerView = findViewById(R.id.commentsRecyclerView)
         commentsRecyclerView.layoutManager = LinearLayoutManager(this)
-        commentAdapter = CommentAdapter(emptyList()) { comment ->
-            // Handle comment reporting if needed
-            
-            
-            // Handle editing a comment
-            commentInput.setText(comment.text)
-            commentInput.requestFocus()
-            isEditing = true
-            editingCommentId = comment.commentId
-        }
+        commentAdapter = CommentAdapter(emptyList(),
+            onEditClick = { comment -> showEditCommentDialog(comment) },
+            onDeleteClick = { comment -> removeComment(comment) }
+        )
+
         commentsRecyclerView.adapter = commentAdapter
         commentInput = findViewById(R.id.write_comment)
         commentButton = findViewById(R.id.comment_button)
@@ -109,30 +102,7 @@ class CommentActivity : AppCompatActivity() {
             val text = commentInput.text.toString().trim()
             if (text.isNotEmpty()) {
                 if (isEditing && editingCommentId != null) {
-                    // UPDATE existing comment
-                    val postRef = db.collection("posts").document(postId)
-
-                    db.runTransaction { transaction ->
-                        val snapshot = transaction.get(postRef)
-                        val post = snapshot.toObject(Post::class.java)
-
-                        if (post != null) {
-                            val updatedComments = post.comments.map { comment ->
-                                if (comment.commentId == editingCommentId) {
-                                    comment.copy(text = text, timestamp = Timestamp.now())  // update text and timestamp
-                                } else {
-                                    comment
-                                }
-                            }
-
-                            transaction.update(postRef, "comments", updatedComments)
-                        }
-                    }.addOnSuccessListener {
-                        Toast.makeText(this, "Comment updated", Toast.LENGTH_SHORT).show()
-                    }.addOnFailureListener { e ->
-                        Log.e("CommentActivity", "Failed to update comment", e)
-                        Toast.makeText(this, "Failed to update comment", Toast.LENGTH_SHORT).show()
-                    }
+                    editComment(text)
                 } else {
                     submitComment()
                 }
@@ -215,6 +185,88 @@ class CommentActivity : AppCompatActivity() {
         }
     }
 
+    // update comment
+    private fun editComment(text: String) {
+        val postRef = db.collection("posts").document(postId)
+
+        db.runTransaction { transaction ->
+            val snapshot = transaction.get(postRef)
+            val post = snapshot.toObject(Post::class.java)
+
+            if (post != null) {
+                val updatedComments = post.comments.map { comment ->
+                    if (comment.commentId == editingCommentId) {
+                        comment.copy(text = text, timestamp = Timestamp.now())  // update text and timestamp
+                    } else {
+                        comment
+                    }
+                }
+
+                transaction.update(postRef, "comments", updatedComments)
+            }
+        }.addOnSuccessListener {
+            Toast.makeText(this, "Comment updated", Toast.LENGTH_SHORT).show()
+        }.addOnFailureListener { e ->
+            Log.e("CommentActivity", "Failed to update comment", e)
+            Toast.makeText(this, "Failed to update comment", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // show dialog to edit comment
+    private fun showEditCommentDialog(comment: Post.Comment){
+        val editText = EditText(this)
+        editText.setText(comment.text)
+
+        AlertDialog.Builder(this)
+            .setTitle("Edit Comment")
+            .setView(editText)
+            .setPositiveButton("Save") { _, _ ->
+                val newText = editText.text.toString()
+                if (newText.isNotEmpty()) {
+                    updateComment(comment, newText)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun updateComment(comment: Post.Comment, newText: String) {
+        db.collection("posts").document(postId)
+            .get()
+            .addOnSuccessListener { document ->
+                val post = document.toObject(Post::class.java)
+                val updatedComments = post?.comments?.map {
+                    if (it.commentId == comment.commentId) it.copy(text = newText) else it
+                } ?: emptyList()
+
+                db.collection("posts").document(postId)
+                    .update("comments", updatedComments)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Comment updated", Toast.LENGTH_SHORT).show()
+                        fetchComments()
+                    }
+            }
+    }
+
+    private fun removeComment(comment: Post.Comment) {
+        db.collection("posts").document(postId)
+            .get()
+            .addOnSuccessListener { document ->
+                val post = document.toObject(Post::class.java)
+                val updatedComments = post?.comments?.filter { it.commentId != comment.commentId }
+                    ?: emptyList()
+
+                db.collection("posts").document(postId)
+                    .update("comments", updatedComments)
+                    .addOnSuccessListener {
+                        Toast.makeText(this, "Comment deleted", Toast.LENGTH_SHORT).show()
+                        fetchComments()
+                    }
+            }
+    }
+
+
+
     private fun fetchComments() {
         val db = FirebaseFirestore.getInstance()
         db.collection("posts").document(postId)
@@ -272,11 +324,4 @@ class CommentActivity : AppCompatActivity() {
             }
         }
     }
-
-    private fun resetCommentInput() {
-        isEditing = false
-        editingCommentId = null
-        commentInput.text.clear()
-    }
-
 }

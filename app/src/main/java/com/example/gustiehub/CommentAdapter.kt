@@ -11,13 +11,16 @@ import com.google.firebase.firestore.FirebaseFirestore
 class CommentAdapter(
     private var commentList: List<Post.Comment>,
 //    private val onReportClick: (String) -> Unit // Callback for reporting a comment
-    private val onCommentLongClick: (Post.Comment) -> Unit  // for editing a comment
+    private val onEditClick: (Post.Comment) -> Unit,
+    private val onDeleteClick: (Post.Comment) -> Unit
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
     class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val usernameTextView: TextView = itemView.findViewById(R.id.user_name)
         val commentTextView: TextView = itemView.findViewById(R.id.comment_text)
         val reportButton: ImageButton = itemView.findViewById(R.id.report_button)
+        val editButton: ImageButton = itemView.findViewById(R.id.edit_button)
+        val deleteButton: ImageButton = itemView.findViewById(R.id.delete_button)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
@@ -41,12 +44,16 @@ class CommentAdapter(
             }
 
         holder.commentTextView.text = comment.text
+
 //        holder.reportButton.setOnClickListener {
 //            onReportClick(comment.commentId)
 //        }
-        holder.commentTextView.setOnLongClickListener {
-            onCommentLongClick(comment)
-            true
+
+        holder.editButton.setOnClickListener {
+            onEditClick(comment)
+        }
+        holder.deleteButton.setOnClickListener {
+            onDeleteClick(comment)
         }
     }
 
