@@ -70,22 +70,24 @@
             android:padding="16dp"
             android:layout_marginTop="60dp">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_chat"
+                android:paddingTop="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constrainedHeight="true"
+                app:layout_constraintBottom_toTopOf="@+id/view"
+                app:layout_constraintTop_toBottomOf="@+id/back_button"
+                android:paddingBottom="16dp"/>
+
             <ImageButton
                 android:id="@+id/back_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/back_arrow_icon"
                 android:layout_gravity="start"
-                android:backgroundTint="@android:color/transparent"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_chat"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constrainedHeight="true"
-                app:layout_constraintBottom_toTopOf="@+id/view"
-                app:layout_constraintTop_toBottomOf="@+id/back_button"
-                android:paddingBottom="16dp"/>
+                android:background="@android:color/transparent"
+                android:clickable="true"/>
 
             <LinearLayout
                 android:id="@+id/view"

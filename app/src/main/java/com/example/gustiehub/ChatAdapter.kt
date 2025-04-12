@@ -59,13 +59,29 @@ class ChatAdapter(
         when (holder) {
             is SentMessageViewHolder -> {
                 holder.messageTextView.text = message.text
-                holder.messageDateTextView.text = formattedDate
+                // Check if the date is different from the previous message
+                val shouldShowDate = position == 0 ||
+                        SimpleDateFormat("MMMM d", Locale.getDefault()).format(messageList[position - 1].timestamp.toDate()) != formattedDate
+                if (shouldShowDate) {
+                    holder.messageDateTextView.visibility = View.VISIBLE
+                    holder.messageDateTextView.text = formattedDate
+                } else {
+                    holder.messageDateTextView.visibility = View.GONE
+                }
                 holder.messageTimeTextView.text = formattedTime
             }
 
             is ReceivedMessageViewHolder -> {
                 holder.messageTextView.text = message.text
-                holder.messageDateTextView.text = formattedDate
+                // Check if the date is different from the previous message
+                val shouldShowDate = position == 0 ||
+                        SimpleDateFormat("MMMM d", Locale.getDefault()).format(messageList[position - 1].timestamp.toDate()) != formattedDate
+                if (shouldShowDate) {
+                    holder.messageDateTextView.visibility = View.VISIBLE
+                    holder.messageDateTextView.text = formattedDate
+                } else {
+                    holder.messageDateTextView.visibility = View.GONE
+                }
                 holder.messageTimeTextView.text = formattedTime
 
                 // load profile picture
