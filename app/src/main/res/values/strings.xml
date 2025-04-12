@@ -43,9 +43,8 @@
     <string name="new_post">New Post</string>
     <string name="post_content">Post Content</string>
     <string name="enable_comments">Enable Comments</string>
-    <string name="make_listing">Make a Listing</string>
+    <string name="make_listing">List an Item</string>
     <string name="item_name">Item </string>
     <string name="price">Price</string>
     <string name="item_description">Item Description</string>
-    <string name="upload_a_picture">+ Upload a Picture</string>
 </resources>
