@@ -37,6 +37,10 @@ class ChatActivity:  AppCompatActivity() {
         setContentView(R.layout.activity_messaging2)
         var userIds = intent.getStringArrayListExtra("userIds")
 
+        if (userIds != null) {
+            conversationId = userIds.sorted().joinToString("_")
+        }
+
         // list of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
