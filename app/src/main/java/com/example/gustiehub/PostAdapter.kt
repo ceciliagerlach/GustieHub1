@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.Switch
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
@@ -12,13 +13,17 @@ import com.google.firebase.auth.FirebaseAuth
 
 class PostAdapter(
     private var postList: List<Post>,
-    private val onUsernameClick: (String) -> Unit
+    private val onUsernameClick: (String) -> Unit,
+    private val onEditClick: (Post) -> Unit,
+    private val onDeleteClick: (Post) -> Unit
 ) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val usernameTextView: TextView = itemView.findViewById(R.id.user_name)
         val descriptionTextView: TextView = itemView.findViewById(R.id.post_text)
         val viewCommentsButton: TextView = itemView.findViewById(R.id.view_comments_button)
+        val editButton: ImageButton = itemView.findViewById(R.id.edit_button)
+        val deleteButton: ImageButton = itemView.findViewById(R.id.delete_button)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -48,6 +53,8 @@ class PostAdapter(
             holder.viewCommentsButton.visibility = View.GONE
             holder.viewCommentsButton.setOnClickListener(null)
         }
+        holder.editButton.setOnClickListener { onEditClick(post) }
+        holder.deleteButton.setOnClickListener { onDeleteClick(post) }
     }
 
     fun updatePosts(newPosts: List<Post>) {

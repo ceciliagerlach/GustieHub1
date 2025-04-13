@@ -192,6 +192,47 @@ class User(private val _userId: String,
         }
     }
 
+    fun deletePost(postID: String, onComplete: (Boolean, String?) -> Unit){
+        val user = auth.currentUser
+        user?.let {
+            val userID = it.uid
+            val postRef = db.collection("posts").document(postID)
+            // only the original creator can delete the post
+            postRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val postCreatorId = document.getString("creatorId")
+                        if (postCreatorId != userID) {
+                            println("User $userID is not the creator of post $postID.")
+                            onComplete(false, "You do not have permission to delete this post.")
+                            return@addOnSuccessListener
+                        }
+
+                        postRef.delete()
+                            .addOnSuccessListener {
+                                println("Post $postID deleted successfully.")
+                                onComplete(true, null)
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error deleting post: ${e.message}")
+                                onComplete(false, e.message)
+                            }
+                    } else {
+                        println("Post $postID not found.")
+                        onComplete(false, "Post not found.")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    println("Error retrieving post: ${e.message}")
+                    onComplete(false, e.message)
+                }
+
+        } ?: run {
+            println("No authenticated user found.")
+            onComplete(false, "No authenticated user found.")
+        }
+    }
+
     fun commentOnPost(postID: String, comment: String, onComplete: (Boolean, String?) -> Unit) {
         val user = auth.currentUser
 

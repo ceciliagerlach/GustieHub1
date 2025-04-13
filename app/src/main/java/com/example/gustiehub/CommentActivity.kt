@@ -37,8 +37,6 @@ class CommentActivity : AppCompatActivity() {
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
 
-    private var editingCommentId: String? = null
-
     private val userObject = User(auth.currentUser?.uid ?: "", "", "", "", 0, "", "")
 
     override fun onCreate(savedInstanceState: Bundle?) {
