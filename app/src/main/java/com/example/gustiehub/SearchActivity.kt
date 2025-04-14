@@ -4,19 +4,45 @@ import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.firestore.FirebaseFirestore
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.LinearLayoutManager
 
-class SearchActivity: AppCompatActivity() {
+class SearchActivity : AppCompatActivity() {
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: EventsAdapter
+    private val searchResults = mutableListOf<Event>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-        // Verify the action and get the query
-        if (Intent.ACTION_SEARCH == intent.action) {
-            intent.getStringExtra(SearchManager.QUERY)?.also { query ->
-                doMySearch(query)
+        recyclerView = findViewById(R.id.recycler_search)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        adapter = EventsAdapter(searchResults)
+        recyclerView.adapter = adapter
+
+        val query = intent.getStringExtra("query") ?: ""
+        searchEvents(query)
+    }
+
+    private fun searchEvents(query: String) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("events")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                searchResults.clear()
+                for (doc in snapshot.documents) {
+                    val event = doc.toObject(Event::class.java)
+                    if (event != null && (
+                                event.eventName.contains(query, ignoreCase = true) ||
+                                        event.text.contains(query, ignoreCase = true)
+                                )) {
+                        searchResults.add(event)
+                    }
+                }
+                adapter.notifyDataSetChanged()
             }
-        }
     }
 
     //TODO: implement actual search functionality

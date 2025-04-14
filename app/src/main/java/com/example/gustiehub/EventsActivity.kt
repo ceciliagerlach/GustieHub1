@@ -1,9 +1,12 @@
 package com.example.gustiehub
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -25,8 +28,9 @@ class EventsActivity: AppCompatActivity() {
     private lateinit var menuAdapter: MenuAdapter
     private lateinit var eventsAdapter: EventsAdapter
     private val groupList = mutableListOf<Group>()
-    private val eventsList = mutableListOf<Event>()
+    private var eventsList = mutableListOf<Event>()
     private val filteredGroupList = mutableListOf<Group>()
+
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
@@ -116,19 +120,44 @@ class EventsActivity: AppCompatActivity() {
         }
 
         // invoking the search dialog
-        val searchButton: SearchView = findViewById(R.id.searchView)
-        searchButton.setOnClickListener {
-            onSearchRequested()
-            //TODO: somehow connect to search activity
-        }
-        //TODO: on dismiss listener too?
-
-        //firebase function for listening from firebase
+        val searchView: SearchView = findViewById(R.id.searchView)
         listenForEventsUpdate()
-        val createEventButton = findViewById<ImageButton>(R.id.create_events_button)
-        createEventButton.setOnClickListener {
-            NewEventsDialog()
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let {
+                    filterEvents(it) // filter events based on the query
+                }
+                hideKeyboard() // hide the keyboard after submitting the query
+                return true
+            }
+
+            @SuppressLint("ServiceCast")
+            fun hideKeyboard() {
+                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputMethodManager.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                // re-filter events based on new query text
+                filterEvents(newText.orEmpty())
+                return true
+            }
+        })
+    }
+
+    fun updateEvents(newEvents: List<Event>) {
+        eventsList.clear()
+        eventsList.addAll(newEvents)
+        eventsAdapter.notifyDataSetChanged()
+    }
+
+    fun filterEvents(query: String) {
+        val filteredList = eventsList.filter { event ->
+            event.eventName.contains(query, ignoreCase = true) ||
+                    event.location.contains(query, ignoreCase = true) ||
+                    event.text.contains(query, ignoreCase = true)
         }
+        eventsAdapter.updateEvents(filteredList)
     }
 
     private fun listenForEventsUpdate() {
@@ -138,14 +167,14 @@ class EventsActivity: AppCompatActivity() {
                     Toast.makeText(this, "Error fetching events", Toast.LENGTH_SHORT).show()
                     return@addSnapshotListener
                 }
-                eventsList.clear()
+                val updatedEvents = mutableListOf<Event>()
                 for (document in snapshot!!.documents) {
                     val event = document.toObject(Event::class.java)
                     if (event != null) {
-                        eventsList.add(event)
+                        updatedEvents.add(event)
                     }
                 }
-                eventsAdapter.notifyDataSetChanged()
+                updateEvents(updatedEvents)
             }
     }
 

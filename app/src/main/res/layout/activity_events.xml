@@ -93,7 +93,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:queryHint="@string/search_hint"
-                android:iconifiedByDefault="true"
+                android:iconifiedByDefault="false"
                 android:paddingRight="10dp"
                 android:paddingBottom="10dp"/>
 
