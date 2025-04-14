@@ -63,7 +63,7 @@ class EventsActivity: AppCompatActivity() {
             startActivity(intent)
         }
         menuRecyclerView.adapter = menuAdapter
-        GlobalData.getFilteredGroupList(userID){ updatedGroups ->
+        GlobalData.getFilteredGroupList(userID) { updatedGroups ->
             runOnUiThread {
                 groupList.clear()
                 groupList.addAll(updatedGroups)
@@ -80,17 +80,21 @@ class EventsActivity: AppCompatActivity() {
                     val intent = Intent(this, DashboardActivity::class.java)
                     startActivity(intent)
                 }
+
                 R.id.announcements -> {
                     val intent = Intent(this, AnnouncementsActivity::class.java)
                     startActivity(intent)
                 }
+
                 R.id.marketplace -> {
                     val intent = Intent(this, MarketplaceActivity::class.java)
                     startActivity(intent)
                 }
+
                 R.id.events -> {
                     drawerLayout.closeDrawer(GravityCompat.START)
                 }
+
                 R.id.groups -> {
                     val intent = Intent(this, GroupsActivity::class.java)
                     startActivity(intent)
@@ -119,45 +123,140 @@ class EventsActivity: AppCompatActivity() {
             startActivity(intent)
         }
 
+        // **********************************************************
+
         // invoking the search dialog
         val searchView: SearchView = findViewById(R.id.searchView)
+        val recyclerView: RecyclerView = findViewById(R.id.eventsRecyclerView)
         listenForEventsUpdate()
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let {
-                    filterEvents(it) // filter events based on the query
+
+        val searchHelper = SearchHelper(
+            context = this,
+            searchView = searchView,
+            recyclerView = recyclerView,
+            adapter = eventsAdapter,
+            dataList = eventsList,
+            filterFunction = ::filterEvents,
+            updateFunction = { filtered -> eventsAdapter.updateEvents(filtered) }
+        )
+//        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+//            override fun onQueryTextSubmit(query: String?): Boolean {
+//                query?.let {
+//                    filterEvents(it) // filter events based on the query
+//                }
+//                hideKeyboard() // hide the keyboard after submitting the query
+//                return true
+//            }
+//
+//            @SuppressLint("ServiceCast")
+//            fun hideKeyboard() {
+//                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+//                inputMethodManager.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
+//            }
+//
+//            override fun onQueryTextChange(newText: String?): Boolean {
+//                // re-filter events based on new query text
+//                filterEvents(newText.orEmpty())
+//                return true
+//            }
+//        })
+//    }
+//
+//    fun updateEvents(newEvents: List<Event>) {
+//        eventsList.clear()
+//        eventsList.addAll(newEvents)
+//        eventsAdapter.notifyDataSetChanged()
+//    }
+//
+//    fun filterEvents(query: String) {
+//        val filteredList = eventsList.filter { event ->
+//            event.eventName.contains(query, ignoreCase = true) ||
+//                    event.location.contains(query, ignoreCase = true) ||
+//                    event.text.contains(query, ignoreCase = true)
+//        }
+//        eventsAdapter.updateEvents(filteredList)
+//    }
+//
+//    private fun listenForEventsUpdate() {
+//        db.collection("events")
+//            .addSnapshotListener { snapshot, e ->
+//                if (e != null) {
+//                    Toast.makeText(this, "Error fetching events", Toast.LENGTH_SHORT).show()
+//                    return@addSnapshotListener
+//                }
+//                val updatedEvents = mutableListOf<Event>()
+//                for (document in snapshot!!.documents) {
+//                    val event = document.toObject(Event::class.java)
+//                    if (event != null) {
+//                        updatedEvents.add(event)
+//                    }
+//                }
+//                updateEvents(updatedEvents)
+//            }
+//    }
+
+        // *************************************************************
+
+        fun NewEventsDialog() {
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.new_event_dialog, null)
+            val editTextEventName = dialogView.findViewById<EditText>(R.id.newEventName)
+            val editTextEventDescription =
+                dialogView.findViewById<EditText>(R.id.newEventDescription)
+            val editTextEventLocation = dialogView.findViewById<EditText>(R.id.newEventLocation)
+            val editTextEventDate = dialogView.findViewById<EditText>(R.id.newEventDate)
+            val editTextEventTime = dialogView.findViewById<EditText>(R.id.newEventTime)
+            val editTextEventGroup = dialogView.findViewById<EditText>(R.id.newEventGroup)
+            val buttonCancel = dialogView.findViewById<Button>(R.id.buttonCancel)
+            val buttonConfirm = dialogView.findViewById<Button>(R.id.buttonConfirm)
+            val dialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(true)
+                .create()
+
+            buttonCancel.setOnClickListener {
+                dialog.dismiss()
+            }
+
+            buttonConfirm.setOnClickListener {
+                val eventName = editTextEventName.text.toString()
+                val eventDescription = editTextEventDescription.text.toString()
+                val eventLocation = editTextEventLocation.text.toString()
+                val eventDate = editTextEventDate.text.toString()
+                val eventTime = editTextEventTime.text.toString()
+                val eventGroup = editTextEventGroup.text.toString()
+                if (eventName.isNotEmpty()) {
+                    val user = FirebaseAuth.getInstance().currentUser
+                    if (user != null) {
+                        val userId = user.uid
+                        val event = Event(
+                            userId,
+                            eventName,
+                            eventGroup,
+                            eventDescription,
+                            eventTime,
+                            eventLocation,
+                            eventDate
+                        )
+                        event.createEvent()
+                        Toast.makeText(this, "Event Created: $eventName", Toast.LENGTH_SHORT).show()
+                        dialog.dismiss()
+                    } else {
+                        Toast.makeText(this, "User not authenticated", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    editTextEventName.error = "Event name cannot be empty"
                 }
-                hideKeyboard() // hide the keyboard after submitting the query
-                return true
             }
-
-            @SuppressLint("ServiceCast")
-            fun hideKeyboard() {
-                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                inputMethodManager.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                // re-filter events based on new query text
-                filterEvents(newText.orEmpty())
-                return true
-            }
-        })
+            dialog.show()
+        }
     }
 
-    fun updateEvents(newEvents: List<Event>) {
-        eventsList.clear()
-        eventsList.addAll(newEvents)
-        eventsAdapter.notifyDataSetChanged()
-    }
-
-    fun filterEvents(query: String) {
-        val filteredList = eventsList.filter { event ->
+    private fun filterEvents(query: String): List<Event> {
+        return eventsList.filter { event ->
             event.eventName.contains(query, ignoreCase = true) ||
                     event.location.contains(query, ignoreCase = true) ||
                     event.text.contains(query, ignoreCase = true)
         }
-        eventsAdapter.updateEvents(filteredList)
     }
 
     private fun listenForEventsUpdate() {
@@ -167,60 +266,15 @@ class EventsActivity: AppCompatActivity() {
                     Toast.makeText(this, "Error fetching events", Toast.LENGTH_SHORT).show()
                     return@addSnapshotListener
                 }
-                val updatedEvents = mutableListOf<Event>()
+                eventsList.clear()
                 for (document in snapshot!!.documents) {
                     val event = document.toObject(Event::class.java)
                     if (event != null) {
-                        updatedEvents.add(event)
+                        eventsList.add(event)
                     }
                 }
-                updateEvents(updatedEvents)
+                eventsAdapter.notifyDataSetChanged()
             }
     }
-
-
-    private fun NewEventsDialog() {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.new_event_dialog, null)
-        val editTextEventName = dialogView.findViewById<EditText>(R.id.newEventName)
-        val editTextEventDescription = dialogView.findViewById<EditText>(R.id.newEventDescription)
-        val editTextEventLocation = dialogView.findViewById<EditText>(R.id.newEventLocation)
-        val editTextEventDate = dialogView.findViewById<EditText>(R.id.newEventDate)
-        val editTextEventTime = dialogView.findViewById<EditText>(R.id.newEventTime)
-        val editTextEventGroup = dialogView.findViewById<EditText>(R.id.newEventGroup)
-        val buttonCancel = dialogView.findViewById<Button>(R.id.buttonCancel)
-        val buttonConfirm = dialogView.findViewById<Button>(R.id.buttonConfirm)
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setCancelable(true)
-            .create()
-
-        buttonCancel.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        buttonConfirm.setOnClickListener {
-            val eventName = editTextEventName.text.toString()
-            val eventDescription = editTextEventDescription.text.toString()
-            val eventLocation = editTextEventLocation.text.toString()
-            val eventDate = editTextEventDate.text.toString()
-            val eventTime = editTextEventTime.text.toString()
-            val eventGroup = editTextEventGroup.text.toString()
-            if (eventName.isNotEmpty()) {
-                val user = FirebaseAuth.getInstance().currentUser
-                if (user != null) {
-                    val userId = user.uid
-                    val event = Event(userId, eventName, eventGroup, eventDescription, eventTime, eventLocation, eventDate)
-                    event.createEvent()
-                    Toast.makeText(this, "Event Created: $eventName", Toast.LENGTH_SHORT).show()
-                    dialog.dismiss()
-                } else {
-                    Toast.makeText(this, "User not authenticated", Toast.LENGTH_LONG).show()
-                }
-            } else {
-                editTextEventName.error = "Event name cannot be empty"
-            }
-        }
-        dialog.show()
-    }
-
 }
+

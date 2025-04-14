@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -11,15 +12,24 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MarketplaceActivity: AppCompatActivity(){
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
+    private val db = FirebaseFirestore.getInstance()
+
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
+
+    // variables for searchbar
+    private lateinit var searchView: SearchView
+    private lateinit var recyclerView: RecyclerView
+//    private lateinit var marketplaceAdapter: MarketplaceAdapter
+//    private lateinit var marketplaceList: MutableList<MarketplaceItem>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,12 +102,50 @@ class MarketplaceActivity: AppCompatActivity(){
         }
 
         // invoking the search dialog
-        val searchButton: SearchView = findViewById(R.id.searchView)
-        searchButton.setOnClickListener {
-            onSearchRequested()
-            //TODO: somehow connect to search activity
-        }
-        //TODO: on dismiss listener too?
+        searchView = findViewById(R.id.searchView)
+        recyclerView = findViewById(R.id.marketplaceRecyclerView)
 
+        // TODO: Set up marketplaceAdapter and marketplaceItem to uncomment this searchbar code
+//        marketplaceAdapter = MarketplaceAdapter(marketplaceList)
+//        recyclerView.adapter = marketplaceAdapter
+//        listenForMarketplaceUpdates()
+//
+//        val searchHelper = SearchHelper(
+//            context = this,
+//            searchView = searchView,
+//            recyclerView = recyclerView,
+//            adapter = marketplaceAdapter,
+//            dataList = marketplaceList,
+//            filterFunction = ::filterMarketplaceItems  // Pass filter function to the helper
+//        )
     }
+
+//    // filters marketplace items based on the query
+//    private fun filterMarketplaceItems(query: String): List<MarketplaceItem> {
+//        return marketplaceList.filter { item ->
+//            item.itemName.contains(query, ignoreCase = true) ||
+//                    item.description.contains(query, ignoreCase = true)
+//        }
+//    }
+//
+//    private fun listenForMarketplaceUpdates() {
+//        fun listenForEventsUpdate() {
+//            db.collection("marketplace")
+//                .addSnapshotListener { snapshot, e ->
+//                    if (e != null) {
+//                        Toast.makeText(this, "Error fetching marketplace items", Toast.LENGTH_SHORT)
+//                            .show()
+//                        return@addSnapshotListener
+//                    }
+//                    val updatedMarketplaceItem = mutableListOf<MarketplaceItem>()
+//                    for (document in snapshot!!.documents) {
+//                        val marketplaceItem = document.toObject(MarketplaceItem::class.java)
+//                        if (marketplaceItem != null) {
+//                            updatedMarketplaceItems.add(marketplaceItem)
+//                        }
+//                    }
+//                    marketplaceAdapter.updateEvents(updatedMarketplaceItems)
+//                }
+//        }
+//    }
 }
