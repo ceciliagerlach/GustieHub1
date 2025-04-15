@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
@@ -19,8 +20,8 @@ class CommentAdapter(
         val usernameTextView: TextView = itemView.findViewById(R.id.user_name)
         val commentTextView: TextView = itemView.findViewById(R.id.comment_text)
         val reportButton: ImageButton = itemView.findViewById(R.id.report_button)
-        val editButton: ImageButton = itemView.findViewById(R.id.edit_button)
-        val deleteButton: ImageButton = itemView.findViewById(R.id.delete_button)
+        val moreButton: ImageButton = itemView.findViewById(R.id.menu_button)
+
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
@@ -49,11 +50,23 @@ class CommentAdapter(
 //            onReportClick(comment.commentId)
 //        }
 
-        holder.editButton.setOnClickListener {
-            onEditClick(comment)
-        }
-        holder.deleteButton.setOnClickListener {
-            onDeleteClick(comment)
+        holder.moreButton.setOnClickListener {
+            val popupMenu = PopupMenu(holder.itemView.context, holder.moreButton)
+            popupMenu.inflate(R.menu.edit_delete_options_menu)
+            popupMenu.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.menu_edit -> {
+                        onEditClick(comment)
+                        true
+                    }
+                    R.id.menu_delete -> {
+                        onDeleteClick(comment)
+                        true
+                    }
+                    else -> false
+                    }
+                }
+            popupMenu.show()
         }
     }
 
