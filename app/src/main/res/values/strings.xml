@@ -46,5 +46,6 @@
     <string name="send_message">Send</string>
     <string name="direct_messaging">Chats</string>
     <string name="new_chat">Start a New Chat</string>
+    <string name="search_user_hint">Search Users</string>
 
 </resources>

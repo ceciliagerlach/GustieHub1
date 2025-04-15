@@ -1,8 +1,10 @@
 package com.example.gustiehub
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -113,8 +115,10 @@ class MessageActivity: AppCompatActivity() {
         }
 
         // set up create new conversation button
-//        val createChatButton = findViewById<ImageButton>(R.id.create_chat_button)
-//        createChatButton.setOnClickListener {
+        val createChatButton = findViewById<ImageButton>(R.id.create_chat_button)
+        createChatButton.setOnClickListener {
+            NewChatDialog()
+        }
 //            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
 //
 //            // TODO: replace this with however we're getting the target user
@@ -204,6 +208,27 @@ class MessageActivity: AppCompatActivity() {
                 }
                 onComplete(messages)
             }
+    }
+
+    // dialog box to start chat with new user
+    private fun NewChatDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.new_chat_dialog, null)
+        val buttonCancel = dialogView.findViewById<Button>(R.id.buttonCancel)
+        val buttonConfirm = dialogView.findViewById<Button>(R.id.buttonConfirm)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        buttonCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+        buttonConfirm.setOnClickListener {
+//            //TODO
+//            val intent = Intent(this, ChatActivity::class.java)
+//            intent.putStringArrayListExtra("userIds", ArrayList(listOf(currentUserId, targetUserId)))
+//            startActivity(intent)
+        }
     }
 }
 
