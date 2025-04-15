@@ -23,8 +23,13 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
     private lateinit var postsRecyclerView: RecyclerView
     private lateinit var postsAdapter: PostAdapter
     private val postList = mutableListOf<Post>()
+    private val allPosts = mutableListOf<Post>()
 
     val db = FirebaseFirestore.getInstance()
+
+    // searchbar variables
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var searchView: SearchView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,11 +38,40 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
         return inflater.inflate(R.layout.group_discussion_fragment, container, false)
     }
 
+    private fun listenForPostUpdates() {
+        db.collection("posts")
+            .whereEqualTo("group", groupName)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Toast.makeText(requireContext(), "Error fetching posts", Toast.LENGTH_SHORT).show()
+                    return@addSnapshotListener
+                }
+                allPosts.clear()
+                postList.clear()
+                for (document in snapshot!!.documents) {
+                    val post = document.toObject(Post::class.java)
+                    if (post != null) {
+                        allPosts.add(post)
+                        postList.add(post)
+                    }
+                }
+                postsAdapter.notifyDataSetChanged()
+            }
+    }
+
+    private fun filterPosts(query: String): List<Post> {
+        return allPosts.filter { post ->
+            post.creatorName.contains(query, ignoreCase = true) ||
+                    post.text.contains(query, ignoreCase = true)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         postsRecyclerView = view.findViewById(R.id.postsRecyclerView)
         postsRecyclerView.layoutManager = LinearLayoutManager(activity)
+        searchView = view.findViewById(R.id.searchView)
 
         postsAdapter = PostAdapter(postList,
             onUsernameClick = { userId ->
@@ -48,14 +82,24 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
         )
         postsRecyclerView.adapter = postsAdapter
 
-        // Fetch and display posts
-        GlobalData.getPosts(groupName) { updatedPosts ->
-            requireActivity().runOnUiThread {
-                postsAdapter.updatePosts(updatedPosts)
-            }
-        }
+        listenForPostUpdates()
 
-        val createPostButton = view.findViewById<ImageButton>(R.id.create_posts_button)
+        FirebaseFirestore.getInstance()
+            .collection("posts")
+            .whereEqualTo("group", groupName)
+
+        val searchHelper = SearchHelper(
+            context = requireContext(),
+            searchView = searchView,
+            recyclerView = postsRecyclerView,
+            adapter = postsAdapter,
+            dataList = postList,
+            filterFunction = ::filterPosts,
+            updateFunction = { filtered -> postsAdapter.updatePosts(filtered) }
+        )
+
+        val createPostButton = view?.findViewById<ImageButton>(R.id.create_posts_button)
+
         fun newPostDialog(){
             val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.new_post_dialog, null)
             val editTextPost = dialogView.findViewById<EditText>(R.id.newPostContent)
@@ -160,9 +204,10 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
             }
             dialog.show()
         }
-        createPostButton.setOnClickListener {
-            newPostDialog()
+        if (createPostButton != null) {
+            createPostButton.setOnClickListener {
+                newPostDialog()
+            }
         }
-
     }
 }

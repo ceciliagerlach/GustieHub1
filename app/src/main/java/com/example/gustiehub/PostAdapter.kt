@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 
 class PostAdapter(
-    private var postList: List<Post>,
+    private var postList: MutableList<Post>,
     private val onUsernameClick: (String) -> Unit
 ) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
@@ -46,9 +46,11 @@ class PostAdapter(
     }
 
     fun updatePosts(newPosts: List<Post>) {
-        postList = newPosts
+        postList.clear()
+        postList.addAll(newPosts)
         notifyDataSetChanged()
     }
+
 
     override fun getItemCount() = postList.size
 }
