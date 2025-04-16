@@ -24,6 +24,9 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
     private val postList = mutableListOf<Post>()
 
     val db = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    val userId = auth.currentUser?.uid
+    private val userObject = User(userId.toString(), "", "", "", 0, "", "")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,7 +46,9 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
                 val intent = Intent(requireContext(), ProfileActivity::class.java)
                 intent.putExtra("userId", userId)
                 startActivity(intent)
-            }
+            },
+            onEditClick = { post -> showEditDialog(post) },
+            onDeleteClick = { post -> removePost(post) }
         )
         postsRecyclerView.adapter = postsAdapter
 
@@ -162,5 +167,50 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
             newPostDialog()
         }
 
+    }
+
+    private fun showEditDialog(post: Post) {
+        val editText = EditText(requireContext())
+        editText.setText(post.text)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Edit Post")
+            .setView(editText)
+            .setPositiveButton("Save") { _, _ ->
+                val newText = editText.text.toString().trim()
+                if (newText.isNotEmpty()) {
+                    userObject?.editPost(post.postId, newText) { success, errorMessage ->
+                        if (success) {
+                            Toast.makeText(requireContext(), "Post updated", Toast.LENGTH_SHORT).show()
+                            GlobalData.getPosts(groupName) { updatedPosts ->
+                                requireActivity().runOnUiThread {
+                                    postsAdapter.updatePosts(updatedPosts)
+                                }
+                            }
+                            } else {
+                                Log.e("Firestore", "Failed to add comment: $errorMessage")
+                            }
+                        }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+
+    }
+
+    private fun removePost(post: Post) {
+        userObject?.deletePost(post.postId){
+            success, errorMessage ->
+            if (success) {
+                Toast.makeText(requireContext(), "Post deleted", Toast.LENGTH_SHORT).show()
+                GlobalData.getPosts(groupName) { updatedPosts ->
+                    requireActivity().runOnUiThread {
+                        postsAdapter.updatePosts(updatedPosts)
+                    }
+                }
+                } else {
+                Log.e("Firestore", "Failed to add comment: $errorMessage")
+            }
+        }
     }
 }

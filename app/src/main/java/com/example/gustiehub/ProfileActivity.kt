@@ -3,8 +3,10 @@ package com.example.gustiehub
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -39,6 +41,15 @@ class ProfileActivity : AppCompatActivity() {
         val profileAreas: TextView = findViewById(R.id.areasOfStudy)
         val profileGroups: TextView = findViewById(R.id.joinedGroups)
         val profileImageView: ImageView = findViewById(R.id.profileImage)
+
+        // editing profile views
+        val editUserName: TextView = findViewById(R.id.editUserName)
+        val editClassYear: TextView = findViewById(R.id.editClassYear)
+        val editHomeState: TextView = findViewById(R.id.editHomeState)
+        val editAreasOfStudy: TextView = findViewById(R.id.editAreasOfStudy)
+        val btnEdit: Button = findViewById(R.id.btnEdit)
+        val btnCancel: Button = findViewById(R.id.btnCancel)
+        val btnSave: Button = findViewById(R.id.btnSave)
 
         // set user information
         if (receivingId.isNullOrEmpty()) {
@@ -100,6 +111,93 @@ class ProfileActivity : AppCompatActivity() {
                 }
             }
         }
+
+        //function for listening for edits and saves
+        btnEdit.setOnClickListener {
+            editUserName.text = profileName.text
+            editClassYear.text = profileYear.text
+            editHomeState.text = profileState.text
+            editAreasOfStudy.text = profileAreas.text
+
+            editUserName.visibility = TextView.VISIBLE
+            editClassYear.visibility = TextView.VISIBLE
+            editHomeState.visibility = TextView.VISIBLE
+            editAreasOfStudy.visibility = TextView.VISIBLE
+
+
+            profileName.visibility = TextView.GONE
+            profileYear.visibility = TextView.GONE
+            profileState.visibility = TextView.GONE
+            profileAreas.visibility = TextView.GONE
+
+            btnEdit.visibility = Button.GONE
+            btnCancel.visibility = Button.VISIBLE
+            btnSave.visibility = Button.VISIBLE
+
+        }
+
+        btnCancel.setOnClickListener {
+            editUserName.visibility = TextView.GONE
+            editClassYear.visibility = TextView.GONE
+            editHomeState.visibility = TextView.GONE
+            editAreasOfStudy.visibility = TextView.GONE
+
+            btnEdit.visibility = Button.VISIBLE
+            btnCancel.visibility = Button.GONE
+            btnSave.visibility = Button.GONE
+
+            profileName.visibility = TextView.VISIBLE
+            profileYear.visibility = TextView.VISIBLE
+            profileState.visibility = TextView.VISIBLE
+            profileAreas.visibility = TextView.VISIBLE
+
+        }
+
+        btnSave.setOnClickListener {
+            profileName.text = editUserName.text
+            profileYear.text = editClassYear.text
+            profileState.text = editHomeState.text
+            profileAreas.text = editAreasOfStudy.text
+
+            editUserName.visibility = TextView.GONE
+            editClassYear.visibility = TextView.GONE
+            editHomeState.visibility = TextView.GONE
+            editAreasOfStudy.visibility = TextView.GONE
+
+            btnEdit.visibility = Button.VISIBLE
+            btnCancel.visibility = Button.GONE
+            btnSave.visibility = Button.GONE
+
+            profileName.visibility = TextView.VISIBLE
+            profileYear.visibility = TextView.VISIBLE
+            profileState.visibility = TextView.VISIBLE
+            profileAreas.visibility = TextView.VISIBLE
+
+            // update user profile in Firestore
+            val user = FirebaseAuth.getInstance().currentUser
+            user?.let {
+                val userId = it.uid
+                val userRef = db.collection("users").document(userId)
+                userRef.update(
+                    mapOf(
+                        "fullName" to editUserName.text.toString(),
+                        "gradYear" to editClassYear.text.toString().toIntOrNull(),
+                        "homeState" to editHomeState.text.toString(),
+                        "areasOfStudy" to editAreasOfStudy.text.toString()
+                    )
+                )
+                    .addOnSuccessListener {
+                        Log.d("ProfileActivity", "User profile updated successfully")
+                        Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("ProfileActivity", "Error updating user profile", e)
+                        Toast.makeText(this, "Error updating profile", Toast.LENGTH_SHORT).show()
+                    }
+            }
+        }
+
+
 
         // list of groups in tab
         menuRecyclerView = findViewById(R.id.recycler_menu)

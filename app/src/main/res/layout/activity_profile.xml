@@ -85,7 +85,18 @@
                 android:text="User Full Name"
                 android:textColor="#A000"
                 android:textStyle="bold"
-                android:textSize="24sp"/>
+                android:textSize="24sp"
+                android:visibility="visible"/>
+
+            <EditText
+                android:id="@+id/editUserName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="User Full Name"
+                android:textSize="24sp"
+                android:textColor="#A000"
+                android:gravity="center"
+                android:visibility="gone"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -114,7 +125,18 @@
                     android:gravity="end"
                     android:text="2025"
                     android:textColor="#A000"
-                    android:textSize="18sp"/>
+                    android:textSize="18sp"
+                    android:visibility="visible" />
+
+                <EditText
+                    android:id="@+id/editClassYear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:layout_weight="1"
+                    android:text="Class Year"
+                    android:textSize="18sp"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
@@ -151,7 +173,18 @@
                     android:gravity="end"
                     android:text="MN"
                     android:textColor="#A000"
-                    android:textSize="18sp"/>
+                    android:textSize="18sp"
+                    android:visibility="visible" />
+
+                <EditText
+                    android:id="@+id/editHomeState"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:layout_weight="1"
+                    android:text="Home State"
+                    android:textSize="18sp"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
@@ -183,7 +216,19 @@
                 android:paddingLeft="32dp"
                 android:paddingRight="32dp"
                 android:paddingTop="8dp"
-                android:paddingBottom="16dp"/>
+                android:paddingBottom="16dp"
+                android:visibility="visible" />
+
+            <EditText
+                android:id="@+id/editAreasOfStudy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Area of Study"
+                android:gravity="start"
+                android:paddingLeft="32dp"
+                android:paddingTop="8dp"
+                android:textSize="18sp"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="330dp"
@@ -213,6 +258,43 @@
                 android:paddingLeft="32dp"
                 android:paddingRight="32dp"
                 android:paddingTop="8dp"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:layout_marginTop="24dp">
+
+                <Button
+                    android:id="@+id/btnEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/gold"
+                    android:textColor="@color/white"
+                    android:text="Edit" />
+
+                <Button
+                    android:id="@+id/btnCancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/gold"
+                    android:textColor="@color/white"
+                    android:text="Cancel"
+                    android:visibility="gone"
+                    android:layout_marginStart="16dp" />
+
+                <Button
+                    android:id="@+id/btnSave"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/gold"
+                    android:textColor="@color/white"
+                    android:text="Save"
+                    android:visibility="gone"
+                    android:layout_marginStart="16dp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
