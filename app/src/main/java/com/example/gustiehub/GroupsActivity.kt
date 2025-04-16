@@ -149,27 +149,6 @@ class GroupsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // invoking the search dialog
-//        val searchView = findViewById<SearchView>(R.id.searchView)
-//        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-//            override fun onQueryTextSubmit(query: String?): Boolean {
-//                return false
-//            }
-//            override fun onQueryTextChange(newText: String?): Boolean {
-//                val filtered = if (newText.isNullOrBlank()) {
-//                    groupList // show everything again
-//                } else {
-//                    groupList.filter {
-//                        it.name.contains(newText, ignoreCase = true)
-//                    }
-//                }
-//                filteredGroupList.clear()
-//                filteredGroupList.addAll(filtered)
-//                menuAdapter.notifyDataSetChanged()
-//                return true
-//            }
-//        })
-
         val searchView: SearchView = findViewById(R.id.searchView)
         val recyclerView: RecyclerView = findViewById(R.id.groupsRecyclerView)
         listenForGroupsUpdate()
