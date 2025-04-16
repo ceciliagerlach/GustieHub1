@@ -38,6 +38,9 @@ class MarketplaceActivity: AppCompatActivity(){
     private var selectedPhotoUri: Uri? = null
 
     val db = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
+    val userId = auth.currentUser?.uid
+    private val userObject = User(userId.toString(), "", "", "", 0, "", "")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,7 +48,18 @@ class MarketplaceActivity: AppCompatActivity(){
 
         val marketplaceRecyclerView = findViewById<RecyclerView>(R.id.marketplaceRecyclerView)
         marketplaceRecyclerView.layoutManager = LinearLayoutManager(this)
-        marketplaceAdapter = MarketplaceAdapter(itemList)
+        marketplaceAdapter = MarketplaceAdapter(itemList,
+            onReportClick = { item, context ->
+                val report = Report(
+                    reporterId = FirebaseAuth.getInstance().currentUser?.uid ?: "Unknown",
+                    contentType = "Item",
+                    contentId = item.itemID,
+                    reason = "Inappropriate listing")
+                userObject.sendReportEmail(context, report)
+
+            }
+
+        )
         marketplaceRecyclerView.adapter = marketplaceAdapter
 
         getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->

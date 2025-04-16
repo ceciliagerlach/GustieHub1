@@ -1,5 +1,6 @@
 package com.example.gustiehub
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,7 +10,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
 class MarketplaceAdapter(
-        private var itemList: List<Marketplace>
+        private var itemList: List<Marketplace>,
+        private val onReportClick: (Marketplace, Context) -> Unit
     ): RecyclerView.Adapter<MarketplaceAdapter.MarketViewHolder>() {
 
     class MarketViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -18,6 +20,7 @@ class MarketplaceAdapter(
         val priceTextView: TextView = itemView.findViewById(R.id.item_price)
         val descriptionTextView: TextView = itemView.findViewById(R.id.listing_description)
         val itemPhotoImageView: ImageView = itemView.findViewById(R.id.item_photo)
+        val reportButton: ImageView = itemView.findViewById(R.id.report_button)
 
     }
 
@@ -33,6 +36,10 @@ class MarketplaceAdapter(
         holder.itemNameTextView.text = item.itemName
         holder.priceTextView.text = item.price
         holder.descriptionTextView.text = item.description
+
+        holder.reportButton.setOnClickListener {
+            onReportClick(item, holder.itemView.context)
+        }
 
         Glide.with(holder.itemView.context)
             .load(item.itemPhotoURL)

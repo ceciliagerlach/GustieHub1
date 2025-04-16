@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -48,7 +49,17 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
                 startActivity(intent)
             },
             onEditClick = { post -> showEditDialog(post) },
-            onDeleteClick = { post -> removePost(post) }
+            onDeleteClick = { post -> removePost(post) },
+            onReportClick = { post, context ->
+                val report = Report(
+                    reporterId = FirebaseAuth.getInstance().currentUser?.uid ?: "Unknown",
+                    contentType = "Post",
+                    contentId = post.postId,
+                    reason = "Inappropriate comment",
+                    timestamp = Timestamp.now()
+                )
+                userObject.sendReportEmail(context, report)
+            }
         )
         postsRecyclerView.adapter = postsAdapter
 

@@ -1,5 +1,6 @@
 package com.example.gustiehub
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,9 +12,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class CommentAdapter(
     private var commentList: List<Post.Comment>,
-//    private val onReportClick: (String) -> Unit // Callback for reporting a comment
     private val onEditClick: (Post.Comment) -> Unit,
-    private val onDeleteClick: (Post.Comment) -> Unit
+    private val onDeleteClick: (Post.Comment) -> Unit,
+    private val onReportClick: (Post.Comment, Context) -> Unit
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
     class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -46,9 +47,9 @@ class CommentAdapter(
 
         holder.commentTextView.text = comment.text
 
-//        holder.reportButton.setOnClickListener {
-//            onReportClick(comment.commentId)
-//        }
+        holder.reportButton.setOnClickListener {
+            onReportClick(comment, holder.itemView.context)
+        }
 
         holder.moreButton.setOnClickListener {
             val popupMenu = PopupMenu(holder.itemView.context, holder.moreButton)

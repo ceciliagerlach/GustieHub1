@@ -1,5 +1,10 @@
 package com.example.gustiehub
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -437,7 +442,27 @@ class User(private val _userId: String,
             }
         } ?: onComplete(false, "User not authenticated.")
     }
-}
+
+        fun sendReportEmail(context: Context, report: Report) {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "message/rfc822"
+                putExtra(Intent.EXTRA_EMAIL, arrayOf("admin@example.com"))
+                putExtra(Intent.EXTRA_SUBJECT, "New Report: ${report.contentType}")
+                putExtra(
+                    Intent.EXTRA_TEXT, """
+                    New Report Submitted:
+                    
+                    Reporter ID: ${report.reporterId}
+                    Content Type: ${report.contentType}
+                    Content ID: ${report.contentId}
+                    Reason: ${report.reason}
+                    Timestamp: ${report.timestamp}
+                """.trimIndent()
+                            )
+            }
+            context.startActivity(Intent.createChooser(intent, "Send Email"))
+        }
+    }
 
 
 // TODO: Create function leaveGroup

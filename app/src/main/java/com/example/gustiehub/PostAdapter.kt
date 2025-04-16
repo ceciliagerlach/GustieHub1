@@ -1,5 +1,6 @@
 package com.example.gustiehub
 
+import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,7 +15,8 @@ class PostAdapter(
     private var postList: List<Post>,
     private val onUsernameClick: (String) -> Unit,
     private val onEditClick: (Post) -> Unit,
-    private val onDeleteClick: (Post) -> Unit
+    private val onDeleteClick: (Post) -> Unit,
+    private val onReportClick: (Post, Context) -> Unit
 ) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -22,6 +24,7 @@ class PostAdapter(
         val descriptionTextView: TextView = itemView.findViewById(R.id.post_text)
         val viewCommentsButton: TextView = itemView.findViewById(R.id.view_comments_button)
         val moreButton: ImageButton = itemView.findViewById(R.id.menu_button)
+        val reportButton: ImageButton = itemView.findViewById(R.id.report_button)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -50,6 +53,10 @@ class PostAdapter(
         } else {
             holder.viewCommentsButton.visibility = View.GONE
             holder.viewCommentsButton.setOnClickListener(null)
+        }
+
+        holder.reportButton.setOnClickListener {
+            onReportClick(post, holder.itemView.context)
         }
 
         holder.moreButton.setOnClickListener {

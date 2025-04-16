@@ -18,6 +18,8 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.Date
+import java.util.Locale
 
 class CommentActivity : AppCompatActivity() {
     private lateinit var commentsRecyclerView: RecyclerView
@@ -87,7 +89,17 @@ class CommentActivity : AppCompatActivity() {
         commentsRecyclerView.layoutManager = LinearLayoutManager(this)
         commentAdapter = CommentAdapter(emptyList(),
             onEditClick = { comment -> showEditCommentDialog(comment) },
-            onDeleteClick = { comment -> removeComment(comment) }
+            onDeleteClick = { comment -> removeComment(comment) },
+            onReportClick = { comment, context ->
+                val report = Report(
+                    reporterId = FirebaseAuth.getInstance().currentUser?.uid ?: "Unknown",
+                    contentType = "Comment",
+                    contentId = comment.commentId,
+                    reason = "Inappropriate comment",
+                    timestamp = Timestamp.now()
+                )
+                userObject.sendReportEmail(context, report)
+            }
         )
 
         commentsRecyclerView.adapter = commentAdapter
