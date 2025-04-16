@@ -139,62 +139,6 @@ class EventsActivity: AppCompatActivity() {
             filterFunction = ::filterEvents,
             updateFunction = { filtered -> eventsAdapter.updateEvents(filtered) }
         )
-//        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-//            override fun onQueryTextSubmit(query: String?): Boolean {
-//                query?.let {
-//                    filterEvents(it) // filter events based on the query
-//                }
-//                hideKeyboard() // hide the keyboard after submitting the query
-//                return true
-//            }
-//
-//            @SuppressLint("ServiceCast")
-//            fun hideKeyboard() {
-//                val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-//                inputMethodManager.hideSoftInputFromWindow(currentFocus?.windowToken, 0)
-//            }
-//
-//            override fun onQueryTextChange(newText: String?): Boolean {
-//                // re-filter events based on new query text
-//                filterEvents(newText.orEmpty())
-//                return true
-//            }
-//        })
-//    }
-//
-//    fun updateEvents(newEvents: List<Event>) {
-//        eventsList.clear()
-//        eventsList.addAll(newEvents)
-//        eventsAdapter.notifyDataSetChanged()
-//    }
-//
-//    fun filterEvents(query: String) {
-//        val filteredList = eventsList.filter { event ->
-//            event.eventName.contains(query, ignoreCase = true) ||
-//                    event.location.contains(query, ignoreCase = true) ||
-//                    event.text.contains(query, ignoreCase = true)
-//        }
-//        eventsAdapter.updateEvents(filteredList)
-//    }
-//
-//    private fun listenForEventsUpdate() {
-//        db.collection("events")
-//            .addSnapshotListener { snapshot, e ->
-//                if (e != null) {
-//                    Toast.makeText(this, "Error fetching events", Toast.LENGTH_SHORT).show()
-//                    return@addSnapshotListener
-//                }
-//                val updatedEvents = mutableListOf<Event>()
-//                for (document in snapshot!!.documents) {
-//                    val event = document.toObject(Event::class.java)
-//                    if (event != null) {
-//                        updatedEvents.add(event)
-//                    }
-//                }
-//                updateEvents(updatedEvents)
-//            }
-//    }
-
         // *************************************************************
 
         fun NewEventsDialog() {

@@ -35,9 +35,13 @@ class GroupsActivity : AppCompatActivity() {
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
     private val db = FirebaseFirestore.getInstance()
+
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
+
+    // variables for search
+    private val allGroupsList = mutableListOf<Group>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,7 +51,7 @@ class GroupsActivity : AppCompatActivity() {
         // display list of groups
         groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
         groupsRecyclerView.layoutManager = LinearLayoutManager(this)
-        groupsAdapter = GroupsAdapter(groupList, onItemClick = { selectedGroup ->
+        groupsAdapter = GroupsAdapter(filteredGroupList, onItemClick = { selectedGroup ->
             val intent = Intent(this, GroupsActivity::class.java)
             intent.putExtra("groupName", selectedGroup.name)
             startActivity(intent)
@@ -66,9 +70,6 @@ class GroupsActivity : AppCompatActivity() {
 
         } )
         groupsRecyclerView.adapter = groupsAdapter
-
-        //firebase function for listening from firebase
-        listenForGroupsUpdates()
 
         createGroupButton.setOnClickListener {
             NewGroupDialog()
@@ -149,32 +150,75 @@ class GroupsActivity : AppCompatActivity() {
         }
 
         // invoking the search dialog
-        val searchButton: SearchView = findViewById(R.id.searchView)
-        searchButton.setOnClickListener {
-            onSearchRequested()
-            //TODO: somehow connect to search activity
-        }
-        //TODO: on dismiss listener too?
+//        val searchView = findViewById<SearchView>(R.id.searchView)
+//        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+//            override fun onQueryTextSubmit(query: String?): Boolean {
+//                return false
+//            }
+//            override fun onQueryTextChange(newText: String?): Boolean {
+//                val filtered = if (newText.isNullOrBlank()) {
+//                    groupList // show everything again
+//                } else {
+//                    groupList.filter {
+//                        it.name.contains(newText, ignoreCase = true)
+//                    }
+//                }
+//                filteredGroupList.clear()
+//                filteredGroupList.addAll(filtered)
+//                menuAdapter.notifyDataSetChanged()
+//                return true
+//            }
+//        })
 
+        val searchView: SearchView = findViewById(R.id.searchView)
+        val recyclerView: RecyclerView = findViewById(R.id.groupsRecyclerView)
+        listenForGroupsUpdate()
+
+        val searchHelper = SearchHelper(
+            context = this,
+            searchView = searchView,
+            recyclerView = recyclerView,
+            adapter = groupsAdapter,
+            dataList = groupList, // master list
+            filterFunction = ::filterGroups,
+            updateFunction = { filtered ->
+                filteredGroupList.clear()
+                filteredGroupList.addAll(filtered)
+                groupsAdapter.notifyDataSetChanged()
+            }
+        )
     }
 
-    private fun listenForGroupsUpdates() {
+    private fun listenForGroupsUpdate() {
         db.collection("groups")
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
                     Toast.makeText(this, "Error fetching groups", Toast.LENGTH_SHORT).show()
                     return@addSnapshotListener
                 }
-                groupsNameList.clear()
+
+                groupList.clear()
+                filteredGroupList.clear()
+
                 for (document in snapshot!!.documents) {
-                    val groupName = document.getString("name")
-                    if (groupName != null) {
-                        groupsNameList.add(groupName)
+                    val group = document.toObject(Group::class.java)
+                    if (group != null && !group.name.contains("Class of") &&!group.name.equals("Gusties")) {
+                        groupList.add(group)
                     }
                 }
+
+                filteredGroupList.addAll(groupList)
                 groupsAdapter.notifyDataSetChanged()
             }
     }
+
+    private fun filterGroups(query: String): List<Group> {
+        if (query.isBlank()) return groupList
+        return groupList.filter { it.name.contains(query, ignoreCase = true) }
+    }
+
+
+
 
     private fun NewGroupDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.new_group_dialog, null)
