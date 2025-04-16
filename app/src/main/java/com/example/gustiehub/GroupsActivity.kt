@@ -149,6 +149,7 @@ class GroupsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        // search functionality
         val searchView: SearchView = findViewById(R.id.searchView)
         val recyclerView: RecyclerView = findViewById(R.id.groupsRecyclerView)
         listenForGroupsUpdate()

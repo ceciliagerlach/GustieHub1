@@ -38,6 +38,7 @@ class GroupsAdapter(
         }
     }
 
+    // refresh group list
     fun updateGroups(newGroups: List<Group>) {
         groupList.clear()
         groupList.addAll(newGroups)
