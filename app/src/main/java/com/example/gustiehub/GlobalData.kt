@@ -187,34 +187,44 @@ object GlobalData {
                 }
                 println("Fetched ${updatedAnnouncements.size} announcements from Firestore.")
                 onAnnouncementsUpdated(updatedAnnouncements) // update views accordingly
-    fun getConversations(userId: String, onConversationsUpdated: (List<Conversation>) -> Unit) {
+            }
+        }
+    }
+    fun getConversations(
+        userId: String,
+        onConversationsUpdated: (List<Conversation>) -> Unit
+    ) {
         val db = FirebaseFirestore.getInstance()
         val conversationsRef = db.collection("conversations")
             .orderBy("lastUpdated", Query.Direction.DESCENDING)
-         conversationsRef.addSnapshotListener { snapshots, e ->
-             if (e != null) {
-                 println("Error listening for chat changes: ${e.message}")
-                 return@addSnapshotListener
-             }
+        conversationsRef.addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                println("Error listening for chat changes: ${e.message}")
+                return@addSnapshotListener
+            }
 
-             snapshots?.let {
-                 val updatedChats = mutableListOf<Conversation>()
-                 for (document in it.documents) {
-                     val chat = document.toObject(Conversation::class.java)
-                     if (chat != null) {
-                         if (userId in chat.userIds) {
-                             updatedChats.add(chat)
-                         }
-                     }
-                 }
-                 println("Fetched ${updatedChats.size} events from Firestore.")
-                 onConversationsUpdated(updatedChats) // update views accordingly
-             }
-         }
+            snapshots?.let {
+                val updatedChats = mutableListOf<Conversation>()
+                for (document in it.documents) {
+                    val chat = document.toObject(Conversation::class.java)
+                    if (chat != null) {
+                        if (userId in chat.userIds) {
+                            updatedChats.add(chat)
+                        }
+                    }
+                }
+                println("Fetched ${updatedChats.size} events from Firestore.")
+                onConversationsUpdated(updatedChats) // update views accordingly
+            }
+        }
     }
 
     // might be redundant?
-    fun getOrCreateConversation(userId1: String, userId2: String, onComplete: (String?) -> Unit) {
+    fun getOrCreateConversation(
+        userId1: String,
+        userId2: String,
+        onComplete: (String?) -> Unit
+    ) {
         val db = FirebaseFirestore.getInstance()
         db.collection("conversations")
             .whereArrayContains("userIds", userId1)
@@ -240,8 +250,10 @@ object GlobalData {
             }
             .addOnFailureListener { onComplete(null) }
     }
-
-    fun getMessages(conversationId: String, onMessagesUpdated: (List<Message>) -> Unit) {
+    fun getMessages(
+        conversationId: String,
+        onMessagesUpdated: (List<Message>) -> Unit
+    ) {
         val db = FirebaseFirestore.getInstance()
         val messagesRef = db.collection("conversations").document(conversationId)
             .collection("messages")
@@ -263,27 +275,25 @@ object GlobalData {
             }
         }
     }
+     /**
+      * Converts a date string (e.g., "April 12") to a Date object and checks if it's today or in the future.
+      */
+     fun isFuture(dateStr: String): Boolean {
+         return try {
+             val dateFormat = SimpleDateFormat("MMMM d", Locale.ENGLISH)
+             val eventDate = dateFormat.parse(dateStr)
+              val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+             val eventCalendar = Calendar.getInstance().apply {
+                 time = eventDate!!
+                 set(Calendar.YEAR, currentYear)
+             }
 
-    /**
-     * Converts a date string (e.g., "April 12") to a Date object and checks if it's today or in the future.
-     */
-    fun isFuture(dateStr: String): Boolean {
-        return try {
-            val dateFormat = SimpleDateFormat("MMMM d", Locale.ENGLISH)
-            val eventDate = dateFormat.parse(dateStr)
-
-            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-            val eventCalendar = Calendar.getInstance().apply {
-                time = eventDate!!
-                set(Calendar.YEAR, currentYear) 
-            }
-
-            val today = Calendar.getInstance()
-            !eventCalendar.after(today)
-        } catch (e: ParseException) {
-            println("Error parsing date: $dateStr")
-            false
-        }
-    }
+             val today = Calendar.getInstance()
+             !eventCalendar.after(today)
+         } catch (e: ParseException) {
+             println("Error parsing date: $dateStr")
+             false
+         }
+     }
 
 }

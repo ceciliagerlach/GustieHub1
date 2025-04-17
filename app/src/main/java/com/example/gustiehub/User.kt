@@ -123,11 +123,11 @@ class User(private val _userId: String,
     }
 
     // Getters
-    fun getFirstName(): String =  firstName
-    fun getLastName(): String = lastName
-    fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
-    fun getGradYear(): Int = gradYear
-    fun getJoinedGroups(): List<String> = joinedGroups
+//    fun getFirstName(): String =  firstName
+//    fun getLastName(): String = lastName
+//    fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
+//    fun getGradYear(): Int = gradYear
+//    fun getJoinedGroups(): List<String> = joinedGroups
 
 
     fun createPost(name: String, group: String, text: String) {

@@ -98,7 +98,7 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
             updateFunction = { filtered -> postsAdapter.updatePosts(filtered) }
         )
 
-        val createPostButton = view?.findViewById<ImageButton>(R.id.create_posts_button)
+        val createPostButton = view.findViewById<ImageButton>(R.id.create_posts_button)
 
         // fetch and display posts
         GlobalData.getPosts(groupName) { updatedPosts ->
@@ -107,7 +107,6 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
             }
         }
         // listen for new posts
-        val createPostButton = view.findViewById<ImageButton>(R.id.create_posts_button)
         fun newPostDialog(){
             val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.new_post_dialog, null)
             val editTextPost = dialogView.findViewById<EditText>(R.id.newPostContent)

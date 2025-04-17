@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
@@ -213,6 +214,7 @@ class MessageActivity: AppCompatActivity() {
     // dialog box to start chat with new user
     private fun NewChatDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.new_chat_dialog, null)
+        val editTextSearchUser = dialogView.findViewById<EditText>(R.id.searchUser)
         val buttonCancel = dialogView.findViewById<Button>(R.id.buttonCancel)
         val buttonConfirm = dialogView.findViewById<Button>(R.id.buttonConfirm)
         val dialog = AlertDialog.Builder(this)
@@ -229,6 +231,7 @@ class MessageActivity: AppCompatActivity() {
 //            intent.putStringArrayListExtra("userIds", ArrayList(listOf(currentUserId, targetUserId)))
 //            startActivity(intent)
         }
+        dialog.show()
     }
 }
 
