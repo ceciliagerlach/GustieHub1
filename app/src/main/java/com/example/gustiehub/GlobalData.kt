@@ -1,5 +1,6 @@
 package com.example.gustiehub
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import java.text.ParseException
@@ -121,7 +122,7 @@ object GlobalData {
         }
     }
 
-    fun getComments(postId: String, onCommentsUpdated: (List<Post.Comment>) -> Unit) {
+    fun getComments(postId: String, onCommentsUpdated: (List<Comment>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         db.collection("posts").document(postId).collection("comments")
             .orderBy("timestamp", Query.Direction.ASCENDING)
@@ -133,14 +134,12 @@ object GlobalData {
 
                 snapshots?.let {
                     val comments = it.documents.mapNotNull { doc ->
-                        doc.toObject(Post.Comment::class.java)
+                        doc.toObject(Comment::class.java)
                     }
                     onCommentsUpdated(comments)
                 }
             }
     }
-
-
 
     fun getEvents(onEventsUpdated: (List<Event>) -> Unit) {
         println("FirestoreDebug getEvents() called")
@@ -188,6 +187,79 @@ object GlobalData {
                 }
                 println("Fetched ${updatedAnnouncements.size} announcements from Firestore.")
                 onAnnouncementsUpdated(updatedAnnouncements) // update views accordingly
+    fun getConversations(userId: String, onConversationsUpdated: (List<Conversation>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val conversationsRef = db.collection("conversations")
+            .orderBy("lastUpdated", Query.Direction.DESCENDING)
+         conversationsRef.addSnapshotListener { snapshots, e ->
+             if (e != null) {
+                 println("Error listening for chat changes: ${e.message}")
+                 return@addSnapshotListener
+             }
+
+             snapshots?.let {
+                 val updatedChats = mutableListOf<Conversation>()
+                 for (document in it.documents) {
+                     val chat = document.toObject(Conversation::class.java)
+                     if (chat != null) {
+                         if (userId in chat.userIds) {
+                             updatedChats.add(chat)
+                         }
+                     }
+                 }
+                 println("Fetched ${updatedChats.size} events from Firestore.")
+                 onConversationsUpdated(updatedChats) // update views accordingly
+             }
+         }
+    }
+
+    // might be redundant?
+    fun getOrCreateConversation(userId1: String, userId2: String, onComplete: (String?) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("conversations")
+            .whereArrayContains("userIds", userId1)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val existing = snapshot.documents.firstOrNull { doc ->
+                    val userIds = doc.get("userIds") as? List<*>
+                    userIds?.contains(userId2) == true
+                }
+                if (existing != null) {
+                    onComplete(existing.id)
+                } else {
+                    val newConversation = hashMapOf(
+                        "userIds" to listOf(userId1, userId2),
+                        "lastMessage" to "",
+                        "lastUpdated" to Timestamp.now()
+                    )
+                    db.collection("conversations")
+                        .add(newConversation)
+                        .addOnSuccessListener { docRef -> onComplete(docRef.id) }
+                        .addOnFailureListener { onComplete(null) }
+                }
+            }
+            .addOnFailureListener { onComplete(null) }
+    }
+
+    fun getMessages(conversationId: String, onMessagesUpdated: (List<Message>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val messagesRef = db.collection("conversations").document(conversationId)
+            .collection("messages")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+        messagesRef.addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                println("Error listening for message changes: ${e.message}")
+                return@addSnapshotListener
+            }
+            snapshots?.let {
+                val updatedMessages = mutableListOf<Message>()
+                for (document in it.documents) {
+                    val message = document.toObject(Message::class.java)
+                    if (message != null) {
+                        updatedMessages.add(message)
+                    }
+                }
+                onMessagesUpdated(updatedMessages) // update views accordingly
             }
         }
     }

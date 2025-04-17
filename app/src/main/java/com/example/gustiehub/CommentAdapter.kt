@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
 
 class CommentAdapter(
-    private var commentList: List<Post.Comment>,
+    private var commentList: List<Comment>,
     private val onReportClick: (String) -> Unit // Callback for reporting a comment
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
@@ -48,7 +48,7 @@ class CommentAdapter(
 
     override fun getItemCount() = commentList.size
 
-    fun updateComments(newComments: List<Post.Comment>) {
+    fun updateComments(newComments: List<Comment>) {
         commentList = newComments
         notifyDataSetChanged()
     }

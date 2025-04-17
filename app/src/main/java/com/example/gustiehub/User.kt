@@ -24,7 +24,7 @@ class User(private val _userId: String,
     private var homeState = _homeState
     private var areasOfStudy = _areasOfStudy
 
-    private lateinit var profilePicture: String // store as URL?
+    lateinit var profilePicture: String // store as URL?
     private var joinedGroups: MutableList<String> = mutableListOf("Gusties") // store group names
 
     private val db = FirebaseFirestore.getInstance()
