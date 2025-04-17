@@ -82,6 +82,7 @@ class ProfileActivity : AppCompatActivity() {
                     }
                 }
         } else {
+            btnEdit.visibility = Button.GONE
             db.collection("users").document(receivingId).get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
@@ -168,8 +169,6 @@ class ProfileActivity : AppCompatActivity() {
                     }
             }
         }
-
-
 
         // list of groups in tab
         menuRecyclerView = findViewById(R.id.recycler_menu)
