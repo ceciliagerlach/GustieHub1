@@ -33,11 +33,13 @@ class DashboardActivity : AppCompatActivity() {
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
 
-    // variables for displaying 2 most recent announcements + events
+    // variables for displaying 3 most recent announcements + events + posts
     private lateinit var announcementPreview1: TextView
     private lateinit var announcementPreview2: TextView
+    private lateinit var announcementPreview3: TextView
     private lateinit var eventPreview1: TextView
     private lateinit var eventPreview2: TextView
+    private lateinit var eventPreview3: TextView
 
     companion object {
         private const val EXTRA_EMAIL = "com.example.gustiehub.email"
@@ -56,14 +58,16 @@ class DashboardActivity : AppCompatActivity() {
         // initialize TextViews
         announcementPreview1 = findViewById(R.id.announcement_preview1)
         announcementPreview2 = findViewById(R.id.announcement_preview2)
+        announcementPreview3 = findViewById(R.id.announcement_preview3)
         eventPreview1 = findViewById(R.id.event_preview1)
         eventPreview2 = findViewById(R.id.event_preview2)
+        eventPreview3 = findViewById(R.id.event_preview3)
 
         // fetch two most recent of each
-        fetchRecentAnnouncements(2)
-        fetchRecentEvents(2)
+        fetchRecentAnnouncements(3)
+        fetchRecentEvents(3)
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        fetchRecentGroupPosts(userId,2)
+        fetchRecentGroupPosts(userId,3)
 
         val email = intent.getStringExtra(EXTRA_EMAIL)
 
@@ -164,6 +168,7 @@ class DashboardActivity : AppCompatActivity() {
                 runOnUiThread {
                     announcementPreview1.text = announcements.getOrNull(0) ?: "No announcements"
                     announcementPreview2.text = announcements.getOrNull(1) ?: "No announcements"
+                    announcementPreview3.text = announcements.getOrNull(2) ?: "No announcements"
                 }
             }
             .addOnFailureListener { e ->
@@ -200,6 +205,7 @@ class DashboardActivity : AppCompatActivity() {
                 runOnUiThread {
                     eventPreview1.text = posts.getOrNull(0) ?: "No events"
                     eventPreview2.text = posts.getOrNull(1) ?: "No events"
+                    eventPreview3.text = posts.getOrNull(2) ?: "No events"
                 }
             }
             .addOnFailureListener { e ->

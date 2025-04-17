@@ -128,7 +128,23 @@
                     android:ellipsize="end"
                     android:padding="10dp"
                     android:textSize="16sp"
-                    android:text="Space for two most recent announcements..."
+                    android:text="Space for second most recent announcement..."
+                    android:textColor="@color/black"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/black"/>
+
+                <TextView
+                    android:id="@+id/announcement_preview3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:padding="10dp"
+                    android:textSize="16sp"
+                    android:text="Space for three most recent announcements..."
                     android:textColor="@color/black"/>
 
                 <View
@@ -144,7 +160,6 @@
                     android:backgroundTint="@color/gold"
                     android:textColor="@color/black"
                     android:paddingStart="10dp"
-                    android:paddingBottom="10dp"
                     android:textSize="16sp"
                     android:gravity="start"/>
 
@@ -276,7 +291,23 @@
                     android:ellipsize="end"
                     android:padding="10dp"
                     android:textSize="16sp"
-                    android:text="Space for two upcoming events..."
+                    android:text="Space for second upcoming event..."
+                    android:textColor="@color/black"/>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/black"/>
+
+                <TextView
+                    android:id="@+id/event_preview3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:padding="10dp"
+                    android:textSize="16sp"
+                    android:text="Space for three upcoming events..."
                     android:textColor="@color/black"/>
 
                 <View
@@ -292,7 +323,6 @@
                     android:backgroundTint="@color/gold"
                     android:textColor="@color/black"
                     android:paddingStart="10dp"
-                    android:paddingBottom="10dp"
                     android:textSize="16sp"
                     android:gravity="start"/>
 
