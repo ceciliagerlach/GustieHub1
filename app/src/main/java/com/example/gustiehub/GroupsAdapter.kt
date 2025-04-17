@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class GroupsAdapter(
-    private var groupList: List<Group>,
+    private var groupList: MutableList<Group>,
     private val onItemClick: (Group) -> Unit,
     //parameter for join group listener function
     private val onJoinGroupClick: (Group) -> Unit
@@ -38,10 +38,13 @@ class GroupsAdapter(
         }
     }
 
+    // refresh group list
     fun updateGroups(newGroups: List<Group>) {
-        groupList = newGroups
+        groupList.clear()
+        groupList.addAll(newGroups)
         notifyDataSetChanged()
     }
+
 
     override fun getItemCount() = groupList.size
 }

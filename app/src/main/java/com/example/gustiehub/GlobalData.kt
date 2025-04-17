@@ -158,7 +158,7 @@ object GlobalData {
 
                 for (document in it.documents) {
                     val event = document.toObject(Event::class.java)
-                    if (event != null && isFutureOrToday(event.date)) {
+                    if (event != null && isFuture(event.date)) {
                             updatedPosts.add(event)
                     }
                 }
@@ -168,6 +168,25 @@ object GlobalData {
         }
     }
 
+    fun getAnnouncements(onAnnouncementsUpdated: (List<Announcement>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val announcementsRef = db.collection("announcements")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+        announcementsRef.addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                println("Error listening for announcement changes: ${e.message}")
+                return@addSnapshotListener
+            }
+            snapshots?.let {
+                val updatedAnnouncements = mutableListOf<Announcement>()
+                for (document in it.documents) {
+                    val announcement = document.toObject(Announcement::class.java)
+                    if (announcement != null) {
+                        updatedAnnouncements.add(announcement)
+                    }
+                }
+                println("Fetched ${updatedAnnouncements.size} announcements from Firestore.")
+                onAnnouncementsUpdated(updatedAnnouncements) // update views accordingly
     fun getConversations(userId: String, onConversationsUpdated: (List<Conversation>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val conversationsRef = db.collection("conversations")
@@ -248,7 +267,7 @@ object GlobalData {
     /**
      * Converts a date string (e.g., "April 12") to a Date object and checks if it's today or in the future.
      */
-    fun isFutureOrToday(dateStr: String): Boolean {
+    fun isFuture(dateStr: String): Boolean {
         return try {
             val dateFormat = SimpleDateFormat("MMMM d", Locale.ENGLISH)
             val eventDate = dateFormat.parse(dateStr)
@@ -260,7 +279,7 @@ object GlobalData {
             }
 
             val today = Calendar.getInstance()
-            !eventCalendar.before(today)
+            !eventCalendar.after(today)
         } catch (e: ParseException) {
             println("Error parsing date: $dateStr")
             false

@@ -20,12 +20,15 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class DashboardActivity : AppCompatActivity() {
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
+    private val db = FirebaseFirestore.getInstance()
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
@@ -59,6 +62,8 @@ class DashboardActivity : AppCompatActivity() {
         // fetch two most recent of each
         fetchRecentAnnouncements(2)
         fetchRecentEvents(2)
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        fetchRecentGroupPosts(userId,2)
 
         val email = intent.getStringExtra(EXTRA_EMAIL)
 
@@ -109,7 +114,7 @@ class DashboardActivity : AppCompatActivity() {
             true
         }
 
-        //initialize buttons reference
+        // initialize buttons reference
         val messageButton: ImageView = findViewById(R.id.messaging)
         val profileButton: ImageView = findViewById(R.id.profile)
         val menuButton: ImageView = findViewById(R.id.menu)
@@ -117,7 +122,7 @@ class DashboardActivity : AppCompatActivity() {
         val activityButton: Button = findViewById(R.id.see_all_activity_button)
         val eventsButton: Button = findViewById(R.id.see_all_events_button)
 
-        //handling clicks for buttons
+        // handling clicks for buttons
         messageButton.setOnClickListener {
             val intent = Intent(this, MessageActivity::class.java)
             startActivity(intent)
@@ -145,7 +150,6 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun fetchRecentAnnouncements(limit: Long) {
-        val db = FirebaseFirestore.getInstance()
         db.collection("announcements")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .limit(limit)   // only display the limit most recent
@@ -157,7 +161,11 @@ class DashboardActivity : AppCompatActivity() {
                     Log.d("Dashboard", "Announcements retrieved: ${documents.documents}")
                 }
 
-                val announcements = documents.map { it.getString("text") ?: "No Content" }
+                val announcements = documents.map {
+                    val header = it.getString("header") ?: "No Content"
+                    val text = it.getString("text") ?: "No Content"
+                    "$header -- $text"
+                }
                 runOnUiThread {
                     announcementPreview1.text = announcements.getOrNull(0) ?: "No announcements"
                     announcementPreview2.text = announcements.getOrNull(1) ?: "No announcements"
@@ -169,10 +177,8 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun fetchRecentEvents(limit: Long) {
-        val db = FirebaseFirestore.getInstance()
         db.collection("events")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(limit)   // only display the limit most recent
+            .orderBy("date", Query.Direction.ASCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 if (documents.isEmpty) {
@@ -181,7 +187,21 @@ class DashboardActivity : AppCompatActivity() {
                     Log.d("Dashboard", "Posts retrieved: ${documents.documents}")
                 }
 
-                val posts = documents.map { it.getString("text") ?: "No Content" }
+                // Filter only future or today's events
+                val futureEvents = documents
+                    .filter {
+                        val date = it.getString("date") ?: return@filter false
+                        GlobalData.isFuture(date)
+                    }
+                    .take(limit.toInt()) // only take up to `limit` events
+
+                // Map to display format
+                val posts = futureEvents.map {
+                    val eventName = it.getString("eventName") ?: "No Name"
+                    val date = it.getString("date") ?: "No Date"
+                    "$date -- $eventName"
+                }
+
                 runOnUiThread {
                     eventPreview1.text = posts.getOrNull(0) ?: "No events"
                     eventPreview2.text = posts.getOrNull(1) ?: "No events"
@@ -191,4 +211,60 @@ class DashboardActivity : AppCompatActivity() {
                 Log.e("Dashboard", "Error fetching posts", e)
             }
     }
+
+
+    fun fetchRecentGroupPosts(userId: String, limit: Long) {
+
+        // get groups the user has joined
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                val joinedGroups = document.get("joinedGroups") as? List<String> ?: emptyList()
+                Log.d("Firestore", "User's joined groups: $joinedGroups")
+
+                if (joinedGroups.isEmpty()) {
+                    Log.d("Firestore", "User has not joined any groups.")
+                    updateActivityPreviews(emptyList())
+                    return@addOnSuccessListener
+                }
+
+                // if user is in more than 10 groups, handle queries in batches
+                val groupsBatch = if (joinedGroups.size > 10) joinedGroups.take(10) else joinedGroups
+
+                Log.d("Firestore", "Fetching posts from groups: $groupsBatch")
+
+                // fetch posts from these groups
+                db.collection("posts")
+                    .whereIn("group", joinedGroups) // filter by joined groups
+                    .orderBy("timestamp", Query.Direction.DESCENDING) // get most recent posts
+                    .limit(2)
+                    .get()
+                    .addOnSuccessListener { postsSnapshot ->
+                        val recentPosts = postsSnapshot.documents.mapNotNull { doc ->
+                            doc.getString("text")
+                        }
+
+                        Log.d("Firestore", "Fetched recent posts: $recentPosts")
+                        updateActivityPreviews(recentPosts)
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("Firestore", "Error fetching posts", e)
+                        updateActivityPreviews(emptyList())
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.e("Firestore", "Error fetching user joined groups", e)
+                updateActivityPreviews(emptyList())
+            }
+    }
+
+    // updates the UI with posts or "No recent activity" if none found
+    private fun updateActivityPreviews(posts: List<String>) {
+        val activityPreview1 = findViewById<TextView>(R.id.activity_preview1)
+        val activityPreview2 = findViewById<TextView>(R.id.activity_preview2)
+
+        activityPreview1.text = posts.getOrNull(0) ?: "No recent activity"
+        activityPreview2.text = posts.getOrNull(1) ?: "No recent activity"
+        Log.d("UI", "Updated activity previews: ${activityPreview1.text}, ${activityPreview2.text}")
+    }
+
 }

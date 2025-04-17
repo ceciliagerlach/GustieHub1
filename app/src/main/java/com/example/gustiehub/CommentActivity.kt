@@ -45,19 +45,41 @@ class CommentActivity : AppCompatActivity() {
         // get postId from intent
         postId = intent.getStringExtra("postId") ?: return
         groupName = intent.getStringExtra("groupName") ?: return
+        commentInput = findViewById(R.id.write_comment)
+        commentButton = findViewById(R.id.comment_button)
 
         // display post information
         val postUserName: TextView = findViewById(R.id.user_name)
         val postText: TextView = findViewById(R.id.post_text)
+//        db.collection("posts").document(postId).get()
+//            .addOnSuccessListener { document ->
+//                if (document.exists()) {
+//                    val username = document.getString("creatorName") ?: "Unknown User"
+//                    val text = document.getString("text") ?: "No Content"
+//                    postUserName.text = username
+//                    postText.text = text
+//                }
+//            }
+
+        // Check if comments are enabled for the post
         db.collection("posts").document(postId).get()
             .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val username = document.getString("creatorName") ?: "Unknown User"
-                    val text = document.getString("text") ?: "No Content"
-                    postUserName.text = username
-                    postText.text = text
+                if (document != null && document.exists()) {
+                    val commentsEnabled = document.getBoolean("commentsEnabled") ?: true
+
+                    if (!commentsEnabled) {
+                        commentInput.isEnabled = false
+                        commentButton.isEnabled = false
+                        commentInput.hint = "Comments are disabled for this post"
+                    }
+                } else {
+                    Log.d("CommentActivity", "No such post")
                 }
             }
+            .addOnFailureListener { exception ->
+                Log.d("CommentActivity", "get failed with ", exception)
+            }
+
 
         // set up RecyclerView
         commentsRecyclerView = findViewById(R.id.commentsRecyclerView)
