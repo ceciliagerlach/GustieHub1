@@ -37,7 +37,6 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         postsRecyclerView = view.findViewById(R.id.postsRecyclerView)
         postsRecyclerView.layoutManager = LinearLayoutManager(activity)
 
@@ -48,7 +47,8 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
                 startActivity(intent)
             },
             onEditClick = { post -> showEditDialog(post) },
-            onDeleteClick = { post -> removePost(post) }
+            onDeleteClick = { post -> removePost(post) },
+            onReportClick = { post -> reportPost(post) }
         )
         postsRecyclerView.adapter = postsAdapter
 
@@ -213,4 +213,9 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
             }
         }
     }
+
+    private fun reportPost(post: Post) {
+        //TODO: add report functionality
+    }
+
 }

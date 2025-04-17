@@ -9,12 +9,14 @@ import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
 
 class PostAdapter(
     private var postList: List<Post>,
     private val onUsernameClick: (String) -> Unit,
     private val onEditClick: (Post) -> Unit,
-    private val onDeleteClick: (Post) -> Unit
+    private val onDeleteClick: (Post) -> Unit,
+    private val onReportClick: (Post) -> Unit
 ) : RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -53,8 +55,14 @@ class PostAdapter(
         }
 
         holder.moreButton.setOnClickListener {
+            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
             val popupMenu = PopupMenu(holder.itemView.context, holder.moreButton)
             popupMenu.inflate(R.menu.edit_delete_options_menu)
+            if (post.creatorId != currentUserId) {
+                // remove edit/delete options if not user's post
+                popupMenu.menu.removeItem(R.id.menu_edit)
+                popupMenu.menu.removeItem(R.id.menu_delete)
+            }
             popupMenu.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.menu_edit -> {
@@ -63,6 +71,10 @@ class PostAdapter(
                     }
                     R.id.menu_delete -> {
                         onDeleteClick(post)
+                        true
+                    }
+                    R.id.menu_report -> {
+                        onReportClick(post)
                         true
                     }
                     else -> false

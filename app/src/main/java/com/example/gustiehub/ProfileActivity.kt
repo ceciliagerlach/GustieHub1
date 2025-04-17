@@ -234,5 +234,10 @@ class ProfileActivity : AppCompatActivity() {
             val intent = Intent(this, MessageActivity::class.java)
             startActivity(intent)
         }
+        val profileButton: ImageView = findViewById(R.id.profile)
+        profileButton.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
+            startActivity(intent)
+        }
     }
 }
