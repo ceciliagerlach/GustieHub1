@@ -88,16 +88,6 @@
                 android:textSize="24sp"
                 android:visibility="visible"/>
 
-            <EditText
-                android:id="@+id/editUserName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="User Full Name"
-                android:textSize="24sp"
-                android:textColor="#A000"
-                android:gravity="center"
-                android:visibility="gone"/>
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -127,16 +117,6 @@
                     android:textColor="#A000"
                     android:textSize="18sp"
                     android:visibility="visible" />
-
-                <EditText
-                    android:id="@+id/editClassYear"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:layout_weight="1"
-                    android:text="Class Year"
-                    android:textSize="18sp"
-                    android:visibility="gone" />
 
             </LinearLayout>
 
@@ -176,16 +156,6 @@
                     android:textSize="18sp"
                     android:visibility="visible" />
 
-                <EditText
-                    android:id="@+id/editHomeState"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:gravity="end"
-                    android:layout_weight="1"
-                    android:text="Home State"
-                    android:textSize="18sp"
-                    android:visibility="gone" />
-
             </LinearLayout>
 
             <View
@@ -194,16 +164,31 @@
                 android:background="#A000"
                 android:layout_gravity="center"/>
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="start"
-                android:text="Areas of Study"
-                android:textColor="#A000"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:paddingLeft="32dp"
-                android:paddingTop="16dp"/>
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:text="Areas of Study"
+                    android:textColor="#A000"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:paddingLeft="32dp"
+                    android:paddingTop="16dp"/>
+
+                <ImageButton
+                    android:id="@+id/btnEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@android:color/transparent"
+                    android:src="@drawable/edit_icon"
+                    android:paddingTop="16dp"/>
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/areasOfStudy"
@@ -226,11 +211,15 @@
                 android:text="Area of Study"
                 android:gravity="start"
                 android:paddingLeft="32dp"
+                android:paddingRight="32dp"
                 android:paddingTop="8dp"
+                android:paddingBottom="16dp"
+                android:textColor="#A000"
                 android:textSize="18sp"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
             <View
+                android:id="@+id/view"
                 android:layout_width="330dp"
                 android:layout_height="1dp"
                 android:background="#A000"
@@ -265,14 +254,6 @@
                 android:orientation="horizontal"
                 android:layout_gravity="center"
                 android:layout_marginTop="24dp">
-
-                <Button
-                    android:id="@+id/btnEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="@color/gold"
-                    android:textColor="@color/white"
-                    android:text="Edit" />
 
                 <Button
                     android:id="@+id/btnCancel"

@@ -3,7 +3,9 @@ package com.example.gustiehub
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -43,11 +45,9 @@ class ProfileActivity : AppCompatActivity() {
         val profileImageView: ImageView = findViewById(R.id.profileImage)
 
         // editing profile views
-        val editUserName: TextView = findViewById(R.id.editUserName)
-        val editClassYear: TextView = findViewById(R.id.editClassYear)
-        val editHomeState: TextView = findViewById(R.id.editHomeState)
         val editAreasOfStudy: TextView = findViewById(R.id.editAreasOfStudy)
-        val btnEdit: Button = findViewById(R.id.btnEdit)
+        val view: View = findViewById(R.id.view)
+        val btnEdit: ImageButton = findViewById(R.id.btnEdit)
         val btnCancel: Button = findViewById(R.id.btnCancel)
         val btnSave: Button = findViewById(R.id.btnSave)
 
@@ -114,64 +114,39 @@ class ProfileActivity : AppCompatActivity() {
 
         //function for listening for edits and saves
         btnEdit.setOnClickListener {
-            editUserName.text = profileName.text
-            editClassYear.text = profileYear.text
-            editHomeState.text = profileState.text
             editAreasOfStudy.text = profileAreas.text
-
-            editUserName.visibility = TextView.VISIBLE
-            editClassYear.visibility = TextView.VISIBLE
-            editHomeState.visibility = TextView.VISIBLE
             editAreasOfStudy.visibility = TextView.VISIBLE
 
-
-            profileName.visibility = TextView.GONE
-            profileYear.visibility = TextView.GONE
-            profileState.visibility = TextView.GONE
             profileAreas.visibility = TextView.GONE
+            view.visibility = View.GONE
 
             btnEdit.visibility = Button.GONE
             btnCancel.visibility = Button.VISIBLE
             btnSave.visibility = Button.VISIBLE
-
         }
 
         btnCancel.setOnClickListener {
-            editUserName.visibility = TextView.GONE
-            editClassYear.visibility = TextView.GONE
-            editHomeState.visibility = TextView.GONE
             editAreasOfStudy.visibility = TextView.GONE
 
             btnEdit.visibility = Button.VISIBLE
             btnCancel.visibility = Button.GONE
             btnSave.visibility = Button.GONE
 
-            profileName.visibility = TextView.VISIBLE
-            profileYear.visibility = TextView.VISIBLE
-            profileState.visibility = TextView.VISIBLE
             profileAreas.visibility = TextView.VISIBLE
-
+            view.visibility = View.VISIBLE
         }
 
         btnSave.setOnClickListener {
-            profileName.text = editUserName.text
-            profileYear.text = editClassYear.text
-            profileState.text = editHomeState.text
             profileAreas.text = editAreasOfStudy.text
 
-            editUserName.visibility = TextView.GONE
-            editClassYear.visibility = TextView.GONE
-            editHomeState.visibility = TextView.GONE
             editAreasOfStudy.visibility = TextView.GONE
 
             btnEdit.visibility = Button.VISIBLE
             btnCancel.visibility = Button.GONE
             btnSave.visibility = Button.GONE
 
-            profileName.visibility = TextView.VISIBLE
-            profileYear.visibility = TextView.VISIBLE
-            profileState.visibility = TextView.VISIBLE
             profileAreas.visibility = TextView.VISIBLE
+            view.visibility = View.VISIBLE
 
             // update user profile in Firestore
             val user = FirebaseAuth.getInstance().currentUser
@@ -180,9 +155,6 @@ class ProfileActivity : AppCompatActivity() {
                 val userRef = db.collection("users").document(userId)
                 userRef.update(
                     mapOf(
-                        "fullName" to editUserName.text.toString(),
-                        "gradYear" to editClassYear.text.toString().toIntOrNull(),
-                        "homeState" to editHomeState.text.toString(),
                         "areasOfStudy" to editAreasOfStudy.text.toString()
                     )
                 )
