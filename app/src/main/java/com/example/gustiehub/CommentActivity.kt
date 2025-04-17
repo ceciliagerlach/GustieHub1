@@ -87,7 +87,8 @@ class CommentActivity : AppCompatActivity() {
         commentsRecyclerView.layoutManager = LinearLayoutManager(this)
         commentAdapter = CommentAdapter(emptyList(),
             onEditClick = { comment -> showEditCommentDialog(comment) },
-            onDeleteClick = { comment -> removeComment(comment) }
+            onDeleteClick = { comment -> removeComment(comment) },
+            onReportClick = { comment -> reportComment(comment) }
         )
 
         commentsRecyclerView.adapter = commentAdapter
@@ -213,18 +214,20 @@ class CommentActivity : AppCompatActivity() {
     }
 
 
-    private fun removeComment(comment: Post.Comment) {
-        userObject.deleteComment(postId, comment.commentId) { success, errorMessage ->
-            if (success) {
-                Toast.makeText(this, "Comment deleted", Toast.LENGTH_SHORT).show()
-                fetchComments()
-            } else {
-                Log.e("Firestore", "Failed to add comment: $errorMessage")
+        private fun removeComment(comment: Post.Comment) {
+            userObject.deleteComment(postId, comment.commentId) { success, errorMessage ->
+                if (success) {
+                    Toast.makeText(this, "Comment deleted", Toast.LENGTH_SHORT).show()
+                    fetchComments()
+                } else {
+                    Log.e("Firestore", "Failed to add comment: $errorMessage")
+                }
             }
         }
-    }
 
-
+        private fun reportComment(comment: Post.Comment) {
+            //TODO: add report functionality
+        }
 
         private fun fetchComments() {
             val db = FirebaseFirestore.getInstance()

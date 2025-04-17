@@ -48,7 +48,7 @@
                     android:src="@drawable/ic_more_vert"
                     android:paddingTop="14dp"
                     android:paddingRight="14dp"
-                    android:contentDescription="Options" />
+                    android:contentDescription="Options"/>
 
             </LinearLayout>
 
@@ -60,24 +60,6 @@
                 android:textSize="18sp"
                 android:text="This is the space for the comment's text..."
                 android:textColor="@color/black"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="end"
-                android:orientation="horizontal"
-                android:paddingTop="8dp">
-
-                <ImageButton
-                    android:id="@+id/report_button"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:background="@color/white"
-                    android:scaleType="fitCenter"
-                    android:paddingTop="0dp"
-                    android:src="@drawable/report_flag"/>
-
-            </LinearLayout>
 
         </LinearLayout>
 
