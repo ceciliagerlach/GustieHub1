@@ -195,7 +195,6 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
             }
             .setNegativeButton("Cancel", null)
             .show()
-
     }
 
     private fun removePost(post: Post) {

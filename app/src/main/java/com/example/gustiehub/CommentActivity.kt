@@ -7,9 +7,11 @@ import android.util.Log
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,6 +30,7 @@ class CommentActivity : AppCompatActivity() {
     private lateinit var groupName: String
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
+    private lateinit var postsAdapter: PostAdapter
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
     val db = FirebaseFirestore.getInstance()
@@ -52,15 +55,51 @@ class CommentActivity : AppCompatActivity() {
         // display post information
         val postUserName: TextView = findViewById(R.id.user_name)
         val postText: TextView = findViewById(R.id.post_text)
-//        db.collection("posts").document(postId).get()
-//            .addOnSuccessListener { document ->
-//                if (document.exists()) {
-//                    val username = document.getString("creatorName") ?: "Unknown User"
-//                    val text = document.getString("text") ?: "No Content"
-//                    postUserName.text = username
-//                    postText.text = text
-//                }
-//            }
+        val moreButton: ImageButton = findViewById(R.id.menu_button)
+        db.collection("posts").document(postId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val username = document.getString("creatorName") ?: "Unknown User"
+                    val text = document.getString("text") ?: "No Content"
+                    postUserName.text = username
+                    postText.text = text
+                }
+            }
+        moreButton.setOnClickListener{
+            val currentUserId = auth.currentUser?.uid ?: return@setOnClickListener
+            val db = FirebaseFirestore.getInstance()
+            db.collection("posts").document(postId).get()
+                .addOnSuccessListener { document ->
+                    val post = document.toObject(Post::class.java)
+                    val popupMenu = PopupMenu(this, moreButton)
+                    popupMenu.inflate(R.menu.edit_delete_options_menu)
+                    if (post != null) {
+                        if (post.creatorId != currentUserId) {
+                            // remove edit/delete options if not user's post
+                            popupMenu.menu.removeItem(R.id.menu_edit)
+                            popupMenu.menu.removeItem(R.id.menu_delete)
+                        }
+                        popupMenu.setOnMenuItemClickListener { item ->
+                            when (item.itemId) {
+                                R.id.menu_edit -> {
+                                    showEditDialog(post)
+                                    true
+                                }
+                                R.id.menu_delete -> {
+                                    removePost(post)
+                                    true
+                                }
+                                R.id.menu_report -> {
+                                    reportPost(post)
+                                    true
+                                }
+                                else -> false
+                            }
+                        }
+                    }
+                    popupMenu.show()
+                }
+        }
 
         // Check if comments are enabled for the post
         db.collection("posts").document(postId).get()
@@ -288,4 +327,55 @@ class CommentActivity : AppCompatActivity() {
                 }
             }
         }
+
+    // edit post
+    private fun showEditDialog(post: Post) {
+        val editText = EditText(this)
+        editText.setText(post.text)
+
+        AlertDialog.Builder(this)
+            .setTitle("Edit Post")
+            .setView(editText)
+            .setPositiveButton("Save") { _, _ ->
+                val newText = editText.text.toString().trim()
+                if (newText.isNotEmpty()) {
+                    userObject?.editPost(post.postId, newText) { success, errorMessage ->
+                        if (success) {
+                            Toast.makeText(this, "Post updated", Toast.LENGTH_SHORT).show()
+                            GlobalData.getPosts(groupName) { updatedPosts ->
+                                this.runOnUiThread {
+                                    postsAdapter.updatePosts(updatedPosts)
+                                }
+                            }
+                        } else {
+                            Log.e("Firestore", "Failed to add comment: $errorMessage")
+                        }
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
+
+    // remove post
+    private fun removePost(post: Post) {
+        userObject?.deletePost(post.postId){
+                success, errorMessage ->
+            if (success) {
+                Toast.makeText(this, "Post deleted", Toast.LENGTH_SHORT).show()
+                GlobalData.getPosts(groupName) { updatedPosts ->
+                    this.runOnUiThread {
+                        postsAdapter.updatePosts(updatedPosts)
+                    }
+                }
+            } else {
+                Log.e("Firestore", "Failed to add comment: $errorMessage")
+            }
+        }
+    }
+
+    // report post
+    private fun reportPost(post: Post) {
+        //TODO: add report functionality
+    }
+}
