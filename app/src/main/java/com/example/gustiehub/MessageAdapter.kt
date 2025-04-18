@@ -44,7 +44,7 @@ class MessageAdapter (
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         val otherUserId = chat.userIds.firstOrNull { it != userId }
         if (otherUserId != null) {
-            // Fetch and display name of the other user
+            // fetch and display name of the other user
             FirebaseFirestore.getInstance().collection("users").document(otherUserId).get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
@@ -54,7 +54,7 @@ class MessageAdapter (
                     }
                 }
 
-            // Load profile picture of the other user in the conversation
+            // load profile picture of the other user in the conversation
             FirebaseFirestore.getInstance().collection("users").document(otherUserId).get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {

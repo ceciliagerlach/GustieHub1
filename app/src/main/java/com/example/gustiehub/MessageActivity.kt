@@ -126,21 +126,6 @@ class MessageActivity: AppCompatActivity() {
         createChatButton.setOnClickListener {
             NewChatDialog()
         }
-//            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@setOnClickListener
-//
-//            // TODO: replace this with however we're getting the target user
-//            val targetUserId = "someOtherUserId"  // Replace with actual ID
-//
-//            getOrCreateConversation(currentUserId, targetUserId) { conversationId ->
-//                conversationId?.let {
-//                    val intent = Intent(this, ChatActivity::class.java)
-//                    intent.putStringArrayListExtra("userIds", ArrayList(listOf(currentUserId, targetUserId)))
-//                    startActivity(intent)
-//                } ?: run {
-//                    Log.w(TAG, "Failed to create conversation")
-//                }
-//            }
-//        }
     }
 
     // ******* Functions ************************************
