@@ -16,15 +16,15 @@ class User(private val _userId: String,
            private val _areasOfStudy: String) {
 
     // initialize values for FireBase
-    private val userId = _userId
+    val userId = _userId
     private val email = _email
-    private var firstName = _firstName
-    private var lastName = _lastName
+    var firstName = _firstName
+    var lastName = _lastName
     private  var gradYear = _gradYear
     private var homeState = _homeState
     private var areasOfStudy = _areasOfStudy
 
-    lateinit var profilePicture: String // store as URL?
+    var profilePicture = "" // store as URL?
     private var joinedGroups: MutableList<String> = mutableListOf("Gusties") // store group names
 
     private val db = FirebaseFirestore.getInstance()

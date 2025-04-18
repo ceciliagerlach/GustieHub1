@@ -16,6 +16,45 @@ object GlobalData {
     var userDict = mutableMapOf<String,User>()
     var groupDict = mutableMapOf<String, Group>()
 
+    fun getUsers(onUserUpdated: (List<User>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val usersRef = db.collection("users")
+            .orderBy("firstName", Query.Direction.ASCENDING)
+
+        usersRef.addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                println("Error listening for user changes: ${e.message}")
+                return@addSnapshotListener
+            }
+
+            val updatedUsers = mutableListOf<User>()
+            snapshots?.documents?.forEach { document ->
+                val userId = document.id
+                val email = document.getString("email") ?: ""
+                val firstName = document.getString("firstName") ?: ""
+                val lastName = document.getString("lastName") ?: ""
+                val gradYear = document.getLong("gradYear")?.toInt() ?: 0
+                val homeState = document.getString("homeState") ?: ""
+                val areasOfStudy = document.getString("areasOfStudy") ?: ""
+
+                val user = User(
+                    _userId = userId,
+                    _email = email,
+                    _firstName = firstName,
+                    _lastName = lastName,
+                    _gradYear = gradYear,
+                    _homeState = homeState,
+                    _areasOfStudy = areasOfStudy
+                )
+                updatedUsers.add(user)
+            }
+
+            println("Fetched ${updatedUsers.size} users from Firestore.")
+            onUserUpdated(updatedUsers)
+        }
+    }
+
+
     fun getGroupList(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
         """ Fetches created groups and updates the global variable groupList accordingly.
             |@return: None
@@ -250,6 +289,22 @@ object GlobalData {
             }
             .addOnFailureListener { onComplete(null) }
     }
+
+    fun getUserConversations(currentUserId: String, onComplete: (List<String>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("conversations")
+            .whereArrayContains("userIds", currentUserId)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val otherUserIds = snapshot.documents.mapNotNull { doc ->
+                    val userIds = doc.get("userIds") as? List<*>
+                    userIds?.firstOrNull { it != currentUserId } as? String
+                }
+                onComplete(otherUserIds)
+            }
+            .addOnFailureListener { onComplete(emptyList()) }
+    }
+
     fun getMessages(
         conversationId: String,
         onMessagesUpdated: (List<Message>) -> Unit
@@ -275,7 +330,26 @@ object GlobalData {
             }
         }
     }
-     /**
+
+    fun listenToMessages(conversationId: String, onMessagesUpdated: (List<Message>) -> Unit) {
+        FirebaseFirestore.getInstance()
+            .collection("conversations").document(conversationId)
+            .collection("messages")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshots, error ->
+                if (error != null || snapshots == null) return@addSnapshotListener
+
+                val messages = snapshots.documents.mapNotNull { doc ->
+                    val senderId = doc.getString("senderId") ?: return@mapNotNull null
+                    val text = doc.getString("text") ?: return@mapNotNull null
+                    val timestamp = doc.getTimestamp("timestamp") ?: return@mapNotNull null
+                    Message(senderId, text, timestamp)
+                }
+                onMessagesUpdated(messages)
+            }
+    }
+
+    /**
       * Converts a date string (e.g., "April 12") to a Date object and checks if it's today or in the future.
       */
      fun isFuture(dateStr: String): Boolean {

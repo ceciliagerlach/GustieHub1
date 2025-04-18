@@ -44,29 +44,31 @@ class MessageAdapter (
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         val otherUserId = chat.userIds.firstOrNull { it != userId }
         if (otherUserId != null) {
+            // Fetch and display name of the other user
             FirebaseFirestore.getInstance().collection("users").document(otherUserId).get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
                         val firstname = document.getString("firstName")
                         val lastname = document.getString("lastName")
-                        holder.nameTextView.text = firstname + " " + lastname
+                        holder.nameTextView.text = "$firstname $lastname"
+                    }
+                }
+
+            // Load profile picture of the other user in the conversation
+            FirebaseFirestore.getInstance().collection("users").document(otherUserId).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val profilePictureUrl = document.getString("profilePicture")
+                        if (!profilePictureUrl.isNullOrEmpty()) {
+                            Glide.with(holder.itemView.context)
+                                .load(profilePictureUrl)
+                                .into(holder.profilePictureImageView)
+                        } else {
+                            holder.profilePictureImageView.setImageResource(R.drawable.sample_profile_picture)
+                        }
                     }
                 }
         }
-        // load profile picture of OTHER user in the conversation
-        FirebaseFirestore.getInstance().collection("users").document(userId).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val profilePictureUrl = document.getString("profilePicture")
-                    if (!profilePictureUrl.isNullOrEmpty()) {
-                        Glide.with(holder.itemView.context)
-                            .load(profilePictureUrl)
-                            .into(holder.profilePictureImageView)
-                    } else {
-                        holder.profilePictureImageView.setImageResource(R.drawable.sample_profile_picture)
-                    }
-                }
-            }
     }
 
     fun updateChats(newChats: List<Conversation>) {
