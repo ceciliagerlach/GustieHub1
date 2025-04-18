@@ -123,6 +123,7 @@ class ChatActivity:  AppCompatActivity() {
             } else {
                 Log.w(TAG, "Could not find or create conversation")
             }
+            chatRecyclerView.scrollToPosition(messageList.size - 1)
         }
 
         // listener for sending a message

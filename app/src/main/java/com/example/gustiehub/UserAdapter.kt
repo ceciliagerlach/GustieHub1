@@ -22,7 +22,6 @@ class UserAdapter(
 
     inner class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nameTextView: TextView = itemView.findViewById(R.id.user_name)
-        val profilePictureImageView: ImageView = itemView.findViewById(R.id.profile_picture)
 
         fun bind(user: User, isSelected: Boolean) {
             nameTextView.text = "${user.firstName} ${user.lastName}"
@@ -30,19 +29,6 @@ class UserAdapter(
                 if (isSelected) R.drawable.selected_user_background
                 else R.drawable.default_user_background
             )
-
-            val context = itemView.context
-            val placeholder = R.drawable.sample_profile_picture
-            val profilePictureUrl = user.profilePicture
-
-            if (!profilePictureUrl.isNullOrEmpty()) {
-                Glide.with(context)
-                    .load(profilePictureUrl)
-                    .placeholder(placeholder)
-                    .into(profilePictureImageView)
-            } else {
-                profilePictureImageView.setImageResource(placeholder)
-            }
         }
     }
 
@@ -82,15 +68,6 @@ class UserAdapter(
 //                    } else {
 //                        holder.itemView.setBackgroundColor(Color.WHITE)
 //                    }
-
-                    val profilePictureUrl = document.getString("profilePicture")
-                    if (!profilePictureUrl.isNullOrEmpty()) {
-                        Glide.with(holder.itemView.context)
-                            .load(profilePictureUrl)
-                            .into(holder.profilePictureImageView)
-                    } else {
-                        holder.profilePictureImageView.setImageResource(R.drawable.sample_profile_picture)
-                    }
                 }
             }
 
