@@ -2,6 +2,7 @@ package com.example.gustiehub
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,8 +21,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import android.text.TextWatcher
 import android.text.Editable
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import com.example.gustiehub.UserAdapter
 
 class MessageActivity: AppCompatActivity() {
@@ -216,7 +219,6 @@ class MessageActivity: AppCompatActivity() {
             .setCancelable(true)
             .create()
 
-        val userList = listOf<User>()
         val allUsers = mutableListOf<User>()
         val filteredUsers = mutableListOf<User>()
         var selectedUser: User? = null

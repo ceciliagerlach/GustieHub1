@@ -1,11 +1,13 @@
 package com.example.gustiehub
 
 import android.graphics.Color
+import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.gustiehub.EventsAdapter.EventsViewHolder
@@ -15,10 +17,7 @@ class UserAdapter(
     private var userList: List<User>,
     private val onUserClick: (User) -> Unit
 ) : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
-    fun setSelectedUser(userId: String?) {
-        selectedUserId = userId
-        notifyDataSetChanged()
-    }
+    private var selectedPosition = RecyclerView.NO_POSITION
 
     inner class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nameTextView: TextView = itemView.findViewById(R.id.user_name)
@@ -31,11 +30,6 @@ class UserAdapter(
             )
         }
     }
-
-//    class UserViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-//        val profilePictureImageView: ImageView = itemView.findViewById(R.id.profile_picture)
-//        val nameTextView: TextView = itemView.findViewById(R.id.user_name)
-//    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -58,16 +52,22 @@ class UserAdapter(
                     holder.bind(user, user.userId == selectedUserId)
                     holder.itemView.setOnClickListener {
                         selectedUserId = user.userId
+                        val previousSelected = selectedPosition
+                        selectedPosition = holder.adapterPosition
+                        notifyItemChanged(previousSelected)
+                        notifyItemChanged(selectedPosition)
                         onUserClick(user)
                         notifyDataSetChanged()
                     }
 
-//                    // visual changes to show user is selected
-//                    if (user.userId == selectedUserId) {
-//                        holder.itemView.setBackgroundColor(Color.GRAY)
-//                    } else {
-//                        holder.itemView.setBackgroundColor(Color.WHITE)
-//                    }
+                    // visual changes to show user is selected
+                    if (position == selectedPosition) {
+                        holder.nameTextView.paintFlags = holder.nameTextView.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+                        holder.nameTextView.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.gold))
+                    } else {
+                        holder.nameTextView.paintFlags = holder.nameTextView.paintFlags and Paint.UNDERLINE_TEXT_FLAG.inv()
+                        holder.nameTextView.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.black))
+                    }
                 }
             }
 

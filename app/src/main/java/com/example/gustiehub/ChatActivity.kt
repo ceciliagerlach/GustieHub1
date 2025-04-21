@@ -118,12 +118,12 @@ class ChatActivity:  AppCompatActivity() {
                         messageList.clear()
                         messageList.addAll(updatedMessages)
                         chatAdapter.updateMessages(updatedMessages)
+                        chatRecyclerView.scrollToPosition(messageList.size - 1)
                     }
                 }
             } else {
                 Log.w(TAG, "Could not find or create conversation")
             }
-            chatRecyclerView.scrollToPosition(messageList.size - 1)
         }
 
         // listener for sending a message
