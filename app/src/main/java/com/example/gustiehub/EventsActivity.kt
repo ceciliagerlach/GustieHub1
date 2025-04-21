@@ -53,6 +53,12 @@ class EventsActivity: AppCompatActivity() {
             }
         }
 
+        // create event button
+        val createEventButton: ImageButton = findViewById(R.id.create_events_button)
+        createEventButton.setOnClickListener {
+            NewEventsDialog()
+        }
+
         // list of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
@@ -139,60 +145,60 @@ class EventsActivity: AppCompatActivity() {
             filterFunction = ::filterEvents,
             updateFunction = { filtered -> eventsAdapter.updateEvents(filtered) }
         )
-        // *************************************************************
+    }
 
-        fun NewEventsDialog() {
-            val dialogView = LayoutInflater.from(this).inflate(R.layout.new_event_dialog, null)
-            val editTextEventName = dialogView.findViewById<EditText>(R.id.newEventName)
-            val editTextEventDescription =
-                dialogView.findViewById<EditText>(R.id.newEventDescription)
-            val editTextEventLocation = dialogView.findViewById<EditText>(R.id.newEventLocation)
-            val editTextEventDate = dialogView.findViewById<EditText>(R.id.newEventDate)
-            val editTextEventTime = dialogView.findViewById<EditText>(R.id.newEventTime)
-            val editTextEventGroup = dialogView.findViewById<EditText>(R.id.newEventGroup)
-            val buttonCancel = dialogView.findViewById<Button>(R.id.buttonCancel)
-            val buttonConfirm = dialogView.findViewById<Button>(R.id.buttonConfirm)
-            val dialog = AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setCancelable(true)
-                .create()
 
-            buttonCancel.setOnClickListener {
-                dialog.dismiss()
-            }
+    fun NewEventsDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.new_event_dialog, null)
+        val editTextEventName = dialogView.findViewById<EditText>(R.id.newEventName)
+        val editTextEventDescription =
+            dialogView.findViewById<EditText>(R.id.newEventDescription)
+        val editTextEventLocation = dialogView.findViewById<EditText>(R.id.newEventLocation)
+        val editTextEventDate = dialogView.findViewById<EditText>(R.id.newEventDate)
+        val editTextEventTime = dialogView.findViewById<EditText>(R.id.newEventTime)
+        val editTextEventGroup = dialogView.findViewById<EditText>(R.id.newEventGroup)
+        val buttonCancel = dialogView.findViewById<Button>(R.id.buttonCancel)
+        val buttonConfirm = dialogView.findViewById<Button>(R.id.buttonConfirm)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
 
-            buttonConfirm.setOnClickListener {
-                val eventName = editTextEventName.text.toString()
-                val eventDescription = editTextEventDescription.text.toString()
-                val eventLocation = editTextEventLocation.text.toString()
-                val eventDate = editTextEventDate.text.toString()
-                val eventTime = editTextEventTime.text.toString()
-                val eventGroup = editTextEventGroup.text.toString()
-                if (eventName.isNotEmpty()) {
-                    val user = FirebaseAuth.getInstance().currentUser
-                    if (user != null) {
-                        val userId = user.uid
-                        val event = Event(
-                            userId,
-                            eventName,
-                            eventGroup,
-                            eventDescription,
-                            eventTime,
-                            eventLocation,
-                            eventDate
-                        )
-                        event.createEvent()
-                        Toast.makeText(this, "Event Created: $eventName", Toast.LENGTH_SHORT).show()
-                        dialog.dismiss()
-                    } else {
-                        Toast.makeText(this, "User not authenticated", Toast.LENGTH_LONG).show()
-                    }
+        buttonCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        buttonConfirm.setOnClickListener {
+            val eventName = editTextEventName.text.toString()
+            val eventDescription = editTextEventDescription.text.toString()
+            val eventLocation = editTextEventLocation.text.toString()
+            val eventDate = editTextEventDate.text.toString()
+            val eventTime = editTextEventTime.text.toString()
+            val eventGroup = editTextEventGroup.text.toString()
+            if (eventName.isNotEmpty()) {
+                val user = FirebaseAuth.getInstance().currentUser
+                if (user != null) {
+                    val userId = user.uid
+                    val event = Event(
+                        userId,
+                        eventName,
+                        eventGroup,
+                        eventDescription,
+                        eventTime,
+                        eventLocation,
+                        eventDate
+                    )
+                    event.createEvent()
+                    Toast.makeText(this, "Event Created: $eventName", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(this, "User not authenticated", Toast.LENGTH_LONG).show()
+                }
                 } else {
                     editTextEventName.error = "Event name cannot be empty"
                 }
             }
             dialog.show()
-        }
     }
 
     private fun filterEvents(query: String): List<Event> {

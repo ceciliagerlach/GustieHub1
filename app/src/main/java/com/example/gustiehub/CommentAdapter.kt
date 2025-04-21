@@ -11,10 +11,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class CommentAdapter(
-    private var commentList: List<Post.Comment>,
-    private val onEditClick: (Post.Comment) -> Unit,
-    private val onDeleteClick: (Post.Comment) -> Unit,
-    private val onReportClick: (Post.Comment) -> Unit
+    private var commentList: List<Comment>,
+    private val onEditClick: (Comment) -> Unit,
+    private val onDeleteClick: (Comment) -> Unit,
+    private val onReportClick: (Comment) -> Unit
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
     class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

@@ -254,6 +254,8 @@ object GlobalData {
                 println("Fetched ${updatedChats.size} events from Firestore.")
                 onConversationsUpdated(updatedChats) // update views accordingly
             }
+        }
+    }
 
     /**
      * Converts a date string (e.g., "April 12") to a Date object and checks if it's today or in the future.
@@ -360,43 +362,22 @@ object GlobalData {
         }
     }
 
-    fun listenToMessages(conversationId: String, onMessagesUpdated: (List<Message>) -> Unit) {
-        FirebaseFirestore.getInstance()
-            .collection("conversations").document(conversationId)
-            .collection("messages")
-            .orderBy("timestamp", Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshots, error ->
-                if (error != null || snapshots == null) return@addSnapshotListener
-
-                val messages = snapshots.documents.mapNotNull { doc ->
-                    val senderId = doc.getString("senderId") ?: return@mapNotNull null
-                    val text = doc.getString("text") ?: return@mapNotNull null
-                    val timestamp = doc.getTimestamp("timestamp") ?: return@mapNotNull null
-                    Message(senderId, text, timestamp)
-                }
-                onMessagesUpdated(messages)
-            }
-    }
-
-    /**
-      * Converts a date string (e.g., "April 12") to a Date object and checks if it's today or in the future.
-      */
-     fun isFuture(dateStr: String): Boolean {
-         return try {
-             val dateFormat = SimpleDateFormat("MMMM d", Locale.ENGLISH)
-             val eventDate = dateFormat.parse(dateStr)
-              val currentYear = Calendar.getInstance().get(Calendar.YEAR)
-             val eventCalendar = Calendar.getInstance().apply {
-                 time = eventDate!!
-                 set(Calendar.YEAR, currentYear)
-             }
-
-             val today = Calendar.getInstance()
-             !eventCalendar.after(today)
-         } catch (e: ParseException) {
-             println("Error parsing date: $dateStr")
-             false
-         }
-     }
+//    fun listenToMessages(conversationId: String, onMessagesUpdated: (List<Message>) -> Unit) {
+//        FirebaseFirestore.getInstance()
+//            .collection("conversations").document(conversationId)
+//            .collection("messages")
+//            .orderBy("timestamp", Query.Direction.ASCENDING)
+//            .addSnapshotListener { snapshots, error ->
+//                if (error != null || snapshots == null) return@addSnapshotListener
+//
+//                val messages = snapshots.documents.mapNotNull { doc ->
+//                    val senderId = doc.getString("senderId") ?: return@mapNotNull null
+//                    val text = doc.getString("text") ?: return@mapNotNull null
+//                    val timestamp = doc.getTimestamp("timestamp") ?: return@mapNotNull null
+//                    Message(senderId, text, timestamp)
+//                }
+//                onMessagesUpdated(messages)
+//            }
+//    }
 
 }

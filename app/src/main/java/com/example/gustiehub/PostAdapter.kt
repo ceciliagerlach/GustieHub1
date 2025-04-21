@@ -85,11 +85,9 @@ class PostAdapter(
     }
 
     fun updatePosts(newPosts: List<Post>) {
-        postList.clear()
-        postList.addAll(newPosts)
+        postList = newPosts
         notifyDataSetChanged()
     }
-
 
     override fun getItemCount() = postList.size
 }

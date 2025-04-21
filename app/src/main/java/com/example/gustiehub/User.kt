@@ -18,8 +18,8 @@ class User(private val _userId: String,
     // initialize values for FireBase
     val userId = _userId
     private val email = _email
-    private var firstName = _firstName
-    private var lastName = _lastName
+    var firstName = _firstName
+    var lastName = _lastName
     private var gradYear = _gradYear
     private var homeState = _homeState
     private var areasOfStudy = _areasOfStudy
@@ -125,11 +125,11 @@ class User(private val _userId: String,
     }
 
     // Getters
-    fun getFirstName(): String = firstName
-    fun getLastName(): String = lastName
-    fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
-    fun getGradYear(): Int = gradYear
-    fun getJoinedGroups(): List<String> = joinedGroups
+//    fun getFirstName(): String = firstName
+//    fun getLastName(): String = lastName
+//    fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
+//    fun getGradYear(): Int = gradYear
+//    fun getJoinedGroups(): List<String> = joinedGroups
 
 
     fun createPost(name: String, group: String, text: String) {

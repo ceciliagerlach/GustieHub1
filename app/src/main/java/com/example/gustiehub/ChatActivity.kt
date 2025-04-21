@@ -35,7 +35,7 @@ class ChatActivity:  AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_messaging2)
-        var userIds = intent.getStringArrayListExtra("userIds")
+        val userIds = intent.getStringArrayListExtra("userIds")
 
         if (userIds != null) {
             conversationId = userIds.sorted().joinToString("_")

@@ -30,7 +30,6 @@ class MarketplaceActivity: AppCompatActivity(){
     private lateinit var menuAdapter: MenuAdapter
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
-    private val db = FirebaseFirestore.getInstance()
     private lateinit var marketplaceAdapter: MarketplaceAdapter
     private val itemList = mutableListOf<Marketplace>()
 
@@ -146,7 +145,7 @@ class MarketplaceActivity: AppCompatActivity(){
 //            dataList = marketplaceList,
 //            filterFunction = ::filterMarketplaceItems  // Pass filter function to the helper
 //        )
-    }
+
 
 //    // filters marketplace items based on the query
 //    private fun filterMarketplaceItems(query: String): List<MarketplaceItem> {
