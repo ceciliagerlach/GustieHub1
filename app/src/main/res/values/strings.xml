@@ -48,5 +48,9 @@
     <string name="direct_messaging">Chats</string>
     <string name="new_chat">Start a New Chat</string>
     <string name="search_user_hint">Search Users</string>
-
+    <string name="make_listing">Make a Listing</string>
+    <string name="item_name">Item </string>
+    <string name="price">Price</string>
+    <string name="item_description">Item Description</string>
+    <string name="upload_a_picture">+ Upload a Picture</string>
 </resources>

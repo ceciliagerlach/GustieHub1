@@ -18,9 +18,9 @@ class User(private val _userId: String,
     // initialize values for FireBase
     val userId = _userId
     private val email = _email
-    var firstName = _firstName
-    var lastName = _lastName
-    private  var gradYear = _gradYear
+    private var firstName = _firstName
+    private var lastName = _lastName
+    private var gradYear = _gradYear
     private var homeState = _homeState
     private var areasOfStudy = _areasOfStudy
 
@@ -30,9 +30,11 @@ class User(private val _userId: String,
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-    fun createUserProfile(userId: String, email: String, firstName: String,
-                          lastName: String, gradYear: Int, homeState: String,
-                          areasOfStudy: String, profilePictureURL: String, onComplete: (Boolean, String?) -> Unit) {
+    fun createUserProfile(
+        userId: String, email: String, firstName: String,
+        lastName: String, gradYear: Int, homeState: String,
+        areasOfStudy: String, profilePictureURL: String, onComplete: (Boolean, String?) -> Unit
+    ) {
         """ Saves new student info to Firestore""".trimMargin()
         val userData = hashMapOf(
             "userID" to userId,
@@ -123,11 +125,11 @@ class User(private val _userId: String,
     }
 
     // Getters
-//    fun getFirstName(): String =  firstName
-//    fun getLastName(): String = lastName
-//    fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
-//    fun getGradYear(): Int = gradYear
-//    fun getJoinedGroups(): List<String> = joinedGroups
+    fun getFirstName(): String = firstName
+    fun getLastName(): String = lastName
+    fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
+    fun getGradYear(): Int = gradYear
+    fun getJoinedGroups(): List<String> = joinedGroups
 
 
     fun createPost(name: String, group: String, text: String) {
@@ -190,6 +192,47 @@ class User(private val _userId: String,
         }
     }
 
+    fun deletePost(postID: String, onComplete: (Boolean, String?) -> Unit){
+        val user = auth.currentUser
+        user?.let {
+            val userID = it.uid
+            val postRef = db.collection("posts").document(postID)
+            // only the original creator can delete the post
+            postRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val postCreatorId = document.getString("creatorId")
+                        if (postCreatorId != userID) {
+                            println("User $userID is not the creator of post $postID.")
+                            onComplete(false, "You do not have permission to delete this post.")
+                            return@addOnSuccessListener
+                        }
+
+                        postRef.delete()
+                            .addOnSuccessListener {
+                                println("Post $postID deleted successfully.")
+                                onComplete(true, null)
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error deleting post: ${e.message}")
+                                onComplete(false, e.message)
+                            }
+                    } else {
+                        println("Post $postID not found.")
+                        onComplete(false, "Post not found.")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    println("Error retrieving post: ${e.message}")
+                    onComplete(false, e.message)
+                }
+
+        } ?: run {
+            println("No authenticated user found.")
+            onComplete(false, "No authenticated user found.")
+        }
+    }
+
     fun commentOnPost(postID: String, comment: String, onComplete: (Boolean, String?) -> Unit) {
         val user = auth.currentUser
 
@@ -200,7 +243,8 @@ class User(private val _userId: String,
             postRef.get().addOnSuccessListener { document ->
                 if (document.exists()) {
                     val newComment = mapOf(
-                        "commentId" to UUID.randomUUID().toString(), // automatically generates a unique Id
+                        "commentId" to UUID.randomUUID()
+                            .toString(), // automatically generates a unique Id
                         "userId" to userID,
                         "text" to comment,
                         "timestamp" to Timestamp.now()
@@ -293,97 +337,107 @@ class User(private val _userId: String,
             }
         } ?: onComplete(false, "User not authenticated.")
     }
-}
 
-fun editComment(postID: String, commentID: String, newComment: String, onComplete: (Boolean, String?) -> Unit) {
-    val db = FirebaseFirestore.getInstance()
-    val user = FirebaseAuth.getInstance().currentUser
 
-    user?.let {
-        val postRef = db.collection("posts").document(postID)
+    fun editComment(
+        postID: String,
+        commentID: String,
+        newComment: String,
+        onComplete: (Boolean, String?) -> Unit
+    ) {
+        val db = FirebaseFirestore.getInstance()
+        val user = FirebaseAuth.getInstance().currentUser
 
-        postRef.get().addOnSuccessListener { document ->
-            if (document.exists()) {
-                // ensure its the commenter that wants to edit the comment
-                val comments = document.get("comments") as? MutableList<Map<String, Any>> ?: mutableListOf()
-                val commentToEdit = comments.find { it["commentId"] == commentID }
+        user?.let {
+            val postRef = db.collection("posts").document(postID)
 
-                val commentUserID = commentToEdit?.get("userId") as? String
-                if (commentUserID == user.uid) {
-                    val updatedComments = comments.map { comment ->
-                        if (comment["commentId"] == commentID) {
-                            comment.toMutableMap().apply {
-                                this["comment"] = newComment
+            postRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    // ensure its the commenter that wants to edit the comment
+                    val comments = document.get("comments") as? MutableList<Map<String, Any>>
+                        ?: mutableListOf()
+                    val commentToEdit = comments.find { it["commentId"] == commentID }
+
+                    val commentUserID = commentToEdit?.get("userId") as? String
+                    if (commentUserID == user.uid) {
+                        val updatedComments = comments.map { comment ->
+                            if (comment["commentId"] == commentID) {
+                                comment.toMutableMap().apply {
+                                    this["text"] = newComment
+                                    this["timestamp"] = Timestamp.now()
+                                }
+                                } else {
+                                comment
                             }
                         }
+                        postRef.update("comments", updatedComments)
+                            .addOnSuccessListener {
+                                println("Comment updated successfully.")
+                                onComplete(true, null)
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error updating comment: ${e.message}")
+                                onComplete(false, e.message)
+                            }
+                    } else {
+                        onComplete(false, "You do not have permission to edit this comment.")
                     }
+                } else {
+                    println("Post $postID does not exist.")
+                    onComplete(false, "Post does not exist.")
                 }
-
-                postRef.update("comments", newComment)
-                    .addOnSuccessListener {
-                        println("Comment updated successfully.")
-                        onComplete(true, null)
-                    }
-                    .addOnFailureListener { e ->
-                        println("Error updating comment: ${e.message}")
-                        onComplete(false, e.message)
-                    }
-            } else {
-                println("Post $postID does not exist.")
-                onComplete(false, "Post does not exist.")
+            }.addOnFailureListener { e ->
+                println("Error fetching post: ${e.message}")
+                onComplete(false, e.message)
             }
-        }.addOnFailureListener { e ->
-            println("Error fetching post: ${e.message}")
-            onComplete(false, e.message)
-        }
-    } ?: onComplete(false, "User not authenticated.")
-}
+        } ?: onComplete(false, "User not authenticated.")
+    }
 
 
+    fun deleteComment(postID: String, commentID: String, onComplete: (Boolean, String?) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val user = FirebaseAuth.getInstance().currentUser
 
-fun deleteComment(postID: String, commentID: String, onComplete: (Boolean, String?) -> Unit) {
-    val db = FirebaseFirestore.getInstance()
-    val user = FirebaseAuth.getInstance().currentUser
+        user?.let {
+            val postRef = db.collection("posts").document(postID)
 
-    user?.let {
-        val postRef = db.collection("posts").document(postID)
+            postRef.get().addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val comments = document.get("comments") as? MutableList<Map<String, Any>>
+                        ?: mutableListOf()
+                    // ensure its the commenter that wants to edit the comment
+                    val commentToDelete = comments.find { it["commentId"] == commentID }
+                    val postCreatorID = document.getString("creatorId")
 
-        postRef.get().addOnSuccessListener { document ->
-            if (document.exists()) {
-                val comments = document.get("comments") as? MutableList<Map<String, Any>> ?: mutableListOf()
-                // ensure its the commenter that wants to edit the comment
-                val commentToDelete = comments.find { it["commentId"] == commentID }
-                val postCreatorID = document.getString("creatorId")
+                    val commentUserID = commentToDelete?.get("userId") as? String
 
-                val commentUserID = commentToDelete?.get("userId") as? String
+                    // only the post creator or commenter can delete their comment
+                    if (commentUserID == user.uid || postCreatorID == user.uid) {
+                        val updatedComments = comments.filterNot { comment ->
+                            comment["commentId"] == commentID
+                        }
 
-                // only the post creator or commenter can delete their comment
-                if (commentUserID == user.uid || postCreatorID == user.uid) {
-                    val updatedComments = comments.filterNot { comment ->
-                        comment["commentId"] == commentID
+                        postRef.update("comments", updatedComments)
+                            .addOnSuccessListener {
+                                println("Comment deleted successfully.")
+                                onComplete(true, null)
+                            }
+                            .addOnFailureListener { e ->
+                                println("Error deleting comment: ${e.message}")
+                                onComplete(false, e.message)
+                            }
                     }
-
-                    postRef.update("comments", updatedComments)
-                        .addOnSuccessListener {
-                            println("Comment deleted successfully.")
-                            onComplete(true, null)
-                        }
-                        .addOnFailureListener { e ->
-                            println("Error deleting comment: ${e.message}")
-                            onComplete(false, e.message)
-                        }
+                } else {
+                    println("Post $postID does not exist.")
+                    onComplete(false, "Post does not exist.")
                 }
-            } else {
-                println("Post $postID does not exist.")
-                onComplete(false, "Post does not exist.")
+            }.addOnFailureListener { e ->
+                println("Error fetching post: ${e.message}")
+                onComplete(false, e.message)
             }
-        }.addOnFailureListener { e ->
-            println("Error fetching post: ${e.message}")
-            onComplete(false, e.message)
-        }
-    } ?: onComplete(false, "User not authenticated.")
+        } ?: onComplete(false, "User not authenticated.")
+    }
 }
-
 
 
 // TODO: Create function leaveGroup

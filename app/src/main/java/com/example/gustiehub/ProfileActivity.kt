@@ -3,8 +3,12 @@ package com.example.gustiehub
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -40,6 +44,13 @@ class ProfileActivity : AppCompatActivity() {
         val profileGroups: TextView = findViewById(R.id.joinedGroups)
         val profileImageView: ImageView = findViewById(R.id.profileImage)
 
+        // editing profile views
+        val editAreasOfStudy: TextView = findViewById(R.id.editAreasOfStudy)
+        val view: View = findViewById(R.id.view)
+        val btnEdit: ImageButton = findViewById(R.id.btnEdit)
+        val btnCancel: Button = findViewById(R.id.btnCancel)
+        val btnSave: Button = findViewById(R.id.btnSave)
+
         // set user information
         if (receivingId.isNullOrEmpty()) {
             db.collection("users").document(userId).get()
@@ -71,6 +82,7 @@ class ProfileActivity : AppCompatActivity() {
                     }
                 }
         } else {
+            btnEdit.visibility = Button.GONE
             db.collection("users").document(receivingId).get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
@@ -98,6 +110,63 @@ class ProfileActivity : AppCompatActivity() {
                           profileImageView.setImageResource(R.drawable.sample_profile_picture)
                     }
                 }
+            }
+        }
+
+        //function for listening for edits and saves
+        btnEdit.setOnClickListener {
+            editAreasOfStudy.text = profileAreas.text
+            editAreasOfStudy.visibility = TextView.VISIBLE
+
+            profileAreas.visibility = TextView.GONE
+            view.visibility = View.GONE
+
+            btnEdit.visibility = Button.GONE
+            btnCancel.visibility = Button.VISIBLE
+            btnSave.visibility = Button.VISIBLE
+        }
+
+        btnCancel.setOnClickListener {
+            editAreasOfStudy.visibility = TextView.GONE
+
+            btnEdit.visibility = Button.VISIBLE
+            btnCancel.visibility = Button.GONE
+            btnSave.visibility = Button.GONE
+
+            profileAreas.visibility = TextView.VISIBLE
+            view.visibility = View.VISIBLE
+        }
+
+        btnSave.setOnClickListener {
+            profileAreas.text = editAreasOfStudy.text
+
+            editAreasOfStudy.visibility = TextView.GONE
+
+            btnEdit.visibility = Button.VISIBLE
+            btnCancel.visibility = Button.GONE
+            btnSave.visibility = Button.GONE
+
+            profileAreas.visibility = TextView.VISIBLE
+            view.visibility = View.VISIBLE
+
+            // update user profile in Firestore
+            val user = FirebaseAuth.getInstance().currentUser
+            user?.let {
+                val userId = it.uid
+                val userRef = db.collection("users").document(userId)
+                userRef.update(
+                    mapOf(
+                        "areasOfStudy" to editAreasOfStudy.text.toString()
+                    )
+                )
+                    .addOnSuccessListener {
+                        Log.d("ProfileActivity", "User profile updated successfully")
+                        Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("ProfileActivity", "Error updating user profile", e)
+                        Toast.makeText(this, "Error updating profile", Toast.LENGTH_SHORT).show()
+                    }
             }
         }
 
@@ -163,6 +232,11 @@ class ProfileActivity : AppCompatActivity() {
         val messageButton: ImageView = findViewById(R.id.messaging)
         messageButton.setOnClickListener {
             val intent = Intent(this, MessageActivity::class.java)
+            startActivity(intent)
+        }
+        val profileButton: ImageView = findViewById(R.id.profile)
+        profileButton.setOnClickListener {
+            val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
     }

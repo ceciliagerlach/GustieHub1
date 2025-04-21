@@ -241,7 +241,6 @@ object GlobalData {
                 println("Error listening for chat changes: ${e.message}")
                 return@addSnapshotListener
             }
-
             snapshots?.let {
                 val updatedChats = mutableListOf<Conversation>()
                 for (document in it.documents) {
@@ -255,6 +254,36 @@ object GlobalData {
                 println("Fetched ${updatedChats.size} events from Firestore.")
                 onConversationsUpdated(updatedChats) // update views accordingly
             }
+
+    /**
+     * Converts a date string (e.g., "April 12") to a Date object and checks if it's today or in the future.
+     */
+    fun isFuture(dateStr: String): Boolean {
+        return try {
+            val dateFormat = SimpleDateFormat("MMMM d", Locale.ENGLISH)
+            val eventDate = dateFormat.parse(dateStr)
+
+            val currentYear = Calendar.getInstance().get(Calendar.YEAR)
+            val eventCalendar = Calendar.getInstance().apply {
+                time = eventDate!!
+                set(Calendar.YEAR, currentYear)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            // normalizes both today and eventCalendar to midnight, so no issues with comparing time
+            val today = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+
+            !eventCalendar.before(today) // return events today and in the future
+        } catch (e: ParseException) {
+            println("Error parsing date: $dateStr")
+            false
         }
     }
 

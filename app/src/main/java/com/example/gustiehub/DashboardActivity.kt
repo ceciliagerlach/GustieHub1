@@ -33,11 +33,13 @@ class DashboardActivity : AppCompatActivity() {
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
 
-    // variables for displaying 2 most recent announcements + events
+    // variables for displaying 3 most recent announcements + events + posts
     private lateinit var announcementPreview1: TextView
     private lateinit var announcementPreview2: TextView
+    private lateinit var announcementPreview3: TextView
     private lateinit var eventPreview1: TextView
     private lateinit var eventPreview2: TextView
+    private lateinit var eventPreview3: TextView
 
     companion object {
         private const val EXTRA_EMAIL = "com.example.gustiehub.email"
@@ -56,14 +58,16 @@ class DashboardActivity : AppCompatActivity() {
         // initialize TextViews
         announcementPreview1 = findViewById(R.id.announcement_preview1)
         announcementPreview2 = findViewById(R.id.announcement_preview2)
+        announcementPreview3 = findViewById(R.id.announcement_preview3)
         eventPreview1 = findViewById(R.id.event_preview1)
         eventPreview2 = findViewById(R.id.event_preview2)
+        eventPreview3 = findViewById(R.id.event_preview3)
 
         // fetch two most recent of each
-        fetchRecentAnnouncements(2)
-        fetchRecentEvents(2)
+        fetchRecentAnnouncements(3)
+        fetchRecentEvents(3)
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
-        fetchRecentGroupPosts(userId,2)
+        fetchRecentGroupPosts(userId,3)
 
         val email = intent.getStringExtra(EXTRA_EMAIL)
 
@@ -119,7 +123,6 @@ class DashboardActivity : AppCompatActivity() {
         val profileButton: ImageView = findViewById(R.id.profile)
         val menuButton: ImageView = findViewById(R.id.menu)
         val announcementsButton: Button = findViewById(R.id.see_all_announcements_button)
-        val activityButton: Button = findViewById(R.id.see_all_activity_button)
         val eventsButton: Button = findViewById(R.id.see_all_events_button)
 
         // handling clicks for buttons
@@ -137,10 +140,6 @@ class DashboardActivity : AppCompatActivity() {
         }
         announcementsButton.setOnClickListener {
             val intent = Intent(this, AnnouncementsActivity::class.java)
-            startActivity(intent)
-        }
-        activityButton.setOnClickListener {
-            val intent = Intent(this, SeeAllActivity::class.java)
             startActivity(intent)
         }
         eventsButton.setOnClickListener {
@@ -169,6 +168,7 @@ class DashboardActivity : AppCompatActivity() {
                 runOnUiThread {
                     announcementPreview1.text = announcements.getOrNull(0) ?: "No announcements"
                     announcementPreview2.text = announcements.getOrNull(1) ?: "No announcements"
+                    announcementPreview3.text = announcements.getOrNull(2) ?: "No announcements"
                 }
             }
             .addOnFailureListener { e ->
@@ -205,6 +205,7 @@ class DashboardActivity : AppCompatActivity() {
                 runOnUiThread {
                     eventPreview1.text = posts.getOrNull(0) ?: "No events"
                     eventPreview2.text = posts.getOrNull(1) ?: "No events"
+                    eventPreview3.text = posts.getOrNull(2) ?: "No events"
                 }
             }
             .addOnFailureListener { e ->
@@ -236,11 +237,13 @@ class DashboardActivity : AppCompatActivity() {
                 db.collection("posts")
                     .whereIn("group", joinedGroups) // filter by joined groups
                     .orderBy("timestamp", Query.Direction.DESCENDING) // get most recent posts
-                    .limit(2)
+                    .limit(3)
                     .get()
                     .addOnSuccessListener { postsSnapshot ->
                         val recentPosts = postsSnapshot.documents.mapNotNull { doc ->
-                            doc.getString("text")
+                            val group = doc.getString("group")
+                            val postText = doc.getString("text")
+                            "$group -- $postText"
                         }
 
                         Log.d("Firestore", "Fetched recent posts: $recentPosts")
@@ -261,10 +264,12 @@ class DashboardActivity : AppCompatActivity() {
     private fun updateActivityPreviews(posts: List<String>) {
         val activityPreview1 = findViewById<TextView>(R.id.activity_preview1)
         val activityPreview2 = findViewById<TextView>(R.id.activity_preview2)
+        val activityPreview3 = findViewById<TextView>(R.id.activity_preview3)
 
         activityPreview1.text = posts.getOrNull(0) ?: "No recent activity"
         activityPreview2.text = posts.getOrNull(1) ?: "No recent activity"
-        Log.d("UI", "Updated activity previews: ${activityPreview1.text}, ${activityPreview2.text}")
+        activityPreview3.text = posts.getOrNull(2) ?: "No recent activity"
+        Log.d("UI", "Updated activity previews: ${activityPreview1.text}, ${activityPreview2.text}, ${activityPreview3.text}")
     }
 
 }
