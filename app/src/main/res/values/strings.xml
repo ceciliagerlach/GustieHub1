@@ -43,6 +43,11 @@
     <string name="new_post">New Post</string>
     <string name="post_content">Post Content</string>
     <string name="enable_comments">Enable Comments</string>
+    <string name="search_hint">Search page</string>
+    <string name="send_message">Send</string>
+    <string name="direct_messaging">Chats</string>
+    <string name="new_chat">Start a New Chat</string>
+    <string name="search_user_hint">Search Users</string>
     <string name="make_listing">Make a Listing</string>
     <string name="item_name">Item </string>
     <string name="price">Price</string>

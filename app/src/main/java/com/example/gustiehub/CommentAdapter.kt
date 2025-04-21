@@ -76,7 +76,7 @@ class CommentAdapter(
 
     override fun getItemCount() = commentList.size
 
-    fun updateComments(newComments: List<Post.Comment>) {
+    fun updateComments(newComments: List<Comment>) {
         commentList = newComments
         notifyDataSetChanged()
     }

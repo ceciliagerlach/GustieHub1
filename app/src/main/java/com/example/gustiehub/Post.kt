@@ -10,12 +10,3 @@ data class Post(
     val commentsEnabled: Boolean = true,
     val timestamp: com.google.firebase.Timestamp? = null,
 )
-
-{
-    data class Comment(
-        val commentId: String = "",
-        val userId: String = "",
-        val text: String = "",
-        val timestamp: com.google.firebase.Timestamp? = null,
-    )
-}

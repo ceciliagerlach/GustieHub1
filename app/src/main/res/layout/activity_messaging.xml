@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--UI for list of individuals to direct message-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/announcements"
+    android:id="@+id/message_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -59,6 +60,53 @@
                     android:src="@drawable/message_icon" />
 
             </Toolbar>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="66dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:paddingTop="16dp"
+                    android:text="@string/direct_messaging"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    android:textSize="30sp"/>
+
+                <ImageButton
+                    android:id="@+id/create_chat_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:backgroundTint="@android:color/transparent"
+                    android:src="@drawable/add_group_icon"
+                    android:paddingTop="20dp"/>
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/chatRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"
+                android:background="@drawable/white_rounded_corner_box"
+                android:paddingTop="14dp"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"/>
 
         </LinearLayout>
 
