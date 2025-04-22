@@ -65,10 +65,18 @@ class CommentActivity : AppCompatActivity() {
                 if (document.exists()) {
                     val username = document.getString("creatorName") ?: "Unknown User"
                     val text = document.getString("text") ?: "No Content"
+                    val creatorId = document.getString("creatorId") ?: ""
                     postUserName.text = username
                     postText.text = text
+                    postUserName.setOnClickListener {
+                        val intent = Intent(this, ProfileActivity::class.java)
+                        intent.putExtra("userId", creatorId)
+                        startActivity(intent)
+                    }
                 }
             }
+
+        // edit, remove, and delete menu options
         moreButton.setOnClickListener {
             val currentUserId = auth.currentUser?.uid ?: return@setOnClickListener
             val db = FirebaseFirestore.getInstance()

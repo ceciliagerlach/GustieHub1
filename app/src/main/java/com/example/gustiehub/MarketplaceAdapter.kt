@@ -9,7 +9,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
 class MarketplaceAdapter(
-        private var itemList: List<Marketplace>
+        private var itemList: List<Marketplace>,
+        private val onUsernameClick: (String) -> Unit
     ): RecyclerView.Adapter<MarketplaceAdapter.MarketViewHolder>() {
 
     class MarketViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -30,6 +31,9 @@ class MarketplaceAdapter(
     override fun onBindViewHolder(holder: MarketViewHolder, position: Int) {
         val item = itemList[position]
         holder.userNameTextView.text = item.userName
+        holder.userNameTextView.setOnClickListener {
+            onUsernameClick(item.userID)
+        }
         holder.itemNameTextView.text = item.itemName
         holder.priceTextView.text = item.price
         holder.descriptionTextView.text = item.description
