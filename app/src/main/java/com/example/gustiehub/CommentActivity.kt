@@ -1,7 +1,9 @@
 package com.example.gustiehub
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.EditText
@@ -20,6 +22,8 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class CommentActivity : AppCompatActivity() {
     private lateinit var commentsRecyclerView: RecyclerView
@@ -92,7 +96,7 @@ class CommentActivity : AppCompatActivity() {
                                 }
 
                                 R.id.menu_report -> {
-                                    reportPost(post)
+                                    reportPost(this, post)
                                     true
                                 }
 
@@ -130,7 +134,7 @@ class CommentActivity : AppCompatActivity() {
         commentAdapter = CommentAdapter(emptyList(),
             onEditClick = { comment: Comment -> showEditCommentDialog(comment) },
             onDeleteClick = { comment: Comment -> removeComment(comment) },
-            onReportClick = { comment: Comment -> reportComment(comment) }
+            onReportClick = { comment: Comment -> reportComment(this, comment) }
         )
 
         commentsRecyclerView.adapter = commentAdapter
@@ -286,15 +290,30 @@ class CommentActivity : AppCompatActivity() {
         }
     }
 
-    private fun reportComment(comment: Comment) {
-        //TODO: add report functionality
-//        val comments = commentsList.mapNotNull { commentMap ->
-//            val commentId = commentMap["commentId"] as? String ?: return@mapNotNull null
-//            val userId = commentMap["userId"] as? String ?: return@mapNotNull null
-//            val text = commentMap["text"] as? String ?: return@mapNotNull null
-//            val timestamp = commentMap["timestamp"] as? Timestamp
-//            Comment(commentId, userId, text, timestamp)
-//        }
+    private fun reportComment(context: Context, comment: Comment) {
+        val sdf = SimpleDateFormat("MMM dd, yyyy • h:mm a", Locale.getDefault())
+        val formattedTimestamp = comment.timestamp?.toDate()?.let { sdf.format(it) } ?: "Unknown time"
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "message/rfc822"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf("admin@gustiehub.com"))
+            putExtra(Intent.EXTRA_SUBJECT, "Report: Comment")
+            putExtra(
+                Intent.EXTRA_TEXT, """
+                A comment has been reported.
+
+                Comment ID: ${comment.commentId}
+                User ID: ${comment.userId}
+                Text: ${comment.text}
+                Timestamp: $formattedTimestamp
+            """.trimIndent()
+            )
+        }
+
+        try {
+            context.startActivity(Intent.createChooser(intent, "Send Email"))
+        } catch (e: Exception) {
+            Log.e("Report", "No email client found", e)
+        }
     }
 
     private fun fetchComments() {
@@ -404,7 +423,29 @@ class CommentActivity : AppCompatActivity() {
     }
 
     // report post
-    private fun reportPost(post: Post) {
-        //TODO: add report functionality
+    private fun reportPost(context: Context, post: Post) {
+        val sdf = SimpleDateFormat("MMM dd, yyyy • h:mm a", Locale.getDefault())
+        val formattedTimestamp = post.timestamp?.toDate()?.let { sdf.format(it) } ?: "Unknown time"
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "message/rfc822"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf("admin@gustiehub.com"))
+            putExtra(Intent.EXTRA_SUBJECT, "Report: Post")
+            putExtra(
+                Intent.EXTRA_TEXT, """
+                A post has been reported.
+
+                Post ID: ${post.postId}
+                Creator ID: ${post.creatorId}
+                Text: ${post.text}
+                Timestamp: $formattedTimestamp
+            """.trimIndent()
+            )
+        }
+
+        try {
+            context.startActivity(Intent.createChooser(intent, "Send Email"))
+        } catch (e: Exception) {
+            Log.e("Report", "No email client found", e)
+        }
     }
 }
