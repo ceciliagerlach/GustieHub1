@@ -87,25 +87,6 @@ object GlobalData {
         }
     }
 
-//    fun fetchRecentPosts(limit: Long = 20) {
-//        """ Fetches most recent posts (defaults to 20) and updates the global variable
-//            |recentPosts accordingly.
-//            |@input limit: the # of most recent posts to fetch
-//            |@return: None
-//        """.trimMargin()
-//
-//        val db = FirebaseFirestore.getInstance()
-//        val postsRef = db.collection("posts")
-//            .orderBy("timestamp", Query.Direction.DESCENDING) // fetch most recent posts first
-//            .limit(limit)   // only fetch limit many posts
-//
-//        postsRef.addSnapshotListener { snapshots, e ->
-//            if (e != null) {
-//                println("Error fetching recent posts: ${e.message}")
-//            }
-//        }
-//    }
-
     fun getFilteredGroupList(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val groupsRef = db.collection("groups")
@@ -361,23 +342,5 @@ object GlobalData {
             }
         }
     }
-
-//    fun listenToMessages(conversationId: String, onMessagesUpdated: (List<Message>) -> Unit) {
-//        FirebaseFirestore.getInstance()
-//            .collection("conversations").document(conversationId)
-//            .collection("messages")
-//            .orderBy("timestamp", Query.Direction.ASCENDING)
-//            .addSnapshotListener { snapshots, error ->
-//                if (error != null || snapshots == null) return@addSnapshotListener
-//
-//                val messages = snapshots.documents.mapNotNull { doc ->
-//                    val senderId = doc.getString("senderId") ?: return@mapNotNull null
-//                    val text = doc.getString("text") ?: return@mapNotNull null
-//                    val timestamp = doc.getTimestamp("timestamp") ?: return@mapNotNull null
-//                    Message(senderId, text, timestamp)
-//                }
-//                onMessagesUpdated(messages)
-//            }
-//    }
 
 }
