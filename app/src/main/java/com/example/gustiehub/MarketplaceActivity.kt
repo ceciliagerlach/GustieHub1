@@ -44,16 +44,19 @@ class MarketplaceActivity: AppCompatActivity(){
     // variables for searchbar
     private lateinit var searchView: SearchView
     private lateinit var recyclerView: RecyclerView
-//    private lateinit var marketplaceAdapter: MarketplaceAdapter
-//    private lateinit var marketplaceList: MutableList<MarketplaceItem>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_marketplace)
 
+        // set up recyclerview for marketplace
         val marketplaceRecyclerView = findViewById<RecyclerView>(R.id.marketplaceRecyclerView)
         marketplaceRecyclerView.layoutManager = LinearLayoutManager(this)
-        marketplaceAdapter = MarketplaceAdapter(itemList)
+        marketplaceAdapter = MarketplaceAdapter(itemList, onUsernameClick = { userId ->
+            val intent = Intent(this, ProfileActivity::class.java)
+            intent.putExtra("userId", userId)
+            startActivity(intent)
+        })
         marketplaceRecyclerView.adapter = marketplaceAdapter
 
         getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->

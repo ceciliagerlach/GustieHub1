@@ -85,8 +85,8 @@ class ChatAdapter(
                 holder.messageTimeTextView.text = formattedTime
 
                 // load profile picture
-                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-                FirebaseFirestore.getInstance().collection("users").document(userId).get()
+                val otherUserId = message.senderId
+                FirebaseFirestore.getInstance().collection("users").document(otherUserId).get()
                     .addOnSuccessListener { document ->
                         val profilePictureUrl = document.getString("profilePicture")
                         if (!profilePictureUrl.isNullOrEmpty()) {
