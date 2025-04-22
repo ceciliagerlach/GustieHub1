@@ -9,7 +9,7 @@ data class Marketplace (
     val price: String = "",
     val description: String = "",
     val itemPhotoURL: String = "",
-    val time: String = "",
+    val timestamp: com.google.firebase.Timestamp? = null,
     val itemID: String = ""
     ) {
 private val db = FirebaseFirestore.getInstance()
@@ -22,7 +22,7 @@ private val db = FirebaseFirestore.getInstance()
             "price" to price,
             "description" to description,
             "itemPhotoURL" to itemPhotoURL,
-            "time" to time,
+            "timestamp" to timestamp,
             "itemID" to itemID
 
         )

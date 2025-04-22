@@ -34,7 +34,6 @@ class GroupsActivity : AppCompatActivity() {
     private val groupsNameList = mutableListOf<String>()
 //    private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
-    private val db = FirebaseFirestore.getInstance()
 
     // variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView

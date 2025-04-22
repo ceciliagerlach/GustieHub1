@@ -1,5 +1,6 @@
 package com.example.gustiehub
 
+import android.widget.Toast
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -143,6 +144,31 @@ object GlobalData {
         }
     }
 
+    fun getMarketplaceItems(onItemsUpdated: (List<Marketplace>) -> Unit) {
+        val db = FirebaseFirestore.getInstance()
+        val itemsRef = db.collection("items")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+
+        itemsRef.addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                println("Error listening for marketplace changes: ${e.message}")
+                return@addSnapshotListener
+            }
+
+            snapshots?.let {
+                val updatedItems = mutableListOf<Marketplace>()
+                for (document in it.documents) {
+                    val item = document.toObject(Marketplace::class.java)
+                    if (item!= null) {
+                        updatedItems.add(item)
+                    }
+                }
+                println("Fetched ${updatedItems.size} events from Firestore.")
+                onItemsUpdated(updatedItems) // update views accordingly
+            }
+        }
+    }
+
     fun getComments(postId: String, onCommentsUpdated: (List<Comment>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         db.collection("posts").document(postId).collection("comments")
@@ -174,17 +200,17 @@ object GlobalData {
             }
 
             snapshots?.let {
-                val updatedPosts = mutableListOf<Event>()
+                val updatedEvents = mutableListOf<Event>()
                 val currentDate = Calendar.getInstance().time
 
                 for (document in it.documents) {
                     val event = document.toObject(Event::class.java)
                     if (event != null && isFuture(event.date)) {
-                            updatedPosts.add(event)
+                            updatedEvents.add(event)
                     }
                 }
-                println("Fetched ${updatedPosts.size} events from Firestore.")
-                onEventsUpdated(updatedPosts) // update views accordingly
+                println("Fetched ${updatedEvents.size} events from Firestore.")
+                onEventsUpdated(updatedEvents) // update views accordingly
             }
         }
     }

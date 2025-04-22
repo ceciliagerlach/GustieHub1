@@ -20,8 +20,10 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
 
@@ -40,6 +42,7 @@ class MarketplaceActivity: AppCompatActivity(){
     private var selectedPhotoUri: Uri? = null
 
     val db = FirebaseFirestore.getInstance()
+    val auth = FirebaseAuth.getInstance()
 
     // variables for searchbar
     private lateinit var searchView: SearchView
@@ -58,11 +61,17 @@ class MarketplaceActivity: AppCompatActivity(){
             startActivity(intent)
         })
         marketplaceRecyclerView.adapter = marketplaceAdapter
+        GlobalData.getMarketplaceItems { updatedMarketplaceItems ->
+            runOnUiThread {
+                itemList.clear()
+                itemList.addAll(updatedMarketplaceItems)
+                marketplaceAdapter.updateItems(updatedMarketplaceItems)
+            }
+        }
 
         getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             selectedPhotoUri = uri
         }
-        listenForItemsUpdate()
 
         // list of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
@@ -184,26 +193,9 @@ class MarketplaceActivity: AppCompatActivity(){
             NewMarketItemDialog()
         }
 
-}
-
-    private fun listenForItemsUpdate() {
-        db.collection("items")
-            .addSnapshotListener { snapshot, e ->
-                if (e != null) {
-                    Toast.makeText(this, "Error fetching events", Toast.LENGTH_SHORT).show()
-                    return@addSnapshotListener
-                }
-                itemList.clear()
-                for (document in snapshot!!.documents) {
-                    val item = document.toObject(Marketplace::class.java)
-                    if (item != null) {
-                        itemList.add(item)
-                    }
-                }
-                marketplaceAdapter.notifyDataSetChanged()
-            }
     }
 
+    // dialog for creating a new listing
     private fun NewMarketItemDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.new_listing_dialog, null)
         val itemNameEditText = dialogView.findViewById<EditText>(R.id.newItemName)
@@ -240,6 +232,7 @@ class MarketplaceActivity: AppCompatActivity(){
         dialog.show()
     }
 
+    // upload image and create listing
     fun uploadItemAndCreateListing(itemName: String, price: String, description: String) {
         val storageRef =
             FirebaseStorage.getInstance().reference.child("items/${UUID.randomUUID()}.jpg")
@@ -255,7 +248,7 @@ class MarketplaceActivity: AppCompatActivity(){
                             price = price,
                             description = description,
                             itemPhotoURL = downloadUri.toString(),
-                            time = System.currentTimeMillis().toString(),
+                            timestamp = Timestamp.now(),
                             itemID = UUID.randomUUID().toString()
                         )
                         newItem.createItemListing()
@@ -266,4 +259,5 @@ class MarketplaceActivity: AppCompatActivity(){
                 }
         }
     }
+
 }
