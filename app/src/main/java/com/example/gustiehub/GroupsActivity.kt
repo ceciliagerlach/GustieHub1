@@ -60,14 +60,21 @@ class GroupsActivity : AppCompatActivity() {
             val user = FirebaseAuth.getInstance().currentUser
             if (user != null) {
                 val userId = user.uid
-                val currentUser = User(userId, user.email ?: "", "", "", _gradYear = 0, "", _areasOfStudy = "")
+                val currentUser =
+                    User(userId, user.email ?: "", "", "", _gradYear = 0, "", _areasOfStudy = "")
                 currentUser.joinGroup(selectedGroup.name)
                 Toast.makeText(this, "Joined group: ${selectedGroup.name}", Toast.LENGTH_SHORT)
                     .show()
-            } else {
-                Toast.makeText(this, "User not authenticated", Toast.LENGTH_LONG).show()
-            }
-
+                GlobalData.getGroupList(userId) { updatedGroups ->
+                    runOnUiThread {
+                        groupList.clear()
+                        groupList.addAll(updatedGroups)
+                        groupsAdapter.updateGroups(updatedGroups)
+                    }
+                }
+            } else run {
+                    Toast.makeText(this, "User not authenticated", Toast.LENGTH_LONG).show()
+                }
         } )
         groupsRecyclerView.adapter = groupsAdapter
 
@@ -75,13 +82,15 @@ class GroupsActivity : AppCompatActivity() {
             NewGroupDialog()
         }
 
-        val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        val userID = FirebaseAuth.getInstance().currentUser?.uid
         groupsRecyclerView.adapter = groupsAdapter
-        GlobalData.getGroupList(userID) { updatedGroups ->
-            runOnUiThread {
-                groupList.clear()
-                groupList.addAll(updatedGroups)
-                groupsAdapter.updateGroups(updatedGroups)
+        if (userID != null) {
+            GlobalData.getGroupList(userID) { updatedGroups ->
+                runOnUiThread {
+                    groupList.clear()
+                    groupList.addAll(updatedGroups)
+                    groupsAdapter.updateGroups(updatedGroups)
+                }
             }
         }
 
@@ -94,11 +103,13 @@ class GroupsActivity : AppCompatActivity() {
             startActivity(intent)
         }
         menuRecyclerView.adapter = menuAdapter
-        GlobalData.getFilteredGroupList(userID){ updatedGroups ->
-            runOnUiThread {
-                groupList.clear()
-                groupList.addAll(updatedGroups)
-                menuAdapter.updateGroups(updatedGroups)
+        if (userID != null) {
+            GlobalData.getFilteredGroupList(userID){ updatedGroups ->
+                runOnUiThread {
+                    groupList.clear()
+                    groupList.addAll(updatedGroups)
+                    menuAdapter.updateGroups(updatedGroups)
+                }
             }
         }
 
