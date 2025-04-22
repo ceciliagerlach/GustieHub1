@@ -6,7 +6,7 @@
     <string name="welcome_text">Welcome!</string>
     <string name="announcements_text">Announcements</string>
     <string name="see_all_text">See All</string>
-    <string name="activity_text">Activity</string>
+    <string name="activity_text">Recent Activity</string>
     <string name="group_text">My Groups</string>"
     <string name="marketplace_text">Marketplace</string>
     <string name="events_text">Events</string>

@@ -1,6 +1,7 @@
 package com.example.gustiehub
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -18,6 +19,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class GroupDiscussionFragment(val groupName: String) : Fragment() {
     private lateinit var postsRecyclerView: RecyclerView
@@ -83,7 +86,7 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
             },
             onEditClick = { post -> showEditDialog(post) },
             onDeleteClick = { post -> removePost(post) },
-            onReportClick = { post -> reportPost(post) }
+            onReportClick = { post -> reportPost(requireContext(), post) }
         )
         postsRecyclerView.adapter = postsAdapter
 
@@ -267,8 +270,32 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
         }
     }
 
-    private fun reportPost(post: Post) {
-        //TODO: add report functionality
+    private fun reportPost(context: Context, post: Post) {
+        val sdf = SimpleDateFormat("MMM dd, yyyy • h:mm a", Locale.getDefault())
+        val formattedTimestamp = post.timestamp?.toDate()?.let { sdf.format(it) } ?: "Unknown time"
+        // create an Intent to send an email with the report
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "message/rfc822"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf("admin@gustiehub.com"))
+            putExtra(Intent.EXTRA_SUBJECT, "Report: Post")
+            putExtra(
+                Intent.EXTRA_TEXT, """
+                A post has been reported.
+
+                Post ID: ${post.postId}
+                Creator ID: ${post.creatorId}
+                Creator Name: ${post.creatorName}
+                Text: ${post.text}
+                Timestamp: $formattedTimestamp
+            """.trimIndent()
+            )
+        }
+
+        try {
+            context.startActivity(Intent.createChooser(intent, "Send Email"))
+        } catch (e: Exception) {
+            Log.e("Report", "No email client found", e)
+        }
     }
 
 }
