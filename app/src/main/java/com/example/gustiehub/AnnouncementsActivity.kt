@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AnnouncementsActivity : AppCompatActivity(){
+    // Variables for recycler views
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var announcementRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
@@ -25,21 +26,15 @@ class AnnouncementsActivity : AppCompatActivity(){
     private val announcementList = mutableListOf<Announcement>()
     private val db = FirebaseFirestore.getInstance()
 
-    // variables for toolbar and tabbed navigation
+    // Variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
-
-    // variables for searchbar
-    private lateinit var searchView: SearchView
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var marketplaceAdapter: AnnouncementAdapter
-    private lateinit var marketplaceList: MutableList<Announcement>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_announcement)
 
-        // list of announcements
+        // List of announcements
         announcementRecyclerView = findViewById<RecyclerView>(R.id.announcementsRecyclerView)
         announcementRecyclerView.layoutManager = LinearLayoutManager(this)
         announcementAdapter = AnnouncementAdapter(announcementList)
@@ -52,7 +47,7 @@ class AnnouncementsActivity : AppCompatActivity(){
             }
         }
 
-        // list of groups in tab
+        // List of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -70,7 +65,7 @@ class AnnouncementsActivity : AppCompatActivity(){
             }
         }
 
-        //set up drawer layout and handle clicks for menu items
+        // Set up drawer layout and handle clicks for menu items
         navView = findViewById(R.id.nav_view)
         drawerLayout = findViewById(R.id.tab_layout)
         navView.setNavigationItemSelectedListener { menuItem ->
@@ -99,14 +94,14 @@ class AnnouncementsActivity : AppCompatActivity(){
             true
         }
 
-        // opening menu
+        // Opening menu
         val menuButton: ImageView = findViewById(R.id.menu)
         menuButton.setOnClickListener {
             val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        // handling clicks for toolbar
+        // Handling clicks for toolbar
         val messageButton: ImageView = findViewById(R.id.messaging)
         val profileButton: ImageView = findViewById(R.id.profile)
         messageButton.setOnClickListener {
@@ -118,6 +113,7 @@ class AnnouncementsActivity : AppCompatActivity(){
             startActivity(intent)
         }
 
+        // Search bar
         val recyclerView: RecyclerView = findViewById(R.id.announcementsRecyclerView)
         val searchView: SearchView = findViewById(R.id.searchView)
 
@@ -138,6 +134,7 @@ class AnnouncementsActivity : AppCompatActivity(){
 
     }
 
+    // Function to filter announcements based on search query
     private fun filterAnnouncements(query: String): List<Announcement> {
         return announcementList.filter { item ->
             item.header.contains(query, ignoreCase = true) ||
@@ -145,6 +142,7 @@ class AnnouncementsActivity : AppCompatActivity(){
         }
     }
 
+    // Function to listen for updates to announcements and update views
     private fun listenForAnnouncementUpdates() {
         db.collection("announcements")
             .addSnapshotListener { snapshot, e ->

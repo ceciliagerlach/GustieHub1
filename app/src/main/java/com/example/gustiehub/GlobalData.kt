@@ -171,20 +171,21 @@ object GlobalData {
 
     fun getComments(postId: String, onCommentsUpdated: (List<Comment>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
-        db.collection("posts").document(postId).collection("comments")
-            .orderBy("timestamp", Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    println("Error getting comments: ${e.message}")
-                    return@addSnapshotListener
-                }
-
-                snapshots?.let {
-                    val comments = it.documents.mapNotNull { doc ->
-                        doc.toObject(Comment::class.java)
-                    }
-                    onCommentsUpdated(comments)
-                }
+        val commentsRef = db.collection("posts").document(postId)
+        commentsRef.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                println("Error getting comments: ${e.message}")
+                return@addSnapshotListener
+            }
+            val commentsList = snapshot?.get("comments") as? List<Map<String, Any>> ?: emptyList()
+            val comments = commentsList.mapNotNull { commentMap ->
+                val commentId = commentMap["commentId"] as? String ?: return@mapNotNull null
+                val userId = commentMap["userId"] as? String ?: return@mapNotNull null
+                val text = commentMap["text"] as? String ?: return@mapNotNull null
+                val timestamp = commentMap["timestamp"] as? Timestamp
+                Comment(commentId, userId, text, timestamp)
+            }
+            onCommentsUpdated(comments)
             }
     }
 

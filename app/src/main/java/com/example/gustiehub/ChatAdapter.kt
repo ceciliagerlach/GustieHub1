@@ -13,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+// Chat adapter to bind message data to views
 class ChatAdapter(
     private var messageList: List<Message>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {

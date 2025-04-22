@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class CommentActivity : AppCompatActivity() {
+    // Variables for recycler views
     private lateinit var commentsRecyclerView: RecyclerView
     private lateinit var commentAdapter: CommentAdapter
     private lateinit var commentInput: EditText
@@ -37,26 +38,28 @@ class CommentActivity : AppCompatActivity() {
     private lateinit var postsAdapter: PostAdapter
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
+    private val commentsList = mutableListOf<Comment>()
     val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
 
-    // variables for toolbar and tabbed navigation
+    // Variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
 
+    // Initialize user object
     private val userObject = User(auth.currentUser?.uid ?: "", "", "", "", 0, "", "")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_comment)
 
-        // get postId from intent
+        // Get postId from intent
         postId = intent.getStringExtra("postId") ?: return
         groupName = intent.getStringExtra("groupName") ?: return
         commentInput = findViewById(R.id.write_comment)
         commentButton = findViewById(R.id.comment_button)
 
-        // display post information
+        // Display post information
         val postUserName: TextView = findViewById(R.id.user_name)
         val postText: TextView = findViewById(R.id.post_text)
         val moreButton: ImageButton = findViewById(R.id.menu_button)
@@ -76,7 +79,7 @@ class CommentActivity : AppCompatActivity() {
                 }
             }
 
-        // edit, remove, and delete menu options
+        // Handle edit, remove, and delete menu options
         moreButton.setOnClickListener {
             val currentUserId = auth.currentUser?.uid ?: return@setOnClickListener
             val db = FirebaseFirestore.getInstance()
@@ -136,7 +139,7 @@ class CommentActivity : AppCompatActivity() {
             }
 
 
-        // set up RecyclerView
+        // Set up comments in RecyclerView
         commentsRecyclerView = findViewById(R.id.commentsRecyclerView)
         commentsRecyclerView.layoutManager = LinearLayoutManager(this)
         commentAdapter = CommentAdapter(emptyList(),
@@ -144,15 +147,18 @@ class CommentActivity : AppCompatActivity() {
             onDeleteClick = { comment: Comment -> removeComment(comment) },
             onReportClick = { comment: Comment -> reportComment(this, comment) }
         )
-
         commentsRecyclerView.adapter = commentAdapter
+        GlobalData.getComments(postId) { updatedComments ->
+            runOnUiThread {
+                commentsList.clear()
+                commentsList.addAll(updatedComments)
+                commentAdapter.updateComments(updatedComments)
+            }
+        }
         commentInput = findViewById(R.id.write_comment)
         commentButton = findViewById(R.id.comment_button)
 
-        // Fetch comments from Firestore
-        fetchComments()
-
-        // get and set profile photo for comment submission
+        // Get and set profile photo for comment submission
         val profileImageView: ImageView = findViewById(R.id.profile_post)
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         db.collection("users").document(userId).get()
@@ -176,7 +182,7 @@ class CommentActivity : AppCompatActivity() {
             submitComment()
         }
 
-        // set onClickListener for back button
+        // Set onClickListener for back button
         val backButton: ImageButton = findViewById(R.id.back_button)
         backButton.setOnClickListener {
             val intent = Intent(this, GroupPageActivity::class.java)
@@ -184,7 +190,7 @@ class CommentActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // list of groups in tab
+        // List of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -202,7 +208,7 @@ class CommentActivity : AppCompatActivity() {
             }
         }
 
-        //set up drawer layout and handle clicks for menu items
+        // Set up drawer layout and handle clicks for menu items
         navView = findViewById(R.id.nav_view)
         drawerLayout = findViewById(R.id.tab_layout)
         navView.setNavigationItemSelectedListener { menuItem ->
@@ -236,14 +242,14 @@ class CommentActivity : AppCompatActivity() {
             true
         }
 
-        // opening menu
+        // Opening menu
         val menuButton: ImageView = findViewById(R.id.menu)
         menuButton.setOnClickListener {
             val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        // handling clicks for toolbar
+        // Handling clicks for toolbar
         val messageButton: ImageView = findViewById(R.id.messaging)
         val profileButton: ImageView = findViewById(R.id.profile)
         messageButton.setOnClickListener {
@@ -256,7 +262,7 @@ class CommentActivity : AppCompatActivity() {
         }
     }
 
-    // show dialog to edit comment
+    // Show dialog to edit comment
     private fun showEditCommentDialog(comment: Comment) {
         val editText = EditText(this)
         editText.setText(comment.text)
@@ -274,7 +280,13 @@ class CommentActivity : AppCompatActivity() {
                     ) { success, errorMessage ->
                         if (success) {
                             Toast.makeText(this, "Comment updated", Toast.LENGTH_SHORT).show()
-                            fetchComments()
+                            GlobalData.getComments(postId) { updatedComments ->
+                                runOnUiThread {
+                                    commentsList.clear()
+                                    commentsList.addAll(updatedComments)
+                                    commentAdapter.updateComments(updatedComments)
+                                }
+                            }
                         } else {
                             Log.e("Firestore", "Failed to add comment: $errorMessage")
                         }
@@ -286,18 +298,25 @@ class CommentActivity : AppCompatActivity() {
             .show()
     }
 
-
+    // Remove comment
     private fun removeComment(comment: Comment) {
         userObject.deleteComment(postId, comment.commentId) { success, errorMessage ->
             if (success) {
                 Toast.makeText(this, "Comment deleted", Toast.LENGTH_SHORT).show()
-                fetchComments()
+                GlobalData.getComments(postId) { updatedComments ->
+                    runOnUiThread {
+                        commentsList.clear()
+                        commentsList.addAll(updatedComments)
+                        commentAdapter.updateComments(updatedComments)
+                    }
+                }
             } else {
                 Log.e("Firestore", "Failed to add comment: $errorMessage")
             }
         }
     }
 
+    // Report comment to administrator via email
     private fun reportComment(context: Context, comment: Comment) {
         val sdf = SimpleDateFormat("MMM dd, yyyy • h:mm a", Locale.getDefault())
         val formattedTimestamp = comment.timestamp?.toDate()?.let { sdf.format(it) } ?: "Unknown time"
@@ -324,38 +343,7 @@ class CommentActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchComments() {
-        val db = FirebaseFirestore.getInstance()
-        db.collection("posts").document(postId)
-            .addSnapshotListener { document, error ->
-                if (error != null) {
-                    Log.e("Firestore", "Error listening for comments", error)
-                    return@addSnapshotListener
-                }
-
-                if (document != null && document.exists()) {
-                    val commentsList =
-                        document.get("comments") as? List<Map<String, Any>> ?: emptyList()
-
-                    Log.d("Firestore", "Live updated comments: $commentsList")
-
-                    val comments = commentsList.mapNotNull { commentMap ->
-                        val commentId =
-                            commentMap["commentId"] as? String ?: return@mapNotNull null
-                        val userId =
-                            commentMap["userId"] as? String ?: return@mapNotNull null
-                        val text = commentMap["text"] as? String ?: return@mapNotNull null
-                        val timestamp = commentMap["timestamp"] as? Timestamp
-                        Comment(commentId, userId, text, timestamp)
-                    }
-
-                    commentAdapter.updateComments(comments)
-                    commentAdapter.notifyDataSetChanged()
-                }
-            }
-    }
-
-
+    // Add comment to post
     private fun submitComment() {
         val user = FirebaseAuth.getInstance().currentUser
         val userId = user?.uid ?: return
@@ -366,7 +354,7 @@ class CommentActivity : AppCompatActivity() {
             return
         }
 
-        // fetch user info to get their name
+        // Fetch user info
         db.collection("users").document(userId).get().addOnSuccessListener { document ->
             val firstName = document.getString("firstName") ?: ""
             val lastName = document.getString("lastName") ?: ""
@@ -377,7 +365,13 @@ class CommentActivity : AppCompatActivity() {
                 if (success) {
                     // clear input field and refresh comments
                     commentInput.text.clear()
-                    fetchComments()
+                    GlobalData.getComments(postId) { updatedComments ->
+                        runOnUiThread {
+                            commentsList.clear()
+                            commentsList.addAll(updatedComments)
+                            commentAdapter.updateComments(updatedComments)
+                        }
+                    }
                 } else {
                     Log.e("Firestore", "Failed to add comment: $errorMessage")
                 }
@@ -385,7 +379,7 @@ class CommentActivity : AppCompatActivity() {
         }
     }
 
-    // edit post
+    // Edit post
     private fun showEditDialog(post: Post) {
         val editText = EditText(this)
         editText.setText(post.text)
@@ -414,7 +408,7 @@ class CommentActivity : AppCompatActivity() {
             .show()
     }
 
-    // remove post
+    // Remove post
     private fun removePost(post: Post) {
         userObject?.deletePost(post.postId) { success, errorMessage ->
             if (success) {
@@ -430,7 +424,7 @@ class CommentActivity : AppCompatActivity() {
         }
     }
 
-    // report post
+    // Report post to administrator via email
     private fun reportPost(context: Context, post: Post) {
         val sdf = SimpleDateFormat("MMM dd, yyyy • h:mm a", Locale.getDefault())
         val formattedTimestamp = post.timestamp?.toDate()?.let { sdf.format(it) } ?: "Unknown time"

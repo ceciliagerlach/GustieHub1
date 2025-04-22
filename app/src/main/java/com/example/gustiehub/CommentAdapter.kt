@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
+// Comment adapter to bind comment data to views
 class CommentAdapter(
     private var commentList: List<Comment>,
     private val onEditClick: (Comment) -> Unit,

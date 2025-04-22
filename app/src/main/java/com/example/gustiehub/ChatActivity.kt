@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class ChatActivity:  AppCompatActivity() {
+    // Variables for recycler views
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var chatRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
@@ -26,7 +27,7 @@ class ChatActivity:  AppCompatActivity() {
     private val filteredGroupList = mutableListOf<Group>()
     private val messageList = mutableListOf<Message>()
 
-    // variables for toolbar and tabbed navigation
+    // Variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
     private val TAG = "ChatActivity"
@@ -41,7 +42,7 @@ class ChatActivity:  AppCompatActivity() {
             conversationId = userIds.sorted().joinToString("_")
         }
 
-        // list of groups in tab
+        // List of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -59,7 +60,7 @@ class ChatActivity:  AppCompatActivity() {
             }
         }
 
-        //set up drawer layout and handle clicks for menu items
+        // Set up drawer layout and handle clicks for menu items
         navView = findViewById(R.id.nav_view)
         drawerLayout = findViewById(R.id.tab_layout)
         navView.setNavigationItemSelectedListener { menuItem ->
@@ -89,23 +90,22 @@ class ChatActivity:  AppCompatActivity() {
             true
         }
 
-        // opening menu
+        // Opening menu
         val menuButton: ImageView = findViewById(R.id.menu)
         menuButton.setOnClickListener {
             val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
             drawerLayout.openDrawer(GravityCompat.START)
         }
-        // initialize and handle clicks for profile button
+        // Initialize and handle clicks for profile button
         val profileButton: ImageView = findViewById(R.id.profile)
         profileButton.setOnClickListener {
             val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
 
-        // list of messages with user
+        // List of messages with user
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val otherUserId = userIds?.firstOrNull { it != userId } ?: return
-
         GlobalData.getOrCreateConversation(userId, otherUserId) { conversationId ->
             if (conversationId != null) {
                 chatRecyclerView = findViewById(R.id.recycler_chat)
@@ -126,7 +126,7 @@ class ChatActivity:  AppCompatActivity() {
             }
         }
 
-        // listener for sending a message
+        // Listener for sending a message
         val sendButton = findViewById<Button>(R.id.send_button)
         val messageInput = findViewById<EditText>(R.id.message_input)
 
@@ -140,7 +140,7 @@ class ChatActivity:  AppCompatActivity() {
             }
         }
 
-        // set onClickListener for back button
+        // Set onClickListener for back button
         val backButton = findViewById<ImageButton>(R.id.back_button)
         backButton.setOnClickListener {
             finish()
@@ -148,6 +148,7 @@ class ChatActivity:  AppCompatActivity() {
 
     }
 
+    // Function to send a message
     private fun sendMessage(conversationId: String, senderId: String, receiverId: String, text: String) {
         val db = FirebaseFirestore.getInstance()
 
@@ -176,9 +177,8 @@ class ChatActivity:  AppCompatActivity() {
             }
     }
 
+    // Function to fetch the receiver's ID
     private fun getReceiverId(userIds: ArrayList<String>): String {
         return userIds.first { it != FirebaseAuth.getInstance().currentUser?.uid }
     }
-
-
 }

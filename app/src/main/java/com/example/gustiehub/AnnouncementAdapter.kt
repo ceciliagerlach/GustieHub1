@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.gustiehub.GroupsAdapter.GroupViewHolder
 
+// Announcement adapter to bind announcement data to views
 class AnnouncementAdapter (
     private var announcementList: List<Announcement>
 ) : RecyclerView.Adapter<AnnouncementAdapter.AnnouncementViewHolder>() {
