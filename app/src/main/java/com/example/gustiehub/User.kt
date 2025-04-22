@@ -24,7 +24,7 @@ class User(private val _userId: String,
     private var homeState = _homeState
     private var areasOfStudy = _areasOfStudy
 
-    var profilePicture = "" // store as URL?
+    var profilePicture = "https://firebasestorage.googleapis.com/v0/b/gustiehub.firebasestorage.app/o/profile_images%2Fdefault-profile-pic.png?alt=media&token=bec09d7b-a74d-484c-93b4-f0b1716d60bc"
     private var joinedGroups: MutableList<String> = mutableListOf("Gusties") // store group names
 
     private val db = FirebaseFirestore.getInstance()

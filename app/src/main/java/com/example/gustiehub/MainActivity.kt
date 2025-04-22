@@ -51,9 +51,11 @@ class MainActivity : AppCompatActivity() {
     private val SERVER_CLIENT_ID = "183734578676-c4vnp76b0k2cbu26f2qb6ujjikr6hknb.apps.googleusercontent.com"
     private val CLIENT_EMAIL_DOMAIN = "@gustavus.edu"
     private lateinit var auth: FirebaseAuth
-    private  val TAG = "MainActivity"
+    private val TAG = "MainActivity"
     private var onPhotoSelected: ((Uri?) -> Unit)? = null
-    private lateinit var profilePictureURL: String
+    private val defaultProfilePictureURL = "https://firebasestorage.googleapis.com/v0/b/gustiehub.firebasestorage.app/o/profile_images%2Fdefault-profile-pic.png?alt=media&token=bec09d7b-a74d-484c-93b4-f0b1716d60bc"
+    // initialize to default picture
+    private var profilePictureURL = defaultProfilePictureURL
 
     // registers a photo picker activity launcher in single-select mode
     val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -320,7 +322,6 @@ class MainActivity : AppCompatActivity() {
 
             if (firstName.isNotEmpty() && lastName.isNotEmpty()) {
                 val user = User(userId, email, firstName, lastName, gradYear, homeState, areasOfStudy)
-
                 user.createUserProfile(userId, email, firstName, lastName,
                     gradYear, homeState, areasOfStudy, profilePictureURL) { success, error ->
                     if (success) {
