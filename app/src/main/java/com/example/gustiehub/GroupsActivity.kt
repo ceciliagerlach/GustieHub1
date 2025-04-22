@@ -32,7 +32,7 @@ class GroupsActivity : AppCompatActivity() {
     private lateinit var groupsAdapter: GroupsAdapter
     private lateinit var menuAdapter: MenuAdapter
     private val groupsNameList = mutableListOf<String>()
-    private val groupList = mutableListOf<Group>()
+//    private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
     private val db = FirebaseFirestore.getInstance()
 
@@ -69,7 +69,9 @@ class GroupsActivity : AppCompatActivity() {
                     runOnUiThread {
                         groupList.clear()
                         groupList.addAll(updatedGroups)
-                        groupsAdapter.updateGroups(updatedGroups)
+                        filteredGroupList.clear()
+                        filteredGroupList.addAll(updatedGroups)
+                        groupsAdapter.notifyDataSetChanged()
                     }
                 }
             } else run {
@@ -89,7 +91,14 @@ class GroupsActivity : AppCompatActivity() {
                 runOnUiThread {
                     groupList.clear()
                     groupList.addAll(updatedGroups)
-                    groupsAdapter.updateGroups(updatedGroups)
+                    filteredGroupList.clear()
+                    filteredGroupList.addAll(updatedGroups)
+                    groupsAdapter.notifyDataSetChanged()
+                }
+            }
+            GlobalData.getFilteredGroupList(userID) { updatedGroups ->
+                runOnUiThread {
+                    menuAdapter.updateGroups(updatedGroups)
                 }
             }
         }
@@ -103,15 +112,15 @@ class GroupsActivity : AppCompatActivity() {
             startActivity(intent)
         }
         menuRecyclerView.adapter = menuAdapter
-        if (userID != null) {
-            GlobalData.getFilteredGroupList(userID){ updatedGroups ->
-                runOnUiThread {
-                    groupList.clear()
-                    groupList.addAll(updatedGroups)
-                    menuAdapter.updateGroups(updatedGroups)
-                }
-            }
-        }
+//        if (userID != null) {
+//            GlobalData.getFilteredGroupList(userID){ updatedGroups ->
+//                runOnUiThread {
+//                    groupList.clear()
+//                    groupList.addAll(updatedGroups)
+//                    menuAdapter.updateGroups(updatedGroups)
+//                }
+//            }
+//        }
 
         //set up drawer layout and handle clicks for menu items
         drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
@@ -163,7 +172,7 @@ class GroupsActivity : AppCompatActivity() {
         // search functionality
         val searchView: SearchView = findViewById(R.id.searchView)
         val recyclerView: RecyclerView = findViewById(R.id.groupsRecyclerView)
-        listenForGroupsUpdate()
+//        listenForGroupsUpdate()
 
         val searchHelper = SearchHelper(
             context = this,
@@ -180,28 +189,28 @@ class GroupsActivity : AppCompatActivity() {
         )
     }
 
-    private fun listenForGroupsUpdate() {
-        db.collection("groups")
-            .addSnapshotListener { snapshot, e ->
-                if (e != null) {
-                    Toast.makeText(this, "Error fetching groups", Toast.LENGTH_SHORT).show()
-                    return@addSnapshotListener
-                }
-
-                groupList.clear()
-                filteredGroupList.clear()
-
-                for (document in snapshot!!.documents) {
-                    val group = document.toObject(Group::class.java)
-                    if (group != null && !group.name.contains("Class of") &&!group.name.equals("Gusties")) {
-                        groupList.add(group)
-                    }
-                }
-
-                filteredGroupList.addAll(groupList)
-                groupsAdapter.notifyDataSetChanged()
-            }
-    }
+//    private fun listenForGroupsUpdate() {
+//        db.collection("groups")
+//            .addSnapshotListener { snapshot, e ->
+//                if (e != null) {
+//                    Toast.makeText(this, "Error fetching groups", Toast.LENGTH_SHORT).show()
+//                    return@addSnapshotListener
+//                }
+//
+//                groupList.clear()
+//                filteredGroupList.clear()
+//
+//                for (document in snapshot!!.documents) {
+//                    val group = document.toObject(Group::class.java)
+//                    if (group != null && !group.name.contains("Class of") &&!group.name.equals("Gusties")) {
+//                        groupList.add(group)
+//                    }
+//                }
+//
+//                filteredGroupList.addAll(groupList)
+//                groupsAdapter.notifyDataSetChanged()
+//            }
+//    }
 
     private fun filterGroups(query: String): List<Group> {
         if (query.isBlank()) return groupList

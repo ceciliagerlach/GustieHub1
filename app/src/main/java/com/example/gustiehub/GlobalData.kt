@@ -77,6 +77,7 @@ object GlobalData {
                         if (userId !in group.members) {
                             if (!group.name.matches(Regex("^Class of \\d{4}$"))) {
                                 updatedGroups.add(group)
+                                println("${userId}: ${group.name}\nUpdated Groups Size: ${updatedGroups.size}")
                             }
                         }
                     }
