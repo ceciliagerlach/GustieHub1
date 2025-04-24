@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 
+// Marketplace adapter to bind listing data to views
 class MarketplaceAdapter(
         private var itemList: List<Marketplace>,
         private val onUsernameClick: (String) -> Unit

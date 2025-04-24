@@ -23,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class EventsActivity: AppCompatActivity() {
+    // Variables for recycler views
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var eventsRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
@@ -31,7 +32,7 @@ class EventsActivity: AppCompatActivity() {
     private var eventsList = mutableListOf<Event>()
     private val filteredGroupList = mutableListOf<Group>()
 
-    // variables for toolbar and tabbed navigation
+    // Variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
     private val db = FirebaseFirestore.getInstance()
@@ -40,7 +41,7 @@ class EventsActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_events)
 
-        // list of events
+        // List of events
         eventsRecyclerView = findViewById<RecyclerView>(R.id.eventsRecyclerView)
         eventsRecyclerView.layoutManager = LinearLayoutManager(this)
         eventsAdapter = EventsAdapter(eventsList)
@@ -53,13 +54,13 @@ class EventsActivity: AppCompatActivity() {
             }
         }
 
-        // create event button
+        // Create event button
         val createEventButton: ImageButton = findViewById(R.id.create_events_button)
         createEventButton.setOnClickListener {
             NewEventsDialog()
         }
 
-        // list of groups in tab
+        // List of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -77,7 +78,7 @@ class EventsActivity: AppCompatActivity() {
             }
         }
 
-        //set up drawer layout and handle clicks for menu items
+        // Set up drawer layout and handle clicks for menu items
         navView = findViewById(R.id.nav_view)
         drawerLayout = findViewById(R.id.tab_layout)
         navView.setNavigationItemSelectedListener { menuItem ->
@@ -110,14 +111,14 @@ class EventsActivity: AppCompatActivity() {
             true
         }
 
-        // opening menu
+        // Opening menu
         val menuButton: ImageView = findViewById(R.id.menu)
         menuButton.setOnClickListener {
             val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        // handling clicks for buttons
+        // Handling clicks for buttons
         val messageButton: ImageView = findViewById(R.id.messaging)
         val profileButton: ImageView = findViewById(R.id.profile)
         messageButton.setOnClickListener {
@@ -129,9 +130,7 @@ class EventsActivity: AppCompatActivity() {
             startActivity(intent)
         }
 
-        // **********************************************************
-
-        // invoking the search dialog
+        // Invoking the search dialog
         val searchView: SearchView = findViewById(R.id.searchView)
         val recyclerView: RecyclerView = findViewById(R.id.eventsRecyclerView)
         listenForEventsUpdate()

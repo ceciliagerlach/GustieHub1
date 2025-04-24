@@ -22,10 +22,12 @@ class SearchActivity : AppCompatActivity() {
         adapter = EventsAdapter(searchResults)
         recyclerView.adapter = adapter
 
+        // Handle search query
         val query = intent.getStringExtra("query") ?: ""
         searchEvents(query)
     }
 
+    // Function to search for events that match the query
     private fun searchEvents(query: String) {
         val db = FirebaseFirestore.getInstance()
         db.collection("events")
@@ -43,17 +45,6 @@ class SearchActivity : AppCompatActivity() {
                 }
                 adapter.notifyDataSetChanged()
             }
-    }
-
-    //TODO: implement actual search functionality
-    //TODO: could maybe somehow ties this into the adapter, so I don't have to duplicate all the views
-
-    //If your data is stored in a SQLite database on the device,
-    //performing a full-text search—using FTS3, rather than a LIKE query
-    //can provide a more robust search across text data and can produce results significantly faster.
-    //See sqlite.org for information about FTS3 and the SQLiteDatabase class for information about SQLite on Android.
-    private fun doMySearch(query: String) {
-
     }
 
 }

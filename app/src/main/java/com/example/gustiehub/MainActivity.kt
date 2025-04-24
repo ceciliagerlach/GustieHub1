@@ -46,18 +46,18 @@ import java.time.Year
 import kotlin.math.sign
 
 class MainActivity : AppCompatActivity() {
+    // Variables for login
     lateinit var loginButton: Button
-
     private val SERVER_CLIENT_ID = "183734578676-c4vnp76b0k2cbu26f2qb6ujjikr6hknb.apps.googleusercontent.com"
     private val CLIENT_EMAIL_DOMAIN = "@gustavus.edu"
     private lateinit var auth: FirebaseAuth
     private val TAG = "MainActivity"
     private var onPhotoSelected: ((Uri?) -> Unit)? = null
     private val defaultProfilePictureURL = "https://firebasestorage.googleapis.com/v0/b/gustiehub.firebasestorage.app/o/profile_images%2Fdefault-profile-pic.png?alt=media&token=bec09d7b-a74d-484c-93b4-f0b1716d60bc"
-    // initialize to default picture
+    // Initialize to default picture
     private var profilePictureURL = defaultProfilePictureURL
 
-    // registers a photo picker activity launcher in single-select mode
+    // Registers a photo picker activity launcher in single-select mode
     val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         // callback is invoked after the user selects a media item or closes the
         // photo picker
@@ -123,11 +123,11 @@ class MainActivity : AppCompatActivity() {
         //findViewById<Button>(R.id.logout_button).setOnClickListener {
         //signOut()
         //}
-    } // end onCreate()
+    }
 
     override fun onStart() {
         super.onStart()
-        // check if user is signed in and update UI
+        // Check if user is signed in and update UI
         val currentUser = auth.currentUser
         updateUI(currentUser)
     }

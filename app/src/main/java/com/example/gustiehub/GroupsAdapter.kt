@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
+// Groups adapter to bind group data to views
 class GroupsAdapter(
     private var groupList: MutableList<Group>,
     private val onItemClick: (Group) -> Unit,
@@ -38,7 +39,7 @@ class GroupsAdapter(
         }
     }
 
-    // refresh group list
+    // Refresh group list
     fun updateGroups(newGroups: List<Group>) {
         groupList.clear()
         groupList.addAll(newGroups)

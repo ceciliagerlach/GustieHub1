@@ -9,14 +9,13 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+// File to fetch data from Firestore
 object GlobalData {
     var groupList = mutableListOf<Group>()
-    var recentPosts = mutableListOf<Post>()
-
-    // will these be used? Not sure yet
     var userDict = mutableMapOf<String,User>()
     var groupDict = mutableMapOf<String, Group>()
 
+    // Functions to get list of users from Firestore
     fun getUsers(onUserUpdated: (List<User>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val usersRef = db.collection("users")
@@ -55,7 +54,7 @@ object GlobalData {
         }
     }
 
-
+    // Functions to get list of groups from Firestore
     fun getGroupList(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
         """ Fetches created groups and updates the global variable groupList accordingly.
             |@return: None
@@ -89,6 +88,7 @@ object GlobalData {
         }
     }
 
+    // Functions to get list of groups the user is in from Firestore
     fun getFilteredGroupList(userId: String, onGroupsUpdated: (List<Group>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val groupsRef = db.collection("groups")
@@ -115,6 +115,7 @@ object GlobalData {
         }
     }
 
+    // Functions to get list of posts for each group from Firestore
     fun getPosts(groupName: String, onPostsUpdated: (List<Post>) -> Unit) {
         println("FirestoreDebug getPosts() called")
         val db = FirebaseFirestore.getInstance()
@@ -144,6 +145,7 @@ object GlobalData {
         }
     }
 
+    // Functions to get list of marketplace items from Firestore
     fun getMarketplaceItems(onItemsUpdated: (List<Marketplace>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val itemsRef = db.collection("items")
@@ -169,6 +171,7 @@ object GlobalData {
         }
     }
 
+    // Functions to get list of comments for each post from Firestore
     fun getComments(postId: String, onCommentsUpdated: (List<Comment>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val commentsRef = db.collection("posts").document(postId)
@@ -189,6 +192,7 @@ object GlobalData {
             }
     }
 
+    // Functions to get list of events from Firestore
     fun getEvents(onEventsUpdated: (List<Event>) -> Unit) {
         println("FirestoreDebug getEvents() called")
         val db = FirebaseFirestore.getInstance()
@@ -216,6 +220,7 @@ object GlobalData {
         }
     }
 
+    // Functions to get list of announcements from Firestore
     fun getAnnouncements(onAnnouncementsUpdated: (List<Announcement>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val announcementsRef = db.collection("announcements")
@@ -238,6 +243,8 @@ object GlobalData {
             }
         }
     }
+
+    // Functions to get list of conversations from Firestore
     fun getConversations(
         userId: String,
         onConversationsUpdated: (List<Conversation>) -> Unit
@@ -266,9 +273,7 @@ object GlobalData {
         }
     }
 
-    /**
-     * Converts a date string (e.g., "April 12") to a Date object and checks if it's today or in the future.
-     */
+    // Function to check if date is today or in the future.
     fun isFuture(dateStr: String): Boolean {
         return try {
             val dateFormat = SimpleDateFormat("MMMM d", Locale.ENGLISH)
@@ -298,7 +303,7 @@ object GlobalData {
         }
     }
 
-    // might be redundant?
+    // Function to get or create a conversation
     fun getOrCreateConversation(
         userId1: String,
         userId2: String,
@@ -330,6 +335,7 @@ object GlobalData {
             .addOnFailureListener { onComplete(null) }
     }
 
+    // Function to get list of other users in a conversation
     fun getUserConversations(currentUserId: String, onComplete: (List<String>) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         db.collection("conversations")
@@ -345,6 +351,7 @@ object GlobalData {
             .addOnFailureListener { onComplete(emptyList()) }
     }
 
+    // Function to get list of messages in a conversation
     fun getMessages(
         conversationId: String,
         onMessagesUpdated: (List<Message>) -> Unit

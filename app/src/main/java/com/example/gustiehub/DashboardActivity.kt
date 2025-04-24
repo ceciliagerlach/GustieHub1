@@ -23,17 +23,20 @@ import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+
 class DashboardActivity : AppCompatActivity() {
+    // Variables for recycler views
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
     private val db = FirebaseFirestore.getInstance()
-    // variables for toolbar and tabbed navigation
+
+    // Variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
 
-    // variables for displaying 3 most recent announcements + events + posts
+    // Variables for displaying 3 most recent announcements + events + posts
     private lateinit var announcementPreview1: TextView
     private lateinit var announcementPreview2: TextView
     private lateinit var announcementPreview3: TextView
@@ -41,6 +44,7 @@ class DashboardActivity : AppCompatActivity() {
     private lateinit var eventPreview2: TextView
     private lateinit var eventPreview3: TextView
 
+    // Passing email to new intent for login
     companion object {
         private const val EXTRA_EMAIL = "com.example.gustiehub.email"
 
@@ -55,7 +59,7 @@ class DashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard)
 
-        // initialize TextViews
+        // Initialize text views
         announcementPreview1 = findViewById(R.id.announcement_preview1)
         announcementPreview2 = findViewById(R.id.announcement_preview2)
         announcementPreview3 = findViewById(R.id.announcement_preview3)
@@ -63,15 +67,13 @@ class DashboardActivity : AppCompatActivity() {
         eventPreview2 = findViewById(R.id.event_preview2)
         eventPreview3 = findViewById(R.id.event_preview3)
 
-        // fetch two most recent of each
+        // Fetch two most recent of each
         fetchRecentAnnouncements(3)
         fetchRecentEvents(3)
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
         fetchRecentGroupPosts(userId,3)
 
-        val email = intent.getStringExtra(EXTRA_EMAIL)
-
-        // list of groups in tab
+        // List of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -89,7 +91,7 @@ class DashboardActivity : AppCompatActivity() {
             }
         }
 
-        //set up drawer layout and handle clicks for menu items
+        // Set up drawer layout and handle clicks for menu items
         navView = findViewById(R.id.nav_view)
         drawerLayout = findViewById(R.id.tab_layout)
         navView.setNavigationItemSelectedListener { menuItem ->
@@ -118,14 +120,14 @@ class DashboardActivity : AppCompatActivity() {
             true
         }
 
-        // initialize buttons reference
+        // Initialize buttons reference
         val messageButton: ImageView = findViewById(R.id.messaging)
         val profileButton: ImageView = findViewById(R.id.profile)
         val menuButton: ImageView = findViewById(R.id.menu)
         val announcementsButton: Button = findViewById(R.id.see_all_announcements_button)
         val eventsButton: Button = findViewById(R.id.see_all_events_button)
 
-        // handling clicks for buttons
+        // Handling clicks for buttons
         messageButton.setOnClickListener {
             val intent = Intent(this, MessageActivity::class.java)
             startActivity(intent)
@@ -148,6 +150,7 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    // Function to fetch recent announcements
     private fun fetchRecentAnnouncements(limit: Long) {
         db.collection("announcements")
             .orderBy("timestamp", Query.Direction.DESCENDING)
@@ -176,6 +179,7 @@ class DashboardActivity : AppCompatActivity() {
             }
     }
 
+    // Function to fetch recent events
     private fun fetchRecentEvents(limit: Long) {
         db.collection("events")
             .orderBy("date", Query.Direction.ASCENDING)
@@ -213,8 +217,8 @@ class DashboardActivity : AppCompatActivity() {
             }
     }
 
-
-    fun fetchRecentGroupPosts(userId: String, limit: Long) {
+    // Function to fetch recent group posts
+    private fun fetchRecentGroupPosts(userId: String, limit: Long) {
 
         // get groups the user has joined
         db.collection("users").document(userId).get()
@@ -237,7 +241,7 @@ class DashboardActivity : AppCompatActivity() {
                 db.collection("posts")
                     .whereIn("group", joinedGroups) // filter by joined groups
                     .orderBy("timestamp", Query.Direction.DESCENDING) // get most recent posts
-                    .limit(3)
+                    .limit(limit)
                     .get()
                     .addOnSuccessListener { postsSnapshot ->
                         val recentPosts = postsSnapshot.documents.mapNotNull { doc ->
@@ -260,7 +264,7 @@ class DashboardActivity : AppCompatActivity() {
             }
     }
 
-    // updates the UI with posts or "No recent activity" if none found
+    // Function to update the UI with posts or "No recent activity" if none found
     private fun updateActivityPreviews(posts: List<String>) {
         val activityPreview1 = findViewById<TextView>(R.id.activity_preview1)
         val activityPreview2 = findViewById<TextView>(R.id.activity_preview2)

@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.example.gustiehub.EventsAdapter.EventsViewHolder
 import com.google.firebase.firestore.FirebaseFirestore
 
+// User adapter to bind user data to views
 class UserAdapter(
     private var userList: List<User>,
     private val onUserClick: (User) -> Unit
@@ -60,7 +61,7 @@ class UserAdapter(
                         notifyDataSetChanged()
                     }
 
-                    // visual changes to show user is selected
+                    // Visual changes to show user is selected
                     if (position == selectedPosition) {
                         holder.nameTextView.paintFlags = holder.nameTextView.paintFlags or Paint.UNDERLINE_TEXT_FLAG
                         holder.nameTextView.setTextColor(ContextCompat.getColor(holder.itemView.context, R.color.gold))
@@ -71,23 +72,10 @@ class UserAdapter(
                 }
             }
 
-
-
         holder.itemView.setOnClickListener {
             onUserClick(user)
         }
     }
-
-//    override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
-//        val user = userList[position]
-//        holder.bind(user, user.userId == selectedUserId)
-//        holder.itemView.setOnClickListener {
-//            selectedUserId = user.userId
-//            onUserClick(user)
-//            setSelectedUser(selectedUserId)
-//            notifyDataSetChanged()
-//        }
-//    }
 
     override fun getItemCount() = userList.size
 

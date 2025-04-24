@@ -2,6 +2,7 @@ package com.example.gustiehub
 
 import com.google.firebase.firestore.FirebaseFirestore
 
+// Marketplace data class with userName, userID, itemName, price, description, itemPhotoURL, timestamp, and itemID attributes
 data class Marketplace (
     val userName: String = "",
     val userID: String = "",
@@ -14,6 +15,7 @@ data class Marketplace (
     ) {
 private val db = FirebaseFirestore.getInstance()
 
+    // Function to create item
     fun createItemListing() {
         val itemData = hashMapOf(
             "userName" to userName,

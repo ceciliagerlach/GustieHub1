@@ -12,6 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+// Message adapter to bind message data to views
 class MessageAdapter (
     private var chatList: List<Conversation>,
     private val onItemClick: (Conversation) -> Unit
@@ -33,14 +34,14 @@ class MessageAdapter (
     override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
         val chat = chatList[position]
         holder.lastMessageTextView.text = chat.lastMessage
-        // format date correctly
+        // Format date correctly
         val dateFormat = SimpleDateFormat("MMMM d", Locale.getDefault())
         val formattedDate = dateFormat.format(chat.lastUpdated.toDate())
         holder.lastMessageDateTextView.text = formattedDate
         holder.itemView.setOnClickListener {
             onItemClick(chat)
         }
-        // get name of OTHER user in the conversation
+        // Get name of OTHER user in the conversation
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         val otherUserId = chat.userIds.firstOrNull { it != userId }
         if (otherUserId != null) {
@@ -54,7 +55,7 @@ class MessageAdapter (
                     }
                 }
 
-            // load profile picture of the other user in the conversation
+            // Load profile picture of the other user in the conversation
             FirebaseFirestore.getInstance().collection("users").document(otherUserId).get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {

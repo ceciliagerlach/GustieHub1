@@ -11,6 +11,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 
+// Post adapter to bind post data to views
 class PostAdapter(
     private var postList: List<Post>,
     private val onUsernameClick: (String) -> Unit,

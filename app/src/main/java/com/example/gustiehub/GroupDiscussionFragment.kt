@@ -22,19 +22,21 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+// Fragment for group discussion
 class GroupDiscussionFragment(val groupName: String) : Fragment() {
+    // Variables for post recycler view
     private lateinit var postsRecyclerView: RecyclerView
     private lateinit var postsAdapter: PostAdapter
     private val postList = mutableListOf<Post>()
     private val allPosts = mutableListOf<Post>()
 
+    // Firebase variables
     val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
     val userId = auth.currentUser?.uid
     private val userObject = User(userId.toString(), "", "", "", 0, "", "")
 
-    // searchbar variables
-    private lateinit var recyclerView: RecyclerView
+    // Searchbar variables
     private lateinit var searchView: SearchView
 
     override fun onCreateView(
@@ -44,6 +46,7 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
         return inflater.inflate(R.layout.group_discussion_fragment, container, false)
     }
 
+    // Function to listen for post updates
     private fun listenForPostUpdates() {
         db.collection("posts")
             .whereEqualTo("group", groupName)
@@ -65,6 +68,7 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
             }
     }
 
+    // Function to filter posts based on search query
     private fun filterPosts(query: String): List<Post> {
         return allPosts.filter { post ->
             post.creatorName.contains(query, ignoreCase = true) ||
@@ -108,13 +112,14 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
 
         val createPostButton = view.findViewById<ImageButton>(R.id.create_posts_button)
 
-        // fetch and display posts
+        // Fetch and display posts
         GlobalData.getPosts(groupName) { updatedPosts ->
             requireActivity().runOnUiThread {
                 postsAdapter.updatePosts(updatedPosts)
             }
         }
-        // listen for new posts
+
+        // Function to create a new post in dialog box
         fun newPostDialog(){
             val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.new_post_dialog, null)
             val editTextPost = dialogView.findViewById<EditText>(R.id.newPostContent)
@@ -226,6 +231,7 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
         }
     }
 
+    // Function to show edit dialog for a post
     private fun showEditDialog(post: Post) {
         val editText = EditText(requireContext())
         editText.setText(post.text)
@@ -254,6 +260,7 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
             .show()
     }
 
+    // Function to remove a post
     private fun removePost(post: Post) {
         userObject?.deletePost(post.postId){
             success, errorMessage ->
@@ -270,6 +277,7 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
         }
     }
 
+    // Function to report a post
     private fun reportPost(context: Context, post: Post) {
         val sdf = SimpleDateFormat("MMM dd, yyyy • h:mm a", Locale.getDefault())
         val formattedTimestamp = post.timestamp?.toDate()?.let { sdf.format(it) } ?: "Unknown time"

@@ -15,6 +15,7 @@ class SearchHelper<T>(
     private val updateFunction: (List<T>) -> Unit
 ) {
     init {
+        // Set up the SearchView
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 val filtered = filterFunction(query ?: "")
@@ -36,8 +37,5 @@ class SearchHelper<T>(
         })
     }
 
-    fun updateDataList(newList: MutableList<T>) {
-        dataList = newList
-    }
 }
 

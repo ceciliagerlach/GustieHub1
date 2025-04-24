@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
+// Menu adapter to bind tab/menu data to views
 class MenuAdapter (
     private var menuItems: List<Group>,
     private val onItemClick: (Group) -> Unit

@@ -28,6 +28,7 @@ import com.google.firebase.storage.FirebaseStorage
 import java.util.UUID
 
 class MarketplaceActivity: AppCompatActivity(){
+    // Variables for recycler views
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
     private val groupList = mutableListOf<Group>()
@@ -35,16 +36,17 @@ class MarketplaceActivity: AppCompatActivity(){
     private lateinit var marketplaceAdapter: MarketplaceAdapter
     private val itemList = mutableListOf<Marketplace>()
 
-    // variables for toolbar and tabbed navigation
+    // Variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
     private lateinit var getContent: ActivityResultLauncher<String>
     private var selectedPhotoUri: Uri? = null
 
+    // Variables for firebase
     val db = FirebaseFirestore.getInstance()
     val auth = FirebaseAuth.getInstance()
 
-    // variables for searchbar
+    // Variables for searchbar
     private lateinit var searchView: SearchView
     private lateinit var recyclerView: RecyclerView
 
@@ -52,7 +54,7 @@ class MarketplaceActivity: AppCompatActivity(){
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_marketplace)
 
-        // set up recyclerview for marketplace
+        // Set up recyclerview for marketplace
         val marketplaceRecyclerView = findViewById<RecyclerView>(R.id.marketplaceRecyclerView)
         marketplaceRecyclerView.layoutManager = LinearLayoutManager(this)
         marketplaceAdapter = MarketplaceAdapter(itemList, onUsernameClick = { userId ->
@@ -73,7 +75,7 @@ class MarketplaceActivity: AppCompatActivity(){
             selectedPhotoUri = uri
         }
 
-        // list of groups in tab
+        // List of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -91,7 +93,7 @@ class MarketplaceActivity: AppCompatActivity(){
             }
         }
 
-        //set up drawer layout and handle clicks for menu items
+        // Set up drawer layout and handle clicks for menu items
         navView = findViewById(R.id.nav_view)
         drawerLayout = findViewById(R.id.tab_layout)
         navView.setNavigationItemSelectedListener { menuItem ->
@@ -120,14 +122,14 @@ class MarketplaceActivity: AppCompatActivity(){
             true
         }
 
-        // opening menu
+        // Opening menu
         val menuButton: ImageView = findViewById(R.id.menu)
         menuButton.setOnClickListener {
             val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        // initialize and handle clicks for message and profile buttons
+        // Initialize and handle clicks for message and profile buttons
         val messageButton: ImageView = findViewById(R.id.messaging)
         val profileButton: ImageView = findViewById(R.id.profile)
         messageButton.setOnClickListener {
@@ -140,7 +142,7 @@ class MarketplaceActivity: AppCompatActivity(){
         }
 
 
-        // invoking the search dialog
+        // Invoking the search dialog
         searchView = findViewById(R.id.searchView)
         recyclerView = findViewById(R.id.marketplaceRecyclerView)
 
@@ -195,7 +197,7 @@ class MarketplaceActivity: AppCompatActivity(){
 
     }
 
-    // dialog for creating a new listing
+    // Function to show dialog for creating a new listing
     private fun NewMarketItemDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.new_listing_dialog, null)
         val itemNameEditText = dialogView.findViewById<EditText>(R.id.newItemName)
@@ -232,8 +234,8 @@ class MarketplaceActivity: AppCompatActivity(){
         dialog.show()
     }
 
-    // upload image and create listing
-    fun uploadItemAndCreateListing(itemName: String, price: String, description: String) {
+    // Function to upload image and create listing
+    private fun uploadItemAndCreateListing(itemName: String, price: String, description: String) {
         val storageRef =
             FirebaseStorage.getInstance().reference.child("items/${UUID.randomUUID()}.jpg")
 

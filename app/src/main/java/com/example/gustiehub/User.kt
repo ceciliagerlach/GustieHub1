@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.time.Year
 import java.util.UUID
 
+// User class with attributes
 class User(private val _userId: String,
            private val _email: String,
            private val _firstName: String,
@@ -15,7 +16,7 @@ class User(private val _userId: String,
            private val _homeState: String,
            private val _areasOfStudy: String) {
 
-    // initialize values for FireBase
+    // Initialize values for FireBase
     val userId = _userId
     private val email = _email
     var firstName = _firstName
@@ -30,6 +31,7 @@ class User(private val _userId: String,
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
+    // Function to create user profile on new user login
     fun createUserProfile(
         userId: String, email: String, firstName: String,
         lastName: String, gradYear: Int, homeState: String,
@@ -44,29 +46,28 @@ class User(private val _userId: String,
             "gradYear" to gradYear,
             "homeState" to homeState,
             "areasOfStudy" to areasOfStudy,
-            "joinedGroups" to mutableListOf<String>(), // You can add default group here if needed
+            "joinedGroups" to mutableListOf<String>(),
             "profilePicture" to profilePictureURL
         )
 
-        // add user to FireBase
+        // Add user to FireBase
         db.collection("users").document(userId)
             .set(userData)
             .addOnSuccessListener {
                 println("User profile created for $userId")
-                this.joinGroup("Gusties") // add new user to Gusties group
-//                addUserToGustiesGroup(userId)
+                this.joinGroup("Gusties") // Add new user to Gusties group
 
-                //add user to class year group
+                // Add user to class year group
                 gradYear.let { year ->
                     val classGroupName = "Class of $year"
-                    //check to see if class group exists
+                    // Check to see if class group exists
                     val classGroupRef = db.collection("groups").document(classGroupName).get()
                     classGroupRef.addOnSuccessListener { document ->
                         if (document.exists()) {
-                            // class group exists, add user to it
+                            // Class group exists, add user to it
                             this.joinGroup(classGroupName)
                         } else {
-                            // class group doesn't exist, create it
+                            // Class group doesn't exist, create it
                             val group = Group(classGroupName, userId)
                             group.createGroup()
                             this.joinGroup(classGroupName)
@@ -81,18 +82,11 @@ class User(private val _userId: String,
                 onComplete(false, e.message)
             }
 
-        // add user to local dictionary
+        // Add user to local dictionary
         GlobalData.userDict[userId] = this
     }
 
-//    fun addUserToGustiesGroup(userId: String) {
-//        val groupsRef = db.collection("groups").document("Gusties")
-//
-//        groupsRef.update("members", FieldValue.arrayUnion(userId))
-//            .addOnSuccessListener { println("User added to Gusties group.") }
-//            .addOnFailureListener { it.printStackTrace() }
-//    }
-
+    // Function to add user to a group
     fun joinGroup(groupID: String) {
         val user = auth.currentUser
         user?.let {
@@ -112,26 +106,7 @@ class User(private val _userId: String,
         }
     }
 
-    private fun updateField(field: String, value: Any) {
-        """ Updates the specified field to have the specified value of any
-            | attribute of a student in Firestore
-            | @param field: String
-            | @param value: String
-            | @return: None""".trimMargin()
-        db.collection("students").document(email)
-            .update(field, value)
-            .addOnSuccessListener { println("Updated $field for $email") }
-            .addOnFailureListener { e -> println("Error updating $field: ${e.message}") }
-    }
-
-    // Getters
-//    fun getFirstName(): String = firstName
-//    fun getLastName(): String = lastName
-//    fun getProfilePicture(): String = if (::profilePicture.isInitialized) profilePicture else ""
-//    fun getGradYear(): Int = gradYear
-//    fun getJoinedGroups(): List<String> = joinedGroups
-
-
+    // Function to create a post
     fun createPost(name: String, group: String, text: String) {
         val postData = hashMapOf(
             "creatorId" to userId,
@@ -153,6 +128,7 @@ class User(private val _userId: String,
             }
     }
 
+    // Function to edit a post
     fun editPost(postID: String, newText: String, onComplete: (Boolean, String?) -> Unit) {
         val user = auth.currentUser
         user?.let {
@@ -192,6 +168,7 @@ class User(private val _userId: String,
         }
     }
 
+    // Function to delete a post
     fun deletePost(postID: String, onComplete: (Boolean, String?) -> Unit){
         val user = auth.currentUser
         user?.let {
@@ -233,6 +210,7 @@ class User(private val _userId: String,
         }
     }
 
+    // Function to comment on a post
     fun commentOnPost(postID: String, comment: String, onComplete: (Boolean, String?) -> Unit) {
         val user = auth.currentUser
 
@@ -268,8 +246,9 @@ class User(private val _userId: String,
                 onComplete(false, e.message)
             }
         } ?: onComplete(false, "User not authenticated.")
-    } // end commentOnPost
+    }
 
+    // Function to disable comments on a post
     fun disableComments(postID: String, onComplete: (Boolean, String?) -> Unit) {
         val user = auth.currentUser
 
@@ -304,6 +283,7 @@ class User(private val _userId: String,
         } ?: onComplete(false, "User not authenticated.")
     }
 
+    // Function to enable/disable comments on a post
     fun enableComments(postID: String, onComplete: (Boolean, String?) -> Unit) {
         val user = auth.currentUser
 
@@ -338,7 +318,7 @@ class User(private val _userId: String,
         } ?: onComplete(false, "User not authenticated.")
     }
 
-
+    // Function to edit a comment
     fun editComment(
         postID: String,
         commentID: String,
@@ -393,7 +373,7 @@ class User(private val _userId: String,
         } ?: onComplete(false, "User not authenticated.")
     }
 
-
+    // Function to delete a comment
     fun deleteComment(postID: String, commentID: String, onComplete: (Boolean, String?) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val user = FirebaseAuth.getInstance().currentUser
@@ -438,7 +418,3 @@ class User(private val _userId: String,
         } ?: onComplete(false, "User not authenticated.")
     }
 }
-
-
-// TODO: Create function leaveGroup
-// TODO: Create report functionality + button

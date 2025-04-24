@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
+// Events adapter to bind event data to views
 class EventsAdapter(
     private var events: MutableList<Event>)
     : RecyclerView.Adapter<EventsAdapter.EventsViewHolder>() {

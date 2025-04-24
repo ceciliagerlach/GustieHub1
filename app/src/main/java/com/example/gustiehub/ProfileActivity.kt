@@ -20,12 +20,13 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileActivity : AppCompatActivity() {
+    // Variables for recycler views
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
 
-    // variables for toolbar and tabbed navigation
+    // Variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
     private val db = FirebaseFirestore.getInstance()
@@ -36,7 +37,7 @@ class ProfileActivity : AppCompatActivity() {
         val receivingId = intent.getStringExtra("userId")
         val userId: String = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
-        // get profile views
+        // Get profile views
         val profileName: TextView = findViewById(R.id.userName)
         val profileYear: TextView = findViewById(R.id.classYear)
         val profileState: TextView = findViewById(R.id.homeState)
@@ -44,14 +45,14 @@ class ProfileActivity : AppCompatActivity() {
         val profileGroups: TextView = findViewById(R.id.joinedGroups)
         val profileImageView: ImageView = findViewById(R.id.profileImage)
 
-        // editing profile views
+        // Editing profile views
         val editAreasOfStudy: TextView = findViewById(R.id.editAreasOfStudy)
         val view: View = findViewById(R.id.view)
         val btnEdit: ImageButton = findViewById(R.id.btnEdit)
         val btnCancel: Button = findViewById(R.id.btnCancel)
         val btnSave: Button = findViewById(R.id.btnSave)
 
-        // set user information
+        // Set user information
         if (receivingId.isNullOrEmpty()) {
             db.collection("users").document(userId).get()
                 .addOnSuccessListener { document ->
@@ -113,7 +114,7 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
 
-        //function for listening for edits and saves
+        // Handle button listening for edits and saves
         btnEdit.setOnClickListener {
             editAreasOfStudy.text = profileAreas.text
             editAreasOfStudy.visibility = TextView.VISIBLE
@@ -149,7 +150,7 @@ class ProfileActivity : AppCompatActivity() {
             profileAreas.visibility = TextView.VISIBLE
             view.visibility = View.VISIBLE
 
-            // update user profile in Firestore
+            // Update user profile in Firestore
             val user = FirebaseAuth.getInstance().currentUser
             user?.let {
                 val userId = it.uid
@@ -170,7 +171,7 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
 
-        // list of groups in tab
+        // List of groups in tab
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuAdapter = MenuAdapter(filteredGroupList) { selectedGroup ->
@@ -187,7 +188,7 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
 
-        //set up drawer layout and handle clicks for menu items
+        // Set up drawer layout and handle clicks for menu items
         navView = findViewById(R.id.nav_view)
         drawerLayout = findViewById(R.id.tab_layout)
         navView.setNavigationItemSelectedListener { menuItem ->
@@ -221,14 +222,14 @@ class ProfileActivity : AppCompatActivity() {
             true
         }
 
-        // opening menu
+        // Opening menu
         val menuButton: ImageView = findViewById(R.id.menu)
         menuButton.setOnClickListener {
             val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        // handling clicks for message button
+        // Handling clicks for message and profile button
         val messageButton: ImageView = findViewById(R.id.messaging)
         messageButton.setOnClickListener {
             val intent = Intent(this, MessageActivity::class.java)

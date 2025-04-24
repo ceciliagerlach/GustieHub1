@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+// Fragment for group information
 class GroupInformationFragment(val groupName: String) : Fragment() {
     private val db = FirebaseFirestore.getInstance()
 
@@ -23,7 +24,7 @@ class GroupInformationFragment(val groupName: String) : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // get and set group information
+        // Get and set group information
         val groupDescriptionTextView = view.findViewById<TextView>(R.id.groupDescription)
         val groupMembers = view.findViewById<TextView>(R.id.groupMembers)
         db.collection("groups").document(groupName).get()

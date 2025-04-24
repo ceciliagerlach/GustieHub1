@@ -28,6 +28,7 @@ import androidx.core.content.ContextCompat
 import com.example.gustiehub.UserAdapter
 
 class MessageActivity: AppCompatActivity() {
+    // Variables for recycler views
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var messageRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
@@ -36,9 +37,8 @@ class MessageActivity: AppCompatActivity() {
     private val chatList = mutableListOf<Conversation>()
     private val filteredGroupList = mutableListOf<Group>()
     private val TAG = "Message Activity"
-    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
-    // variables for toolbar and tabbed navigation
+    // Variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
 
@@ -46,7 +46,7 @@ class MessageActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_messaging)
 
-        // list of groups in tab
+        // List of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -64,7 +64,7 @@ class MessageActivity: AppCompatActivity() {
             }
         }
 
-        //set up drawer layout and handle clicks for menu items
+        // Set up drawer layout and handle clicks for menu items
         navView = findViewById(R.id.nav_view)
         drawerLayout = findViewById(R.id.tab_layout)
         navView.setNavigationItemSelectedListener { menuItem ->
@@ -94,20 +94,20 @@ class MessageActivity: AppCompatActivity() {
             true
         }
 
-        // opening menu
+        // Opening menu
         val menuButton: ImageView = findViewById(R.id.menu)
         menuButton.setOnClickListener {
             val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
             drawerLayout.openDrawer(GravityCompat.START)
         }
-        // initialize and handle clicks for profile button
+        // Initialize and handle clicks for profile button
         val profileButton: ImageView = findViewById(R.id.profile)
         profileButton.setOnClickListener {
             val intent = Intent(this, ProfileActivity::class.java)
             startActivity(intent)
         }
 
-        // list of conversations with other users
+        // List of conversations with other users
         messageRecyclerView = findViewById(R.id.chatRecyclerView)
         messageRecyclerView.layoutManager = LinearLayoutManager(this)
         messageAdapter = MessageAdapter(chatList) { selectedChat ->
@@ -124,30 +124,30 @@ class MessageActivity: AppCompatActivity() {
             }
         }
 
-        // set up create new conversation button
+        // Set up create new conversation button
         val createChatButton = findViewById<ImageButton>(R.id.create_chat_button)
         createChatButton.setOnClickListener {
             NewChatDialog()
         }
     }
 
-    // ******* Functions ************************************
-    fun getOrCreateConversation(userId1: String, userId2: String, onComplete: (String?) -> Unit) {
+    // Function to get or create a conversation between two users
+    private fun getOrCreateConversation(userId1: String, userId2: String, onComplete: (String?) -> Unit) {
         val db = FirebaseFirestore.getInstance()
         val sortedUserIds = listOf(userId1, userId2).sorted()
         val conversationId = "${sortedUserIds[0]}_${sortedUserIds[1]}"
 
-        // find conversation
+        // Find conversation
         db.collection("conversations")
-            // get conversation IDs containing the first user's ID
+            // Get conversation IDs containing the first user's ID
             .whereArrayContains("userIds", userId1)
             .get()
             .addOnSuccessListener { snapshot ->
-                // search for the convo containing the second user's ID too
+                // Search for the conversation containing the second user's ID too
                 val existing = snapshot.documents.firstOrNull { it.get("userIds") is List<*> && (it["userIds"] as List<*>).contains(userId2) }
                 if (existing != null) {
                     onComplete(existing.id)
-                    // create a new convo isntance if none exist
+                    // Create a new conversation instance if none exist
                 } else {
                     val newConversation = hashMapOf(
                         "userIds" to sortedUserIds,
@@ -163,50 +163,7 @@ class MessageActivity: AppCompatActivity() {
             .addOnFailureListener { onComplete(null) }
     }
 
-    fun sendMessage(conversationId: String, senderId: String, text: String) {
-        val db = FirebaseFirestore.getInstance()
-        // create message instance
-        val message = hashMapOf(
-            "senderId" to senderId,
-            "text" to text,
-            "timestamp" to Timestamp.now()
-        )
-
-        // find convo with both participants and add message
-        val conversationRef = db.collection("conversations").document(conversationId)
-        conversationRef.collection("messages")
-            .add(message)
-            .addOnSuccessListener {
-                conversationRef.update(
-                    mapOf(
-                        "lastMessage" to text,
-                        "lastUpdated" to Timestamp.now()
-                    )
-                )
-            }
-    }
-
-    fun fetchMessages(conversationId: String, onComplete: (List<Message>) -> Unit) {
-        val db = FirebaseFirestore.getInstance()
-        // get conversation
-        db.collection("conversations").document(conversationId)
-            .collection("messages")
-            .orderBy("timestamp")
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val messages = snapshot.documents.mapNotNull { doc ->
-                    val senderId = doc.getString("senderId")
-                    val text = doc.getString("text")
-                    val timestamp = doc.getTimestamp("timestamp")
-                    if (senderId != null && text != null && timestamp != null) {
-                        Message(senderId, text, timestamp)
-                    } else null
-                }
-                onComplete(messages)
-            }
-    }
-
-    // dialog box to start chat with new user
+    // Function to open dialog box to start chat with new user
     private fun NewChatDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.new_chat_dialog, null)
         val searchView = dialogView.findViewById<SearchView>(R.id.searchUser)

@@ -7,6 +7,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ServerTimestamp
 
+// Event data class with creatorId, eventName, group, text, time, location, and date attributes
 data class Event(
     val creatorId: String = "" ,
     val eventName: String = "",
@@ -19,6 +20,7 @@ data class Event(
 
     private val db = FirebaseFirestore.getInstance()
 
+    // Function to create event
     fun createEvent() {
         val eventData = hashMapOf(
             "eventName" to eventName,

@@ -26,28 +26,23 @@ import com.example.gustiehub.GlobalData.groupList
 import com.google.android.material.navigation.NavigationView
 
 class GroupsActivity : AppCompatActivity() {
-    // variables for recycler view, displaying list of groups
+    // Variables for recycler view, displaying list of groups
     private lateinit var groupsRecyclerView: RecyclerView
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var groupsAdapter: GroupsAdapter
     private lateinit var menuAdapter: MenuAdapter
-    private val groupsNameList = mutableListOf<String>()
-//    private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
 
-    // variables for toolbar and tabbed navigation
+    // Variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
-
-    // variables for search
-    private val allGroupsList = mutableListOf<Group>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_groups)
         val createGroupButton = findViewById<ImageButton>(R.id.create_groups_button)
 
-        // display list of groups
+        // Display list of groups
         groupsRecyclerView = findViewById(R.id.groupsRecyclerView)
         groupsRecyclerView.layoutManager = LinearLayoutManager(this)
         groupsAdapter = GroupsAdapter(filteredGroupList, onItemClick = { selectedGroup ->
@@ -79,10 +74,12 @@ class GroupsActivity : AppCompatActivity() {
         } )
         groupsRecyclerView.adapter = groupsAdapter
 
+        // Handle create group button and open dialog box
         createGroupButton.setOnClickListener {
             NewGroupDialog()
         }
 
+        // Display list of groups user joined in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid
         groupsRecyclerView.adapter = groupsAdapter
         if (userID != null) {
@@ -101,8 +98,6 @@ class GroupsActivity : AppCompatActivity() {
                 }
             }
         }
-
-        // list of groups in tab
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
         menuAdapter = MenuAdapter(filteredGroupList) { selectedGroup ->
@@ -111,17 +106,8 @@ class GroupsActivity : AppCompatActivity() {
             startActivity(intent)
         }
         menuRecyclerView.adapter = menuAdapter
-//        if (userID != null) {
-//            GlobalData.getFilteredGroupList(userID){ updatedGroups ->
-//                runOnUiThread {
-//                    groupList.clear()
-//                    groupList.addAll(updatedGroups)
-//                    menuAdapter.updateGroups(updatedGroups)
-//                }
-//            }
-//        }
 
-        //set up drawer layout and handle clicks for menu items
+        // Set up drawer layout and handle clicks for menu items
         drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
         navView = findViewById<NavigationView>(R.id.nav_view)
         navView.setNavigationItemSelectedListener { menuItem ->
@@ -149,14 +135,15 @@ class GroupsActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(GravityCompat.START)
             true
         }
-        // opening menu
+
+        //  Opening menu
         val menuButton: ImageView = findViewById(R.id.menu)
         menuButton.setOnClickListener {
             val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        // initialize and handle clicks for message and profile buttons
+        // Initialize and handle clicks for message and profile buttons
         val messageButton: ImageView = findViewById(R.id.messaging)
         val profileButton: ImageView = findViewById(R.id.profile)
         messageButton.setOnClickListener {
@@ -168,10 +155,9 @@ class GroupsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // search functionality
+        // Search functionality
         val searchView: SearchView = findViewById(R.id.searchView)
         val recyclerView: RecyclerView = findViewById(R.id.groupsRecyclerView)
-//        listenForGroupsUpdate()
 
         val searchHelper = SearchHelper(
             context = this,
@@ -188,37 +174,13 @@ class GroupsActivity : AppCompatActivity() {
         )
     }
 
-//    private fun listenForGroupsUpdate() {
-//        db.collection("groups")
-//            .addSnapshotListener { snapshot, e ->
-//                if (e != null) {
-//                    Toast.makeText(this, "Error fetching groups", Toast.LENGTH_SHORT).show()
-//                    return@addSnapshotListener
-//                }
-//
-//                groupList.clear()
-//                filteredGroupList.clear()
-//
-//                for (document in snapshot!!.documents) {
-//                    val group = document.toObject(Group::class.java)
-//                    if (group != null && !group.name.contains("Class of") &&!group.name.equals("Gusties")) {
-//                        groupList.add(group)
-//                    }
-//                }
-//
-//                filteredGroupList.addAll(groupList)
-//                groupsAdapter.notifyDataSetChanged()
-//            }
-//    }
-
+    // Function to filter groups based on search query
     private fun filterGroups(query: String): List<Group> {
         if (query.isBlank()) return groupList
         return groupList.filter { it.name.contains(query, ignoreCase = true) }
     }
 
-
-
-
+    // Function to create a new group and open dialog box
     private fun NewGroupDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.new_group_dialog, null)
         val editTextGroupName = dialogView.findViewById<EditText>(R.id.newGroupName)

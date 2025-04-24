@@ -20,18 +20,14 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class GroupPageActivity : AppCompatActivity() {
-    // variables for recycler view, displaying list of groups and posts
-    private lateinit var postsRecyclerView: RecyclerView
-    private lateinit var postsAdapter: PostAdapter
+    // Variables for recycler view
     private lateinit var menuRecyclerView: RecyclerView
     private lateinit var menuAdapter: MenuAdapter
-    private val postList = mutableListOf<Post>()
     private val groupList = mutableListOf<Group>()
     private val filteredGroupList = mutableListOf<Group>()
-    // variables for toolbar and tabbed navigation
+    // Variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
     lateinit var drawerLayout: DrawerLayout
-    private val db = FirebaseFirestore.getInstance()
     lateinit var groupName: String
 
     companion object {
@@ -49,11 +45,11 @@ class GroupPageActivity : AppCompatActivity() {
         setContentView(R.layout.activity_group_page)
         groupName = intent.getStringExtra("groupName").toString()
 
-        // get and set group name
+        // Get and set group name
         val groupNameTextView = findViewById<TextView>(R.id.group_name_text)
         groupNameTextView.text = groupName
 
-        // list of groups in tab
+        // List of groups in tab
         val userID = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         menuRecyclerView = findViewById(R.id.recycler_menu)
         menuRecyclerView.layoutManager = LinearLayoutManager(this)
@@ -71,7 +67,7 @@ class GroupPageActivity : AppCompatActivity() {
             }
         }
 
-        // initialize and handle clicks for message and profile buttons
+        // Initialize and handle clicks for message and profile buttons
         val messageButton: ImageView = findViewById(R.id.messaging)
         val profileButton: ImageView = findViewById(R.id.profile)
         messageButton.setOnClickListener {
@@ -83,14 +79,14 @@ class GroupPageActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // opening menu
+        // Opening menu
         val menuButton: ImageView = findViewById(R.id.menu)
         menuButton.setOnClickListener {
             val drawerLayout = findViewById<DrawerLayout>(R.id.tab_layout)
             drawerLayout.openDrawer(GravityCompat.START)
         }
 
-        //set up drawer layout and handle clicks for menu items
+        // Set up drawer layout and handle clicks for menu items
         navView = findViewById(R.id.nav_view)
         drawerLayout = findViewById(R.id.tab_layout)
         navView.setNavigationItemSelectedListener { menuItem ->
@@ -124,7 +120,7 @@ class GroupPageActivity : AppCompatActivity() {
             true
         }
 
-        // setting up view pager
+        // Setting up view pager
         val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
         val viewPager = findViewById<ViewPager2>(R.id.viewPager)
         val adapter = ViewPagerAdapter(this, groupName)

@@ -1,5 +1,6 @@
 package com.example.gustiehub
 
+// Post data class with postId, creatorId, creatorName, group, text, comments, commentsEnabled, and timestamp attributes
 data class Post(
     val postId: String = "",
     val creatorId: String = "",

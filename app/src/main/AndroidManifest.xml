@@ -45,9 +45,6 @@
             android:name=".ProfileActivity"
             android:exported="true" />
         <activity
-            android:name=".SeeAllActivity"
-            android:exported="true" />
-        <activity
             android:name=".EventsActivity"
             android:exported="true" />
         <activity
