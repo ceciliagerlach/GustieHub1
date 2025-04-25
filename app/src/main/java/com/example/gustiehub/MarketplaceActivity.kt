@@ -35,6 +35,7 @@ class MarketplaceActivity: AppCompatActivity(){
     private val filteredGroupList = mutableListOf<Group>()
     private lateinit var marketplaceAdapter: MarketplaceAdapter
     private val itemList = mutableListOf<Marketplace>()
+    private val filteredMarketplaceList = mutableListOf<Group>()
 
     // Variables for toolbar and tabbed navigation
     lateinit var navView: NavigationView
@@ -85,7 +86,7 @@ class MarketplaceActivity: AppCompatActivity(){
             startActivity(intent)
         }
         menuRecyclerView.adapter = menuAdapter
-        GlobalData.getFilteredGroupList(userID){ updatedGroups ->
+        GlobalData.getFilteredGroupList(userID) { updatedGroups ->
             runOnUiThread {
                 groupList.clear()
                 groupList.addAll(updatedGroups)
@@ -102,17 +103,21 @@ class MarketplaceActivity: AppCompatActivity(){
                     val intent = Intent(this, DashboardActivity::class.java)
                     startActivity(intent)
                 }
+
                 R.id.announcements -> {
                     val intent = Intent(this, AnnouncementsActivity::class.java)
                     startActivity(intent)
                 }
+
                 R.id.marketplace -> {
                     drawerLayout.closeDrawer(GravityCompat.START)
                 }
+
                 R.id.events -> {
                     val intent = Intent(this, EventsActivity::class.java)
                     startActivity(intent)
                 }
+
                 R.id.groups -> {
                     val intent = Intent(this, GroupsActivity::class.java)
                     startActivity(intent)
@@ -149,52 +154,33 @@ class MarketplaceActivity: AppCompatActivity(){
         // TODO: Set up marketplaceAdapter and marketplaceItem to uncomment this searchbar code
 //        marketplaceAdapter = MarketplaceAdapter(marketplaceList)
 //        recyclerView.adapter = marketplaceAdapter
-//        listenForMarketplaceUpdates()
-//
-//        val searchHelper = SearchHelper(
-//            context = this,
-//            searchView = searchView,
-//            recyclerView = recyclerView,
-//            adapter = marketplaceAdapter,
-//            dataList = marketplaceList,
-//            filterFunction = ::filterMarketplaceItems  // Pass filter function to the helper
-//        )
-
-
-//    // filters marketplace items based on the query
-//    private fun filterMarketplaceItems(query: String): List<MarketplaceItem> {
-//        return marketplaceList.filter { item ->
-//            item.itemName.contains(query, ignoreCase = true) ||
-//                    item.description.contains(query, ignoreCase = true)
-//        }
-//    }
-//
-//    private fun listenForMarketplaceUpdates() {
-//        fun listenForEventsUpdate() {
-//            db.collection("marketplace")
-//                .addSnapshotListener { snapshot, e ->
-//                    if (e != null) {
-//                        Toast.makeText(this, "Error fetching marketplace items", Toast.LENGTH_SHORT)
-//                            .show()
-//                        return@addSnapshotListener
-//                    }
-//                    val updatedMarketplaceItem = mutableListOf<MarketplaceItem>()
-//                    for (document in snapshot!!.documents) {
-//                        val marketplaceItem = document.toObject(MarketplaceItem::class.java)
-//                        if (marketplaceItem != null) {
-//                            updatedMarketplaceItems.add(marketplaceItem)
-//                        }
-//                    }
-//                    marketplaceAdapter.updateEvents(updatedMarketplaceItems)
-//                }
-//        }
-//    }
 
         val createListingButton = findViewById<ImageButton>(R.id.make_listing_button)
         createListingButton.setOnClickListener {
             NewMarketItemDialog()
         }
 
+        // Search functionality
+        val searchView: SearchView = findViewById(R.id.searchView)
+        val recyclerView: RecyclerView = findViewById(R.id.marketplaceRecyclerView)
+
+        val searchHelper = SearchHelper(
+            context = this,
+            searchView = searchView,
+            recyclerView = recyclerView,
+            adapter = marketplaceAdapter,
+            dataList = itemList, // master list
+            filterFunction = ::filterMarketplaceItems,
+            updateFunction = { filtered -> marketplaceAdapter.updateItems(filtered) }
+        )
+
+    }
+
+    // filters marketplace items based on the query
+    private fun filterMarketplaceItems(query: String): List<Marketplace> {
+        if (query.isBlank()) return itemList
+        return itemList.filter { it.itemName.contains(query, ignoreCase = true) ||
+        it.userName.contains(query, ignoreCase = true)} // can search by item name or poster's name
     }
 
     // Function to show dialog for creating a new listing
