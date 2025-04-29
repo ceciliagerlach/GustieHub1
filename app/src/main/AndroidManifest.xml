@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GustieHub"
         tools:targetApi="31">
+        <meta-data android:name="android.app.default_searchable"
+        android:value=".SearchableActivity"/>
+        <activity
+            android:name=".CommentActivity"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -23,41 +28,38 @@
         </activity>
         <activity
             android:name=".DashboardActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true" />
         <activity
             android:name=".AnnouncementsActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true" />
         <activity
             android:name=".MarketplaceActivity"
-            android:exported="true">
-        </activity>
-        <activity
-            android:name=".MenuActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true" />
         <activity
             android:name=".MessageActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true" />
         <activity
             android:name=".GroupsActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true" />
         <activity
             android:name=".ProfileActivity"
-            android:exported="true">
-        </activity>
-        <activity
-            android:name=".SeeAllActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true" />
         <activity
             android:name=".EventsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".GroupPageActivity"
+            android:exported="true" />
+        <activity
+            android:name=".SearchActivity"
             android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH"/>
+            </intent-filter>
         </activity>
-
+        <activity
+            android:name=".ChatActivity"
+            android:exported="true"/>
     </application>
 
 </manifest>
