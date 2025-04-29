@@ -208,7 +208,6 @@ class GroupDiscussionFragment(val groupName: String) : Fragment() {
                                     ).show()
                                 }
                         }
-                        Toast.makeText(requireContext(), "Post Created", Toast.LENGTH_SHORT).show()
                         dialog.dismiss()
                     } else {
                         Toast.makeText(
